@@ -18,7 +18,7 @@ export function getExportPackageRoot(): string {
 
 export function getAppRoot(): string {
   return (
-    process.env.PRESENTON_APP_ROOT?.trim() ||
+    process.env.AIPPT_APP_ROOT?.trim() ||
     path.join(process.cwd(), "..", "..")
   );
 }
@@ -28,7 +28,7 @@ function extractSessionTokenFromCookieHeader(cookieHeader?: string): string | un
     return undefined;
   }
 
-  const match = cookieHeader.match(/(?:^|;\s*)presenton_session=([^;]+)/);
+  const match = cookieHeader.match(/(?:^|;\s*)aippt_session=([^;]+)/);
   if (!match?.[1]) {
     return undefined;
   }
@@ -187,7 +187,7 @@ async function runBundledPresentationExportLocked(params: {
     : basePptUrl;
 
   const tempBase =
-    process.env.TEMP_DIRECTORY?.trim() || path.join(os.tmpdir(), "presenton");
+    process.env.TEMP_DIRECTORY?.trim() || path.join(os.tmpdir(), "AIPPT");
   await fs.mkdir(tempBase, { recursive: true });
   const workDir = await fs.mkdtemp(path.join(tempBase, "export-"));
   const exportTaskPath = path.join(workDir, "export_task.json");

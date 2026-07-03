@@ -1,15 +1,15 @@
-# Contributing to Presenton
+# Contributing to AIPPT
 
 Welcome! 🚀  
-Thanks for helping improve **Presenton — the open-source AI presentation generator.**
+Thanks for helping improve **AIPPT — the open-source AI presentation generator.**
 
 ## Quick Links
 
-- **GitHub:** https://github.com/presenton/presenton
-- **Docs:** https://docs.presenton.ai
-- **Website:** https://presenton.ai
+- **GitHub:** https://github.com/AIPPT/AIPPT
+- **Docs:** https://docs.AIPPT.ai
+- **Website:** https://AIPPT.ai
 - **Discord:** https://discord.gg/9ZsKKxudNE
-- **X:** https://x.com/presentonai
+- **X:** https://x.com/AIPPTai
 
 ---
 
@@ -173,5 +173,5 @@ CODE_OF_CONDUCT.md
 
 ---
 
-Thanks for helping make **Presenton better for everyone.**
+Thanks for helping make **AIPPT better for everyone.**
 ```

@@ -27,7 +27,7 @@ If you prefer to test individual components:
 # Main FastAPI
 cd servers/fastapi
 export APP_DATA_DIRECTORY=/tmp/app_data
-export TEMP_DIRECTORY=/tmp/presenton
+export TEMP_DIRECTORY=/tmp/aippt
 export DATABASE_URL=sqlite+aiosqlite:///./test.db
 export DISABLE_ANONYMOUS_TRACKING=true
 export DISABLE_IMAGE_GENERATION=true
@@ -45,6 +45,6 @@ npm run build
 
 ### Docker Build
 ```bash
-docker build -t presenton:test -f Dockerfile .
-docker images | grep presenton:test
+docker build -t AIPPT:test -f Dockerfile .
+docker images | grep AIPPT:test
 ```

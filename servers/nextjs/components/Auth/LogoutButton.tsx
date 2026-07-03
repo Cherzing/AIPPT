@@ -8,20 +8,22 @@ import { getApiUrl } from "@/utils/api";
 type LogoutButtonProps = {
   label?: string;
   className?: string;
+  iconClassName?: string;
   iconOnly?: boolean;
+  iconWrapperClassName?: string;
 };
 
 export default function LogoutButton({
-  label = "Logout",
+  label = "退出登录",
   className = "",
+  iconClassName = "h-4 w-4",
   iconOnly = false,
+  iconWrapperClassName,
 }: LogoutButtonProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogout = async () => {
-    if (isSubmitting) {
-      return;
-    }
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
     try {
@@ -29,8 +31,6 @@ export default function LogoutButton({
         method: "POST",
         credentials: "include",
       });
-    } catch {
-      // Always route back to auth gate even if backend logout fails.
     } finally {
       window.location.replace("/");
       setIsSubmitting(false);
@@ -46,7 +46,13 @@ export default function LogoutButton({
       aria-label={label}
       title={label}
     >
-      <LogOut className="h-4 w-4" />
+      {iconWrapperClassName ? (
+        <span className={iconWrapperClassName}>
+          <LogOut className={iconClassName} />
+        </span>
+      ) : (
+        <LogOut className={iconClassName} />
+      )}
       {!iconOnly ? <span>{isSubmitting ? "正在退出..." : label}</span> : null}
     </button>
   );

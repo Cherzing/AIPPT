@@ -147,7 +147,7 @@ const PresentationHeader = ({
       return;
     }
     const trimmed = draftTitle.trim();
-    const next = trimmed || presentationData.title || "Presentation";
+    const next = trimmed || presentationData.title || "演示文稿";
     if (next !== presentationData.title) {
       dispatch(updateTitle(next));
       trackEvent(MixpanelEvent.Presentation_Title_Updated, {
@@ -213,8 +213,8 @@ const PresentationHeader = ({
         slide_count: presentationData?.slides?.length || 0,
       });
       exportToastId = notify.loading(
-        "Exporting PPTX",
-        "Your presentation is being exported. This may take a moment."
+        "正在导出 PPTX",
+        "正在导出演示文稿，请稍候。"
       );
       setIsExporting(true);
       // Save the presentation data before exporting
@@ -250,15 +250,15 @@ const PresentationHeader = ({
         downloadLink(pptxPath, safePptxFileName);
       }
       notify.success(
-        "Export complete",
-        "Your PPTX file has been downloaded.",
+        "导出完成",
+        "PPTX 文件已下载。",
         { id: exportToastId }
       );
     } catch (error) {
       console.error("Export failed:", error);
       notify.error(
-        "Export failed",
-        "We are having trouble exporting your presentation. Please try again.",
+        "导出失败",
+        "导出演示文稿时出现问题，请重试。",
         exportToastId !== undefined ? { id: exportToastId } : undefined
       );
     } finally {
@@ -278,8 +278,8 @@ const PresentationHeader = ({
         slide_count: presentationData?.slides?.length || 0,
       });
       exportToastId = notify.loading(
-        "Exporting PDF",
-        "Your presentation is being exported. This may take a moment."
+        "正在导出 PDF",
+        "正在导出演示文稿，请稍候。"
       );
       setIsExporting(true);
       // Save the presentation data before exporting
@@ -311,15 +311,15 @@ const PresentationHeader = ({
         }
       }
       notify.success(
-        "Export complete",
-        "Your PDF file has been downloaded.",
+        "导出完成",
+        "PDF 文件已下载。",
         { id: exportToastId }
       );
     } catch (err) {
       console.error(err);
       notify.error(
-        "Export failed",
-        "We are having trouble exporting your presentation. Please try again.",
+        "导出失败",
+        "导出演示文稿时出现问题，请重试。",
         exportToastId !== undefined ? { id: exportToastId } : undefined
       );
     } finally {
@@ -351,7 +351,7 @@ const PresentationHeader = ({
     <div
       className={` rounded-[18px] max-md:mt-4 ${mobile ? "" : "bg-white"}  p-5`}
     >
-      <p className="text-sm font-medium text-[#19001F]">Export as</p>
+      <p className="text-sm font-medium text-[#19001F]">导出为</p>
       <div className="my-[18px] h-[1px] bg-[#E8E8E8]" />
       <div className="space-y-3">
         <Button
@@ -409,29 +409,29 @@ const PresentationHeader = ({
                 cancelTitleEdit();
               }
             }}
-            placeholder="Presentation title"
+            placeholder="演示文稿标题"
             className="min-w-0 flex-1 bg-transparent py-2 pr-2 font-unbounded text-base leading-tight text-[#101323] placeholder:text-[#101323]/35 outline-none border-0 focus:ring-0"
-            aria-label="Presentation title"
+            aria-label="演示文稿标题"
           />
           <div className="flex shrink-0 items-center gap-0.5 border-l border-[#EDECEC] pl-1 ml-0.5">
-            <ToolTip content="Save · Enter">
+            <ToolTip content="保存 · Enter">
               <button
                 type="button"
                 onMouseDown={onTitleSaveMouseDown}
                 onClick={commitTitleEdit}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[#5141e5] hover:bg-[#5141e5]/10 transition-colors"
-                aria-label="Save title"
+                aria-label="保存标题"
               >
                 <Check className="h-4 w-4" strokeWidth={2.25} />
               </button>
             </ToolTip>
-            <ToolTip content="Cancel · Esc">
+            <ToolTip content="取消 · Esc">
               <button
                 type="button"
                 onMouseDown={onTitleCancelMouseDown}
                 onClick={cancelTitleEdit}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[#101323]/55 hover:bg-[#F6F6F9] hover:text-[#101323] transition-colors"
-                aria-label="Cancel editing title"
+                aria-label="取消编辑标题"
               >
                 <X className="h-4 w-4" strokeWidth={2.25} />
               </button>
@@ -451,7 +451,7 @@ const PresentationHeader = ({
         >
           <h2 className="min-w-0 flex-1 font-unbounded text-lg w-[450px] leading-snug text-[#101323]">
             <MarkdownRenderer
-              content={presentationData?.title || "Presentation"}
+              content={presentationData?.title || "演示文稿"}
               className="mb-0 min-w-0 overflow-hidden text-ellipsis line-clamp-1 text-sm text-[#101323] prose-p:my-0 prose-headings:my-0"
             />
           </h2>
@@ -479,7 +479,7 @@ const PresentationHeader = ({
             className="w-10 h-10 cursor-pointer object-contain"
           />
           {presentationData && !isStreaming && !isEditingTitle ? (
-            <ToolTip content="Rename presentation">{titleBlock}</ToolTip>
+            <ToolTip content="重命名演示文稿">{titleBlock}</ToolTip>
           ) : (
             titleBlock
           )}
@@ -501,7 +501,7 @@ const PresentationHeader = ({
             )}
 
           <div className="flex items-center gap-2 bg-[#F6F6F9] px-3.5 h-[38px] border border-[#EDECEC] rounded-[80px]">
-            <ToolTip content="Regenerate Presentation">
+            <ToolTip content="重新生成演示文稿">
               <button
                 type="button"
                 onClick={() => setIsRegenerateConfirmOpen(true)}
@@ -511,7 +511,7 @@ const PresentationHeader = ({
               </button>
             </ToolTip>
             <Separator orientation="vertical" className="h-4" />
-            <ToolTip content="Undo">
+            <ToolTip content="撤销">
               <button
                 disabled={!canUndo}
                 className=" disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer group"
@@ -523,7 +523,7 @@ const PresentationHeader = ({
               </button>
             </ToolTip>
             <Separator orientation="vertical" className="h-4" />
-            <ToolTip content="Redo">
+            <ToolTip content="重做">
               <button
                 disabled={!canRedo}
                 className=" disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer group"
@@ -535,7 +535,7 @@ const PresentationHeader = ({
               </button>
             </ToolTip>
             <Separator orientation="vertical" className="h-4 w-[2px]" />
-            <ToolTip content="Present">
+            <ToolTip content="放映">
               <button
                 onClick={() => {
                   const to = `?id=${presentation_id}&mode=present&slide=${
@@ -575,7 +575,7 @@ const PresentationHeader = ({
                 {isExporting ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 ) : (
-                  "Export"
+                  "导出"
                 )}{" "}
                 <ArrowRightFromLine className="w-3.5 h-3.5" />
               </button>
@@ -599,11 +599,10 @@ const PresentationHeader = ({
               <AlertTriangle className="h-6 w-6 text-red-500" />
             </div>
             <DialogTitle className="text-lg font-semibold text-[#191919]">
-              Regenerate Presentation?
+              重新生成演示文稿？
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed text-gray-500">
-              This will replace the current slides with a newly generated
-              version and clear undo history. Your current edits may be lost.
+              这会用新生成的版本替换当前幻灯片，并清空撤销历史。当前编辑内容可能会丢失。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex-row border-t border-gray-100 p-0 sm:space-x-0">
@@ -613,7 +612,7 @@ const PresentationHeader = ({
               onClick={() => setIsRegenerateConfirmOpen(false)}
               className="h-auto flex-1 rounded-none rounded-bl-2xl px-4 py-3.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-700"
             >
-              Cancel
+              取消
             </Button>
             <Button
               type="button"
@@ -621,7 +620,7 @@ const PresentationHeader = ({
               onClick={handleReGenerate}
               className="h-auto flex-1 rounded-none rounded-br-2xl border-l border-gray-100 px-4 py-3.5 text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600"
             >
-              Regenerate
+              重新生成
             </Button>
           </DialogFooter>
         </DialogContent>

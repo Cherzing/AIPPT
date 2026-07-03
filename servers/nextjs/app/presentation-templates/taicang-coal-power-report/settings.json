@@ -1,5 +1,6 @@
 {
   "description": "Formal Chinese leadership-report layouts for newly commissioned coal power projects, including cover, agenda, section divider, KPI snapshot, project overview, milestones, workstream progress, performance comparison, timeline, settlement, decision summary, and closing slides.",
+  "category": "电厂专区",
   "ordered": false,
   "default": false,
   "icon_weight": "regular"

@@ -99,9 +99,10 @@ const CustomTemplatePage = () => {
     const handleSaveTemplate = useCallback(async (
         layoutName: string,
         description: string,
-        template_info_id: string
+        template_info_id: string,
+        category: string
     ): Promise<string | null> => {
-        const id = await saveLayout(layoutName, description, template_info_id);
+        const id = await saveLayout(layoutName, description, template_info_id, category);
         if (id) {
             router.push(`/template-preview?slug=custom-${id}`);
         }

@@ -31,27 +31,27 @@ const unbounded = Unbounded({
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
-  title: "AI PPT",
-  description: "AI PPT ?????????????",
+  title: "AIPPT",
+  description: "AIPPT 智能演示文稿生成与管理平台",
   keywords: [
-    "AI PPT",
-    "AI ????",
-    "??????",
-    "PPT ??",
-    "????",
-    "AI ???",
+    "AIPPT",
+    "AI 演示文稿",
+    "PPT 生成",
+    "智能排版",
+    "文档转演示文稿",
+    "AIPPT",
   ],
   openGraph: {
-    title: "AI PPT",
-    description: "AI PPT ?????????????",
+    title: "AIPPT",
+    description: "AIPPT 智能演示文稿生成与管理平台",
     url: "http://localhost:3000",
-    siteName: "AI PPT",
+    siteName: "AIPPT",
     images: [
       {
         url: "/Logo.png",
         width: 1200,
         height: 630,
-        alt: "AI PPT Logo",
+        alt: "AIPPT Logo",
       },
     ],
     type: "website",
@@ -62,8 +62,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI PPT",
-    description: "AI PPT ?????????????",
+    title: "AIPPT",
+    description: "AIPPT 智能演示文稿生成与管理平台",
     images: ["/Logo.png"],
   },
 };

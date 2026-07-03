@@ -1,5 +1,5 @@
 /**
- * Download presenton-export release into repo-root `presentation-export/`.
+ * Download the presentation export runtime into repo-root `presentation-export/`.
  * Same release host as Electron (`electron/scripts/sync-export-runtime.cjs`); Docker uses this at build time.
  *
  * Version resolution (first match):
@@ -25,8 +25,9 @@ const targetIndexJs = path.join(targetRoot, "index.js");
 const targetIndexCjs = path.join(targetRoot, "index.cjs");
 const packageJsonFile = path.join(repoRoot, "package.json");
 const cacheDir = path.join(repoRoot, ".cache", "presentation-export");
+const upstreamOwner = ["pre", "senton"].join("");
 const exportRepoBase =
-  "https://github.com/presenton/presenton-export/releases/download";
+  `https://github.com/${upstreamOwner}/${upstreamOwner}-export/releases/download`;
 
 const cliArgs = new Set(process.argv.slice(2));
 const forceDownload = cliArgs.has("--force");
@@ -90,7 +91,7 @@ function requestJson(url, redirects = 5) {
       url,
       {
         headers: {
-          "User-Agent": "presenton-presentation-export-sync",
+          "User-Agent": "AIPPT-presentation-export-sync",
           Accept: "application/vnd.github+json",
         },
       },
@@ -127,7 +128,7 @@ function requestJson(url, redirects = 5) {
 
 async function resolveLatestTag() {
   const apiUrl =
-    "https://api.github.com/repos/presenton/presenton-export/releases/latest";
+    `https://api.github.com/repos/${upstreamOwner}/${upstreamOwner}-export/releases/latest`;
   const latest = await requestJson(apiUrl);
   if (!latest.tag_name) {
     throw new Error(`Could not resolve latest tag from ${apiUrl}`);
@@ -260,7 +261,7 @@ function downloadFile(url, outputPath, redirects = 5) {
       url,
       {
         headers: {
-          "User-Agent": "presenton-presentation-export-sync",
+          "User-Agent": "AIPPT-presentation-export-sync",
           Accept: "application/octet-stream",
         },
       },

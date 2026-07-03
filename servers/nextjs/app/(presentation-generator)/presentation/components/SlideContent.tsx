@@ -61,8 +61,8 @@ const SlideContent = ({
   const handleSubmit = async () => {
     if (!editPrompt.trim()) {
       notify.warning(
-        "Prompt required",
-        "Please enter a prompt before submitting."
+        "请输入修改要求",
+        "提交前请先填写要修改的内容。"
       );
       return;
     }
@@ -87,21 +87,21 @@ const SlideContent = ({
             .length,
         });
         notify.success(
-          "Slide updated",
-          "Your changes were applied to this slide."
+          "幻灯片已更新",
+          "修改内容已应用到当前幻灯片。"
         );
         setEditPrompt("");
       } else {
         notify.error(
-          "Slide edit failed",
-          "The server did not return an updated slide. Please try again."
+          "幻灯片修改失败",
+          "服务器未返回更新后的幻灯片，请重试。"
         );
       }
     } catch (error: any) {
       console.error("Error in slide editing:", error);
       notify.error(
-        "Slide edit failed",
-        error.message || "Something went wrong while editing the slide."
+        "幻灯片修改失败",
+        error.message || "修改幻灯片时发生错误。"
       );
     } finally {
       setIsUpdating(false);
@@ -112,8 +112,8 @@ const SlideContent = ({
     try {
       if ((presentationData?.slides?.length ?? 0) <= 1) {
         notify.warning(
-          "Cannot delete slide",
-          "A presentation must contain at least one slide."
+          "无法删除幻灯片",
+          "演示文稿至少需要保留一张幻灯片。"
         );
         return;
       }
@@ -136,8 +136,8 @@ const SlideContent = ({
     } catch (error: any) {
       console.error("Error deleting slide:", error);
       notify.error(
-        "Could not delete slide",
-        error.message || "Something went wrong while deleting the slide."
+        "无法删除幻灯片",
+        error.message || "删除幻灯片时发生错误。"
       );
     }
   };
@@ -182,7 +182,7 @@ const SlideContent = ({
                 />
                 <span className="relative z-10 flex items-center  gap-2">
                   <Sparkles className="h-4 w-4 text-[#9034EA]" />
-                  Updating slides...
+                  正在更新幻灯片……
                 </span>
               </span>
             </div>
@@ -192,9 +192,11 @@ const SlideContent = ({
           </div>
           {!showNewSlideSelection && (
             <div className="group-hover:opacity-100 hidden md:block opacity-0 transition-opacity my-4 duration-300">
-              <ToolTip content="Add new slide below">
+              <ToolTip content="在下方新增幻灯片">
                 {!isStreaming && (
                   <div
+                    role="button"
+                    aria-label="在下方新增幻灯片"
                     onClick={() => {
                       setShowNewSlideSelection(true);
                     }}
@@ -245,9 +247,10 @@ const SlideContent = ({
                 <PopoverTrigger asChild>
                   <button
                     type="button"
+                    aria-label="用提示词修改幻灯片"
                     className="flex px-3.5 py-2.5 items-center justify-center rounded-full bg-[#F7F6F9] font-syne"
                   >
-                    <ToolTip content="Update slide using prompt">
+                    <ToolTip content="用提示词修改幻灯片">
                       <Pencil className="h-4 w-4" />
                     </ToolTip>
                   </button>
@@ -260,10 +263,10 @@ const SlideContent = ({
                 >
                   <div className="border-b border-gray-100 px-4 py-3">
                     <p className="text-sm font-semibold text-gray-900">
-                      Update slide
+                      修改幻灯片
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      Describe how this slide should be improved.
+                      描述希望如何优化当前幻灯片。
                     </p>
                   </div>
                   <form
@@ -276,7 +279,7 @@ const SlideContent = ({
                     <Textarea
                       id={`slide-${slide.index}-prompt`}
                       value={editPrompt}
-                      placeholder="Enter your prompt here..."
+                      placeholder="请输入修改要求……"
                       className="min-h-[110px] max-h-[180px] w-full resize-none rounded-xl border border-gray-200 p-3 text-sm focus-visible:ring-1 focus-visible:ring-[#5141e5]"
                       disabled={isUpdating}
                       onChange={(e) => setEditPrompt(e.target.value)}
@@ -298,7 +301,7 @@ const SlideContent = ({
                           : "hover:opacity-90"
                       }`}
                     >
-                      {isUpdating ? "Updating..." : "Update"}
+                      {isUpdating ? "正在更新……" : "提交修改"}
                       <SendHorizontal className="h-4 w-4" />
                     </button>
                   </form>
@@ -313,6 +316,7 @@ const SlideContent = ({
                   <PopoverTrigger asChild>
                     <button
                       type="button"
+                      aria-label="查看演讲备注"
                       style={{
                         background:
                           "linear-gradient(270deg, #D5CAFC 2.4%, #E3D2EB 27.88%, #F4DCD3 69.23%, #FDE4C2 100%)",
@@ -323,7 +327,7 @@ const SlideContent = ({
                           : "border-gray-200 bg-white text-gray-600"
                       }`}
                     >
-                      <ToolTip content="??????">
+                      <ToolTip content="演讲备注">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="14"
@@ -364,7 +368,7 @@ const SlideContent = ({
                   >
                     <div className="border-b border-gray-100 px-4 py-3">
                       <p className="text-sm font-semibold text-gray-900">
-                        Speaker notes
+                        演讲备注
                       </p>
                     </div>
                     <div className="space-y-3 p-4">
@@ -378,10 +382,11 @@ const SlideContent = ({
 
               <button
                 type="button"
+                aria-label="删除幻灯片"
                 onClick={onDeleteSlide}
                 className="flex px-4 py-2.5 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 font-syne"
               >
-                <ToolTip content="Delete slide">
+                <ToolTip content="删除幻灯片">
                   <Trash className="h-4 w-4" />
                 </ToolTip>
               </button>

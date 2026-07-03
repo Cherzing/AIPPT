@@ -150,7 +150,7 @@ export const usePresentationStreaming = (
       setLoading(false);
       dispatch(setStreaming(false));
       setError(true);
-      notify.error("Presentation streaming failed", description);
+      notify.error("演示文稿生成失败", description);
     };
 
     const scheduleRetry = (reason: string): boolean => {
@@ -190,7 +190,7 @@ export const usePresentationStreaming = (
           data = JSON.parse(event.data);
         } catch {
           if (!scheduleRetry("invalid SSE payload")) {
-            finalizeFailure("Failed to parse stream response.");
+            finalizeFailure("无法解析生成流响应。");
           }
           return;
         }
@@ -256,7 +256,7 @@ export const usePresentationStreaming = (
                   continue;
                 }
                 shownAssetWarnings.add(detail);
-                notify.warning("Some images could not be generated", detail, {
+                notify.warning("部分图片无法生成", detail, {
                   duration: 12_000,
                 });
               }
@@ -280,7 +280,7 @@ export const usePresentationStreaming = (
               window.history.replaceState({}, "", newUrl.toString());
             } catch (error) {
               if (!scheduleRetry("failed to parse complete payload")) {
-                finalizeFailure("Failed to parse final presentation payload.");
+                finalizeFailure("无法解析最终演示文稿内容。");
               }
             }
             accumulatedChunks = "";
@@ -308,7 +308,7 @@ export const usePresentationStreaming = (
             ) {
               finalizeFailure(
                 data.detail ||
-                  "Failed to connect to the server. Please try again."
+                  "无法连接服务器，请重试。"
               );
             }
             break;
@@ -318,7 +318,7 @@ export const usePresentationStreaming = (
       eventSource.onerror = (error) => {
         console.error("EventSource failed:", error);
         if (!scheduleRetry("connection lost")) {
-          finalizeFailure("Failed to connect to the server. Please try again.");
+          finalizeFailure("无法连接服务器，请重试。");
         }
       };
     };

@@ -1,5 +1,5 @@
 """
-Presenton Version Server (test/dev stub)
+AIPPT Version Server (test/dev stub)
 
 This simulates the remote version-check endpoint that the Electron app polls.
 In production, replace UPDATE_SERVER_URL in the Electron app with your hosted URL.
@@ -24,7 +24,7 @@ VERSIONS = {
         "0.6.1-beta",
         "0.7.0",
     ],
-    "download_url": "https://github.com/presenton/presenton/releases/latest",
+    "download_url": "https://github.com/AIPPT/AIPPT/releases/latest",
     "release_notes": "Bug fixes, performance improvements, and new AI model support.",
 }
 
@@ -57,13 +57,13 @@ class VersionHandler(BaseHTTPRequestHandler):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Presenton version check server")
+    parser = argparse.ArgumentParser(description="AIPPT version check server")
     parser.add_argument("--port", type=int, default=8765, help="Port to listen on")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to bind to")
     args = parser.parse_args()
 
     server = HTTPServer((args.host, args.port), VersionHandler)
-    print(f"Presenton version server running at http://{args.host}:{args.port}", flush=True)
+    print(f"AIPPT version server running at http://{args.host}:{args.port}", flush=True)
     print(f"  GET /versions  -> version information", flush=True)
     print(f"  Current 'latest' set to: {VERSIONS['latest']}", flush=True)
     print("Press Ctrl+C to stop.", flush=True)

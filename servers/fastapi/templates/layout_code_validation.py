@@ -55,7 +55,7 @@ def _validation_url_candidates() -> list[str]:
 
     candidate_bases = [
         os.getenv("NEXT_PUBLIC_URL"),
-        os.getenv("PRESENTON_NEXT_URL"),
+        os.getenv("AIPPT_NEXT_URL"),
         "http://localhost",
         "http://localhost:3000",
     ]

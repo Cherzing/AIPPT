@@ -1,12 +1,12 @@
 spec:
-  name: presenton
+  name: AIPPT
   region: nyc
   services:
-    - name: presenton
+    - name: AIPPT
       image:
         registry_type: GHCR
         registry: ghcr.io
-        repository: presenton/presenton
+        repository: AIPPT/AIPPT
         tag: latest
       http_port: 80
       instance_count: 1

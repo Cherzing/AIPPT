@@ -5,6 +5,205 @@
 body {
   font-family: var(--font-syne), var(--font-unbounded), var(--font-inter),
     sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.10), transparent 34rem),
+    linear-gradient(135deg, #f8fafc 0%, #eef2ff 42%, #f8fafc 100%);
+}
+
+:root {
+  --aippt-bg: #f8fafc;
+  --aippt-surface: #ffffff;
+  --aippt-surface-soft: #f1f5f9;
+  --aippt-border: #e2e8f0;
+  --aippt-text: #0f172a;
+  --aippt-muted: #64748b;
+  --aippt-primary: #4f46e5;
+  --aippt-secondary: #7c3aed;
+  --aippt-success: #10b981;
+  --aippt-shadow: 0 20px 60px rgba(79, 70, 229, 0.10);
+  --aippt-card-shadow: 0 12px 34px rgba(15, 23, 42, 0.08);
+  --aippt-radius: 24px;
+}
+
+.aippt-soft-card {
+  border: 1px solid var(--aippt-border);
+  border-radius: var(--aippt-radius);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--aippt-card-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.aippt-page-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .aippt-page-shell {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aippt-page-shell {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+.aippt-page-shell::before,
+.aippt-page-shell::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  border-radius: 9999px;
+  filter: blur(48px);
+}
+
+.aippt-page-shell::before {
+  left: 12%;
+  top: -18rem;
+  height: 30rem;
+  width: 30rem;
+  background: rgba(199, 210, 254, 0.42);
+}
+
+.aippt-page-shell::after {
+  right: -10rem;
+  top: 10rem;
+  height: 28rem;
+  width: 28rem;
+  background: rgba(221, 214, 254, 0.38);
+}
+
+.aippt-page-content {
+  position: relative;
+  z-index: 1;
+}
+
+.aippt-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  margin-bottom: 1.25rem;
+  padding: 1rem 0;
+  backdrop-filter: blur(16px);
+}
+
+.aippt-section-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  background: rgba(238, 242, 255, 0.9);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4338ca;
+}
+
+.aippt-gradient-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(270deg, #d5cafc 2.4%, #e3d2eb 27.88%, #f4dcd3 69.23%, #fde4c2 100%);
+  padding: 0.75rem 1.125rem;
+  color: #101323;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 14px 32px rgba(124, 81, 248, 0.16);
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.aippt-gradient-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(124, 81, 248, 0.24);
+  filter: saturate(1.04);
+}
+
+.aippt-ghost-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 0.75rem 1.125rem;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.aippt-ghost-button:hover {
+  transform: translateY(-2px);
+  background: #ffffff;
+  color: #4338ca;
+  box-shadow: 0 16px 34px rgba(79, 70, 229, 0.12);
+}
+
+.aippt-input {
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 0.75rem 1rem;
+  color: #0f172a;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.aippt-input:focus {
+  border-color: rgba(99, 102, 241, 0.56);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+  background: #ffffff;
+}
+
+.aippt-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.76);
+  padding: 0.25rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.aippt-segment {
+  min-height: 2.25rem;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.aippt-segment[data-active="true"] {
+  background: #ffffff;
+  color: #4338ca;
+  box-shadow: 0 8px 22px rgba(79, 70, 229, 0.12);
+}
+
+.aippt-focus {
+  outline: none;
+}
+
+.aippt-focus:focus-visible {
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.18);
 }
 
 @layer utilities {
@@ -72,7 +271,10 @@ body {
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background:
+      radial-gradient(circle at top left, rgba(99, 102, 241, 0.10), transparent 34rem),
+      linear-gradient(135deg, #f8fafc 0%, #eef2ff 42%, #f8fafc 100%);
   }
 }
 

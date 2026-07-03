@@ -27,7 +27,7 @@ skills-lock.json
 .codex/
 eng.traineddata
 
-# presenton-export runtime (downloaded via scripts/sync-presentation-export.cjs or Docker build)
+# AIPPT-export runtime (downloaded via scripts/sync-presentation-export.cjs or Docker build)
 presentation-export/
 .cache/presentation-export/
 servers/fastapi/build/

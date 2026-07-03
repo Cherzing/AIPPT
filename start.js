@@ -19,7 +19,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "fs";
-import { printPresentonStartupBanner } from "./scripts/presenton-terminal-banner.mjs";
+import { printAIPPTStartupBanner } from "./scripts/aippt-terminal-banner.mjs";
 import {
   buildUserConfigFromEnv,
   readUserConfigEnv,
@@ -587,7 +587,7 @@ const startServers = async (nginxReadyPromise) => {
 
   try {
     await Promise.all([fastApiReadyPromise, nextjsReadyPromise, nginxReadyPromise]);
-    printPresentonStartupBanner({
+    printAIPPTStartupBanner({
       mode: isDev ? "development" : "production",
       nextPort: nextjsPort,
       fastapiPort,

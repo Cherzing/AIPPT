@@ -60,7 +60,7 @@ interface FastApiEnv {
   USER_CONFIG_PATH?: string,
   MIGRATE_DATABASE_ON_STARTUP?: string,
   DISABLE_AUTH?: string,
-  PRESENTON_ELECTRON?: string,
+  AIPPT_ELECTRON?: string,
   /** Absolute path to the bundled/resolved ImageMagick magick executable. */
   IMAGEMAGICK_BINARY?: string,
   /** ImageMagick runtime root used by the bundled portable build. */
@@ -102,7 +102,7 @@ interface NextJsEnv {
   APP_DATA_DIRECTORY?: string,
   DISABLE_AUTH?: string,
   EXPORT_PACKAGE_ROOT?: string,
-  PRESENTON_APP_ROOT?: string,
+  AIPPT_APP_ROOT?: string,
   BUILT_PYTHON_MODULE_PATH?: string,
 }
 

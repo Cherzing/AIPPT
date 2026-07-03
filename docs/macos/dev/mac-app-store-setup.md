@@ -1,6 +1,6 @@
 # Mac App Store Setup
 
-Presenton’s Electron app is configured for Mac App Store (MAS) distribution with App Sandbox. MAS builds must be produced on macOS because Apple’s signing tools are required.
+AIPPT’s Electron app is configured for Mac App Store (MAS) distribution with App Sandbox. MAS builds must be produced on macOS because Apple’s signing tools are required.
 
 This guide covers Apple Developer setup, local provisioning files, and the npm scripts in `electron/package.json` on `main`.
 
@@ -14,7 +14,7 @@ This guide covers Apple Developer setup, local provisioning files, and the npm s
 
 Build configuration lives in `electron/build.js`. Key identifiers:
 
-- **Bundle ID:** `com.presenton.presenton`
+- **Bundle ID:** `com.AIPPT.AIPPT`
 - **Team ID:** `S6W5C54KL6` (set in `extendInfo.ElectronTeamID`)
 
 ## MAS files in the repo
@@ -47,7 +47,7 @@ Used for `mas` (App Store submission) builds.
 
 [Apple Developer Portal](https://developer.apple.com/account) → **Certificates, Identifiers & Profiles** → **Identifiers** → **App IDs**.
 
-Create a macOS App ID that matches `com.presenton.presenton` (or update `APP_ID` in `electron/build.js` if you use a different ID).
+Create a macOS App ID that matches `com.AIPPT.AIPPT` (or update `APP_ID` in `electron/build.js` if you use a different ID).
 
 ### 4. Provisioning profiles
 
@@ -57,7 +57,7 @@ Create **two** macOS profiles and download each `.provisionprofile` file into `e
 
 - Portal → **Profiles** → **+**
 - Type: **macOS App Development**
-- App ID: your Presenton app ID
+- App ID: your AIPPT app ID
 - Certificate: **Apple Development**
 - Save as `electron/build/AppleDevelopment.provisionprofile`
 
@@ -67,7 +67,7 @@ Create **two** macOS profiles and download each `.provisionprofile` file into `e
 
 - Portal → **Profiles** → **+**
 - Type: **Mac App Store**
-- App ID: your Presenton app ID
+- App ID: your AIPPT app ID
 - Certificate: **Apple Distribution**
 - Save as `electron/build/MacAppStore.provisionprofile`
 
@@ -85,19 +85,19 @@ Provisioning profiles expire (typically yearly). Regenerate and replace the loca
 
 | Variable | Used for | Description |
 |----------|----------|-------------|
-| `PRESENTON_MAC_TARGET` | Set by npm scripts | `mas-dev` or `mas` (do not set manually when using the scripts below) |
-| `PRESENTON_MAS_DEV_IDENTITY` | `mas-dev` | Signing identity, e.g. `Apple Development: Your Name (TEAMID)` |
-| `PRESENTON_MAS_DISTRIBUTION_IDENTITY` | `mas` | Distribution identity, e.g. `Apple Distribution: Your Org (TEAMID)` |
-| `PRESENTON_MAS_IDENTITY` | `mas` | Alias for distribution identity |
+| `AIPPT_MAC_TARGET` | Set by npm scripts | `mas-dev` or `mas` (do not set manually when using the scripts below) |
+| `AIPPT_MAS_DEV_IDENTITY` | `mas-dev` | Signing identity, e.g. `Apple Development: Your Name (TEAMID)` |
+| `AIPPT_MAS_DISTRIBUTION_IDENTITY` | `mas` | Distribution identity, e.g. `Apple Distribution: Your Org (TEAMID)` |
+| `AIPPT_MAS_IDENTITY` | `mas` | Alias for distribution identity |
 | `CSC_NAME` | Either target | Fallback if the target-specific identity vars are unset |
-| `PRESENTON_APP_STORE_VERSION` | `mas` | App Store **version** (`x.y.z`). Required when `package.json` version contains a suffix like `-beta` |
-| `PRESENTON_APP_STORE_BUILD` | `mas` | App Store **build** number. Defaults to the short version if unset |
+| `AIPPT_APP_STORE_VERSION` | `mas` | App Store **version** (`x.y.z`). Required when `package.json` version contains a suffix like `-beta` |
+| `AIPPT_APP_STORE_BUILD` | `mas` | App Store **build** number. Defaults to the short version if unset |
 
 Example for a beta package version:
 
 ```bash
-export PRESENTON_APP_STORE_VERSION=1.0.0
-export PRESENTON_APP_STORE_BUILD=42
+export AIPPT_APP_STORE_VERSION=1.0.0
+export AIPPT_APP_STORE_BUILD=42
 ```
 
 ## Build commands
@@ -110,12 +110,12 @@ Rebuilds Next.js, FastAPI, export runtime, and packages the app:
 
 ```bash
 # MAS development — runs on Macs in your dev provisioning profile
-PRESENTON_MAS_DEV_IDENTITY="Apple Development: Your Name (TEAMID)" \
+AIPPT_MAS_DEV_IDENTITY="Apple Development: Your Name (TEAMID)" \
   npm run build:all:mas-dev
 
 # MAS distribution — for App Store Connect upload
-PRESENTON_MAS_DISTRIBUTION_IDENTITY="Apple Distribution: Your Org (TEAMID)" \
-  PRESENTON_APP_STORE_VERSION=1.0.0 \
+AIPPT_MAS_DISTRIBUTION_IDENTITY="Apple Distribution: Your Org (TEAMID)" \
+  AIPPT_APP_STORE_VERSION=1.0.0 \
   npm run build:all:mas
 ```
 
@@ -124,11 +124,11 @@ PRESENTON_MAS_DISTRIBUTION_IDENTITY="Apple Distribution: Your Org (TEAMID)" \
 If you already ran `build:all` and only need to re-run the Electron packager:
 
 ```bash
-PRESENTON_MAS_DEV_IDENTITY="Apple Development: Your Name (TEAMID)" \
+AIPPT_MAS_DEV_IDENTITY="Apple Development: Your Name (TEAMID)" \
   npm run dist:mac:mas-dev
 
-PRESENTON_MAS_DISTRIBUTION_IDENTITY="Apple Distribution: Your Org (TEAMID)" \
-  PRESENTON_APP_STORE_VERSION=1.0.0 \
+AIPPT_MAS_DISTRIBUTION_IDENTITY="Apple Distribution: Your Org (TEAMID)" \
+  AIPPT_APP_STORE_VERSION=1.0.0 \
   npm run dist:mac:mas
 ```
 
@@ -150,15 +150,15 @@ Exact paths depend on architecture (`arm64` vs `x64`). Typical layouts:
 electron/dist/
   mas-dev-arm64/          # unsigned or dev-signed .app (mas-dev)
   mas-arm64/              # distribution-signed .app (mas)
-  Presenton-<version>.pkg # MAS installer for upload
-  Presenton-<version>.dmg # local DMG (default target)
+  AIPPT-<version>.pkg # MAS installer for upload
+  AIPPT-<version>.dmg # local DMG (default target)
 ```
 
 Upload the `.pkg` from the `mas` build to [App Store Connect](https://appstoreconnect.apple.com).
 
 ## Icons
 
-The default macOS icon is `electron/resources/ui/assets/images/presenton_short_filled.png`.
+The default macOS icon is `electron/resources/ui/assets/images/AIPPT_short_filled.png`.
 
 For App Store packaging you can provide a proper `.icns` at `electron/build/icon.icns` and update the `mac.icon` field in `electron/build.js` if you want a custom store icon.
 
@@ -183,7 +183,7 @@ Re-download the profile from the Developer Portal. Do not commit real profiles t
 
 **“Cannot derive an App Store version from package version”**
 
-Set `PRESENTON_APP_STORE_VERSION` to three integers, e.g. `1.0.0`.
+Set `AIPPT_APP_STORE_VERSION` to three integers, e.g. `1.0.0`.
 
 **“MAS builds must be run on macOS”**
 

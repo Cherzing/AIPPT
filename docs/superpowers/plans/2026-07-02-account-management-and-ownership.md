@@ -1,8 +1,8 @@
-﻿# Account And Presentation Ownership Implementation Plan
+# Account And Presentation Ownership Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 完善 Presenton-zh 的管理员用户管理、普通用户个人中心/退出，以及 dashboard PPT 所属用户显示，并将项目推送到 GitHub。
+**Goal:** 完善 AIPPT-zh 的管理员用户管理、普通用户个人中心/退出，以及 dashboard PPT 所属用户显示，并将项目推送到 GitHub。
 
 **Architecture:** 继续使用 `app_data/userConfig.json` 的 `AUTH_USERS` 作为账号存储，不新增用户表。PPT 归属沿用 `presentations.owner_user`，后端已有管理员看全部、普通用户看自己的基础；前端补展示和入口。普通用户资料改名时同步更新历史 PPT 的 `owner_user`。
 

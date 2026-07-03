@@ -72,6 +72,6 @@ export const FAQS = [
     },
     {
         question: "模板生成后可以做什么？",
-        answer: "生成后的模板可用于后续 AI PPT 创建，帮助保持页面风格一致。",
+        answer: "生成后的模板可用于后续 AIPPT 创建，帮助保持页面风格一致。",
     },
 ]

@@ -7,9 +7,9 @@ const {
   normalizeBundledMacChromiumForPackaging,
 } = require("./scripts/prepare-export-chromium.cjs")
 
-const APP_ID = "com.presenton.presenton"
+const APP_ID = "com.AIPPT.AIPPT"
 const TEAM_ID = "S6W5C54KL6"
-const macTarget = process.env.PRESENTON_MAC_TARGET
+const macTarget = process.env.AIPPT_MAC_TARGET
 const masDevProvisioningProfile = resolveProvisioningProfileForTarget({
   target: "mas-dev",
   label: "MAS development",
@@ -28,7 +28,7 @@ const masProvisioningProfile = resolveProvisioningProfileForTarget({
   ],
 })
 const masDevIdentity =
-  process.env.PRESENTON_MAS_DEV_IDENTITY || process.env.CSC_NAME || ""
+  process.env.AIPPT_MAS_DEV_IDENTITY || process.env.CSC_NAME || ""
 const masSigningIdentities = resolveMasSigningIdentitiesForTarget()
 const masIdentityQualifier = masSigningIdentities.qualifier
 const masAppSigningIdentity = masSigningIdentities.appIdentity
@@ -40,31 +40,31 @@ const appStoreBundleVersion =
     ? getAppStoreBundleVersion(appStoreBundleShortVersion)
     : undefined
 const macDistributionIdentity =
-  process.env.PRESENTON_MAC_SIGN_IDENTITY ||
-  (process.env.PRESENTON_MAC_AUTO_SIGN === "1" ? undefined : null)
+  process.env.AIPPT_MAC_SIGN_IDENTITY ||
+  (process.env.AIPPT_MAC_AUTO_SIGN === "1" ? undefined : null)
 const masSigningExtraArgs =
-  process.env.PRESENTON_CODESIGN_TIMESTAMP === "1" ? [] : ["--timestamp=none"]
+  process.env.AIPPT_CODESIGN_TIMESTAMP === "1" ? [] : ["--timestamp=none"]
 
 function getAppStoreBundleShortVersion() {
-  const configuredVersion = process.env.PRESENTON_APP_STORE_VERSION
+  const configuredVersion = process.env.AIPPT_APP_STORE_VERSION
   if (configuredVersion) {
-    validateAppStoreVersion(configuredVersion, "PRESENTON_APP_STORE_VERSION")
+    validateAppStoreVersion(configuredVersion, "AIPPT_APP_STORE_VERSION")
     return configuredVersion
   }
 
   const match = /^(\d+)\.(\d+)\.(\d+)/.exec(packageMetadata.version)
   if (!match) {
     throw new Error(
-      `Cannot derive an App Store version from package version "${packageMetadata.version}". Set PRESENTON_APP_STORE_VERSION to three period-separated integers, for example 1.0.0.`
+      `Cannot derive an App Store version from package version "${packageMetadata.version}". Set AIPPT_APP_STORE_VERSION to three period-separated integers, for example 1.0.0.`
     )
   }
   return `${match[1]}.${match[2]}.${match[3]}`
 }
 
 function getAppStoreBundleVersion(bundleShortVersion) {
-  const configuredBuild = process.env.PRESENTON_APP_STORE_BUILD
+  const configuredBuild = process.env.AIPPT_APP_STORE_BUILD
   if (configuredBuild) {
-    validateAppStoreBuild(configuredBuild, "PRESENTON_APP_STORE_BUILD")
+    validateAppStoreBuild(configuredBuild, "AIPPT_APP_STORE_BUILD")
     return configuredBuild
   }
   return bundleShortVersion
@@ -185,13 +185,13 @@ function resolveMasSigningIdentitiesForTarget() {
 function resolveMasSigningIdentities() {
   const identities = getAppleSigningIdentities()
   const explicitIdentity =
-    process.env.PRESENTON_MAS_DISTRIBUTION_IDENTITY ||
-    process.env.PRESENTON_MAS_IDENTITY
+    process.env.AIPPT_MAS_DISTRIBUTION_IDENTITY ||
+    process.env.AIPPT_MAS_IDENTITY
 
   const qualifier = explicitIdentity
     ? validateMasIdentityQualifier(
       explicitIdentity,
-      "PRESENTON_MAS_DISTRIBUTION_IDENTITY/PRESENTON_MAS_IDENTITY",
+      "AIPPT_MAS_DISTRIBUTION_IDENTITY/AIPPT_MAS_IDENTITY",
       identities
     )
     : process.env.CSC_NAME
@@ -342,10 +342,10 @@ function assertCodesignCanUseIdentity(identity) {
     return
   }
 
-  const tempDir = fs.mkdtempSync(path.join(require("os").tmpdir(), "presenton-codesign-"))
+  const tempDir = fs.mkdtempSync(path.join(require("os").tmpdir(), "AIPPT-codesign-"))
   const tempFile = path.join(tempDir, "preflight")
   try {
-    fs.writeFileSync(tempFile, "Presenton MAS signing preflight\n")
+    fs.writeFileSync(tempFile, "AIPPT MAS signing preflight\n")
     execFileSync(
       "codesign",
       ["--force", "--sign", identity, "--timestamp=none", tempFile],
@@ -433,7 +433,7 @@ function resolvePackagedResourcesRoot(appPath, appBundleName) {
 
 const config = {
   appId: APP_ID,
-  productName: "Presenton",
+  productName: "AIPPT",
   asar: true,
   asarUnpack: [
     "resources/**",
@@ -443,7 +443,7 @@ const config = {
     "node_modules/detect-libc/**",
     "node_modules/semver/**",
   ],
-  copyright: "Copyright © 2026 Presenton",
+  copyright: "Copyright © 2026 AIPPT",
   directories: {
     output: "dist",
     buildResources: "build",
@@ -456,7 +456,7 @@ const config = {
   ],
   afterPack,
   mac: {
-    artifactName: "Presenton-${version}.${ext}",
+    artifactName: "AIPPT-${version}.${ext}",
     target: [macTarget || "dmg"],
     category: "public.app-category.productivity",
     hardenedRuntime: false,
@@ -491,7 +491,7 @@ const config = {
     additionalArguments: masSigningExtraArgs,
   },
   linux: {
-    artifactName: "Presenton-${version}.${ext}",
+    artifactName: "AIPPT-${version}.${ext}",
     target: ["AppImage", "deb"],
     icon: "build/icons",
   },
@@ -501,8 +501,8 @@ const config = {
   win: {
     target: ["nsis", "appx"],
     icon: "build/icon.ico",
-    artifactName: "Presenton-${version}.${ext}",
-    executableName: "Presenton",
+    artifactName: "AIPPT-${version}.${ext}",
+    executableName: "AIPPT",
   },
   nsis: {
     oneClick: false,
@@ -514,15 +514,15 @@ const config = {
     installerHeaderIcon: "build/icon.ico",
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: "Presenton",
-    uninstallDisplayName: "Presenton",
+    shortcutName: "AIPPT",
+    uninstallDisplayName: "AIPPT",
   },
   appx: {
-    identityName: "PresentonAI.Presenton",
+    identityName: "AIPPTAI.AIPPT",
     publisher: "CN=8A2C57B5-F1C6-473A-93EE-2E9B72134341",
-    displayName: "Presenton",
-    publisherDisplayName: "Presenton Inc.",
-    applicationId: "PresentonAI.Presenton",
+    displayName: "AIPPT",
+    publisherDisplayName: "AIPPT Inc.",
+    applicationId: "AIPPTAI.AIPPT",
     
   },
 }
@@ -533,7 +533,7 @@ const targets =
     ? builder.Platform.MAC.createTarget([effectiveMacTarget])
     : undefined
 
-if (macTarget === "mas" && process.env.PRESENTON_SKIP_CODESIGN_PREFLIGHT !== "1") {
+if (macTarget === "mas" && process.env.AIPPT_SKIP_CODESIGN_PREFLIGHT !== "1") {
   assertCodesignCanUseIdentity(masAppSigningIdentity)
 }
 

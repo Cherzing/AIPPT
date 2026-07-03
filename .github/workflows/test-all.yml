@@ -51,7 +51,7 @@ jobs:
     - name: Set up environment variables
       run: |
         echo "APP_DATA_DIRECTORY=/tmp/app_data" >> $GITHUB_ENV
-        echo "TEMP_DIRECTORY=/tmp/presenton" >> $GITHUB_ENV
+        echo "TEMP_DIRECTORY=/tmp/aippt" >> $GITHUB_ENV
         echo "PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium" >> $GITHUB_ENV
         echo "DATABASE_URL=sqlite+aiosqlite:///./test.db" >> $GITHUB_ENV
         echo "DISABLE_ANONYMOUS_TRACKING=true" >> $GITHUB_ENV

@@ -51,6 +51,7 @@ export async function GET() {
                     // Provide default settings if settings.json is missing or invalid
                     settings = {
                         description: `${templateName} presentation layouts`,
+                        category: '通用模板',
                         ordered: false,
                         default: false,
                         icon_weight: 'bold'

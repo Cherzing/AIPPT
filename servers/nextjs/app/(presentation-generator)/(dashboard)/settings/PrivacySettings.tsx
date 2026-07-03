@@ -63,7 +63,7 @@ const PrivacySettings = () => {
           使用情况分析
         </h4>
         <p className="text-xs text-[#6B7280] mb-6 leading-relaxed max-w-lg">
-          分享匿名使用数据以帮助我们改进 AI PPT。不会收集个人信息或演示文稿内容。
+          分享匿名使用数据以帮助我们改进 AIPPT。不会收集个人信息或演示文稿内容。
         </p>
 
         <div className="flex items-center justify-between gap-4 rounded-[10px] bg-white border border-[#EDEEEF] p-4">

@@ -19,12 +19,12 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, onSelect, onDelete,
 
   return (
     <div
-      className="group relative w-[305px] cursor-pointer rounded-xl border border-[#EDEEEF] bg-white transition-all hover:shadow-md"
+      className="group relative w-full min-w-[280px] cursor-pointer overflow-hidden rounded-[24px] border border-[var(--aippt-border)] bg-white/86 shadow-[0_14px_36px_rgba(15,23,42,0.07)] backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(79,70,229,0.14)]"
       onClick={() => onSelect(theme)}
     >
       {showDeleteButton && (
         <button
-          className="absolute -right-3 -top-3 z-10 hidden rounded-full border border-[#EDEEEF] bg-white p-2 transition-all duration-300 hover:bg-gray-100 hover:text-gray-700 group-hover:block"
+          className="aippt-focus absolute right-3 top-3 z-10 hidden rounded-full border border-[#EDEEEF] bg-white p-2 transition-all duration-300 hover:bg-gray-100 hover:text-gray-700 group-hover:block"
           style={{ boxShadow: '0 6.6px 13.2px 0 rgba(0, 0, 0, 0.10)' }}
           aria-label="删除主题"
           onClick={(event) => {
@@ -116,7 +116,7 @@ export const ThemeCard: React.FC<ThemeCardProps> = ({ theme, onSelect, onDelete,
         </div>
       </div>
 
-      <div className="border-t border-[#EDEEEF] bg-white px-5 py-4">
+      <div className="border-t border-[#EDEEEF] bg-white/85 px-5 py-4">
         <div className="mb-3 text-[16px] font-medium text-[#191919]">{theme.name}</div>
         <div className="flex items-center gap-2">
           {Object.values(theme.data.colors).slice(0, 2).map((color, index) => (

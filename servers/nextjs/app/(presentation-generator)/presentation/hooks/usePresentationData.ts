@@ -38,7 +38,7 @@ export const usePresentationData = (
       }
     } catch (error) {
       setError(true);
-      notify.error("Failed to load presentation", "The presentation could not be loaded. Please try again.");
+      notify.error("加载演示文稿失败", "无法加载演示文稿，请重试。");
       console.error("Error fetching user slides:", error);
       setLoading(false);
     }

@@ -211,14 +211,14 @@ export function ConfigurationInitializer({ children }: { children: React.ReactNo
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--aippt-bg)] p-4">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl border border-[#EDEEEF] bg-white p-8 text-center shadow-xl">
+          <div className="aippt-soft-card p-8 text-center">
             {/* Logo/Branding */}
             <div className="mb-6">
               <img
                 src="/Logo.png"
-                alt="AI PPT"
+                alt="AIPPT"
                 className="mx-auto mb-4 h-12 opacity-90"
               />
               <div className="mx-auto h-1 w-16 rounded-full bg-[#7C51F8]" />
@@ -227,10 +227,10 @@ export function ConfigurationInitializer({ children }: { children: React.ReactNo
             {/* Loading Text */}
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-gray-800 font-inter">
-                Initializing Application
+                正在初始化应用
               </h3>
               <p className="text-sm text-gray-600 font-inter">
-                Loading configuration and checking model availability...
+                正在加载配置并检查模型可用性...
               </p>
             </div>
 

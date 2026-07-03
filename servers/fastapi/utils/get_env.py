@@ -46,9 +46,9 @@ def is_disable_auth_enabled():
     return _is_truthy(get_disable_auth_env())
 
 
-def is_presenton_electron_desktop():
-    """True when running inside the AI PPT Electron desktop app."""
-    return _is_truthy(os.getenv("PRESENTON_ELECTRON"))
+def is_aippt_electron_desktop():
+    """True when running inside the AIPPT Electron desktop app."""
+    return _is_truthy(os.getenv("AIPPT_ELECTRON"))
 
 
 def get_llm_provider_env():

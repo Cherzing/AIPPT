@@ -14,6 +14,7 @@ export interface TemplateSummary {
     id: string;
     name: string;
     total_layouts: number;
+    category?: string | null;
 }
 
 export interface RawLayoutResponse {
@@ -56,6 +57,8 @@ export interface CustomTemplates {
     name: string;
 
     layoutCount: number;
+
+    category: string;
 
     isCustom: true;
 }
@@ -226,6 +229,7 @@ export function useCustomTemplateSummaries() {
                     id: item.id,
                     name: item.name || "Custom Template",
                     layoutCount: item.total_layouts,
+                    category: item.category || "自定义模板",
                     isCustom: true as const,
                 }
             });

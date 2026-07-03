@@ -80,6 +80,7 @@ export interface TemplateGroupSettings {
     ordered: boolean;
     default: boolean;
     icon_weight?: string;
+    category?: string;
 }
 
 // Template with settings

@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
+import { ArrowRight, LockKeyhole, Sparkles } from "lucide-react";
+
 import { getApiUrl } from "@/utils/api";
 import { isAuthDisabled } from "@/utils/auth";
 import { formatFastApiDetail, UNAUTHORIZED_DETAIL } from "@/utils/authErrors";
@@ -18,6 +19,7 @@ const initialStatus: AuthStatus = {
   configured: false,
   authenticated: false,
   username: null,
+  role: null,
 };
 
 export default function AuthGate() {
@@ -38,6 +40,7 @@ export default function AuthGate() {
         configured: true,
         authenticated: true,
         username: "electron",
+        role: "admin",
       });
       setIsLoading(false);
       return;
@@ -61,13 +64,12 @@ export default function AuthGate() {
   }, [isLoading, isRedirecting, status.authenticated]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || isLoading) {
-      return;
-    }
+    if (typeof window === "undefined" || isLoading) return;
+
     const params = new URLSearchParams(window.location.search);
     if (params.get("reason") === "unauthorized") {
       if (status.configured && !status.authenticated) {
-        notify.error("Unauthorized", "Sign in to view this page.", {
+        notify.error("需要登录", "请登录后继续访问该页面。", {
           id: "auth-unauthorized-redirect",
           duration: 5000,
         });
@@ -95,13 +97,11 @@ export default function AuthGate() {
         configured: Boolean(data.configured),
         authenticated: Boolean(data.authenticated),
         username: data.username ?? null,
+        role: data.role ?? null,
       });
     } catch (fetchError) {
       console.error(fetchError);
-      notify.error(
-        "Could not load login",
-        "We could not connect to the login service. Please refresh and try again."
-      );
+      notify.error("登录服务不可用", "无法连接登录服务，请刷新后重试。");
     } finally {
       setIsLoading(false);
     }
@@ -112,26 +112,17 @@ export default function AuthGate() {
 
     const cleanedUsername = username.trim();
     if (cleanedUsername.length < 3) {
-      notify.warning(
-        "Username too short",
-        "Your username must be at least 3 characters."
-      );
+      notify.warning("用户名过短", "用户名至少需要 3 个字符。");
       return;
     }
 
     if (password.length < 6) {
-      notify.warning(
-        "Password too short",
-        "Your password must be at least 6 characters."
-      );
+      notify.warning("密码过短", "密码至少需要 6 个字符。");
       return;
     }
 
     if ((isSetupMode || isRegisterMode) && password !== confirmPassword) {
-      notify.warning(
-        "Passwords do not match",
-        "Make sure both password fields match before continuing."
-      );
+      notify.warning("两次密码不一致", "请确认两次输入的密码完全一致。");
       return;
     }
 
@@ -143,37 +134,27 @@ export default function AuthGate() {
         : isRegisterMode
           ? "/api/v1/auth/register"
           : "/api/v1/auth/login";
-      const response = await fetch(
-        getApiUrl(authPath),
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: cleanedUsername,
-            password,
-          }),
-        }
-      );
+      const response = await fetch(getApiUrl(authPath), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: cleanedUsername,
+          password,
+        }),
+      });
 
       const payload = await response.json();
       if (!response.ok) {
         const detail = formatFastApiDetail(payload?.detail);
-        if (response.status === 401) {
-          notify.error(
-            "Sign-in failed",
-            detail === UNAUTHORIZED_DETAIL
-              ? "The username or password is incorrect. Please try again."
-              : detail
-          );
-        } else {
-          notify.error(
-            isSetupMode ? "Could not create account" : "Sign-in failed",
-            detail || "Something went wrong. Please try again."
-          );
-        }
+        notify.error(
+          isSetupMode ? "无法创建管理员" : isRegisterMode ? "注册失败" : "登录失败",
+          response.status === 401 && detail === UNAUTHORIZED_DETAIL
+            ? "用户名或密码不正确，请重新输入。"
+            : detail || "请求处理失败，请稍后重试。"
+        );
         return;
       }
 
@@ -182,10 +163,11 @@ export default function AuthGate() {
           configured: true,
           authenticated: false,
           username: (payload as AuthStatus).username ?? cleanedUsername,
+          role: (payload as AuthStatus).role ?? "admin",
         });
         setPassword("");
         setConfirmPassword("");
-        notify.success("Account created", "Sign in with your new username and password to continue.", {
+        notify.success("管理员已创建", "请使用新账号登录 AIPPT。", {
           duration: 6000,
         });
         return;
@@ -195,19 +177,14 @@ export default function AuthGate() {
         configured: Boolean((payload as AuthStatus).configured),
         authenticated: Boolean((payload as AuthStatus).authenticated),
         username: (payload as AuthStatus).username ?? cleanedUsername,
+        role: (payload as AuthStatus).role ?? null,
       });
       setPassword("");
       setConfirmPassword("");
-      notify.success(
-        "Signed in",
-        "Welcome back. Loading your workspace."
-      );
+      notify.success("登录成功", "正在进入 AIPPT 工作台。");
     } catch (submitError) {
       console.error(submitError);
-      notify.error(
-        "Login unavailable",
-        "The login service is unavailable right now. Please try again in a moment."
-      );
+      notify.error("登录服务不可用", "请稍后再试。");
     } finally {
       setIsSubmitting(false);
     }
@@ -215,157 +192,174 @@ export default function AuthGate() {
 
   if (isLoading || isRedirecting || status.authenticated) {
     return (
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
-        <div className="relative z-10 w-full max-w-md">
-          <div className="rounded-2xl border border-[#EDEEEF] bg-white p-8 text-center shadow-xl">
-            <Image
-              src="/Logo.png"
-              alt="AI PPT"
-              width={160}
-              height={48}
-              className="mx-auto mb-5 h-12 w-auto opacity-95"
-              priority
-            />
-            <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#7C51F8]" />
-            <h1 className="font-syne text-lg font-semibold text-black">AI PPT</h1>
-            <p className="mt-3 font-syne text-sm text-[#000000CC]">正在准备工作区...</p>
-            <div className="mt-6 flex justify-center gap-1.5">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-[#5146E5]" />
-              <span
-                className="h-2 w-2 animate-pulse rounded-full bg-[#7C51F8]"
-                style={{ animationDelay: "0.2s" }}
-              />
-              <span
-                className="h-2 w-2 animate-pulse rounded-full bg-[#5146E5]"
-                style={{ animationDelay: "0.4s" }}
-              />
-            </div>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aippt-bg)] p-6">
+        <div className="pointer-events-none absolute left-1/2 top-[-12rem] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-indigo-200/40 blur-3xl" />
+        <section className="aippt-soft-card relative z-10 w-full max-w-md rounded-[28px] p-8 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 text-2xl font-black text-white shadow-[0_18px_42px_rgba(79,70,229,0.28)]">
+            A
           </div>
-        </div>
+          <h1 className="text-xl font-bold text-slate-950">AIPPT</h1>
+          <p className="mt-3 text-sm text-slate-500">正在准备你的工作台...</p>
+          <div className="mt-6 flex justify-center gap-1.5">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-indigo-600" />
+            <span className="h-2 w-2 animate-pulse rounded-full bg-violet-600 [animation-delay:0.2s]" />
+            <span className="h-2 w-2 animate-pulse rounded-full bg-indigo-600 [animation-delay:0.4s]" />
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-6">
-      <section className="relative z-10 w-full max-w-xl rounded-2xl border border-[#E1E1E5] bg-white p-7 shadow-xl sm:p-10">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-[74px] w-[74px] shrink-0 items-center justify-center rounded-[4px] bg-[#F4F3FF] p-3">
-              <Image
-                src="/logo-with-bg.png"
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
-              />
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--aippt-bg)] p-6">
+      <div className="pointer-events-none absolute left-[-10rem] top-[-8rem] h-[30rem] w-[30rem] rounded-full bg-indigo-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-[-10rem] right-[-8rem] h-[30rem] w-[30rem] rounded-full bg-violet-200/40 blur-3xl" />
+
+      <section className="relative z-10 grid w-full max-w-5xl gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="aippt-soft-card hidden rounded-[32px] p-8 lg:flex lg:flex-col lg:justify-between">
+          <div>
+            <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 text-xl font-black text-white shadow-[0_18px_42px_rgba(79,70,229,0.28)]">
+              A
             </div>
-            <div>
-              <p className="font-syne text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7A5AF8]">
-                安全实例
-              </p>
-              <h1 className="mt-1 font-syne text-2xl font-semibold leading-tight text-black sm:text-[26px]">
-                {isSetupMode ? "创建管理员登录信息" : "登录后继续"}
-              </h1>
-            </div>
+            <p className="mb-3 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+              AI 演示文稿平台
+            </p>
+            <h1 className="text-4xl font-bold tracking-[-0.05em] text-slate-950">
+              用 AIPPT 更快生成高质量 PPT
+            </h1>
+            <p className="mt-4 text-sm leading-6 text-slate-600">
+              管理模板、生成文稿、维护账号权限，在一个清晰的工作台内完成。
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {["私有文稿隔离", "管理员统一管理", "模板驱动生成"].map((item) => (
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 text-sm font-medium text-slate-700">
+                <Sparkles className="h-4 w-4 text-indigo-600" />
+                {item}
+              </div>
+            ))}
           </div>
         </div>
 
-        <p className="font-syne text-base text-[#000000CC] sm:text-lg">
-          {isSetupMode
-            ? "此部署仅需一次初始化设置。后续访问将使用同一组用户名和密码。"
-            : "此部署已受保护。请输入凭据以打开应用。"}
-        </p>
-
-        {!isSetupMode ? (
-          <div className="mt-6 grid grid-cols-2 gap-2 rounded-[14px] bg-[#F6F6F9] p-1">
-            <button
-              type="button"
-              onClick={() => setAuthMode("login")}
-              className={`rounded-[11px] px-4 py-2 font-syne text-sm transition ${authMode === "login" ? "bg-white text-black shadow-sm" : "text-[#494A4D]"}`}
-            >
-              登录
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode("register")}
-              className={`rounded-[11px] px-4 py-2 font-syne text-sm transition ${authMode === "register" ? "bg-white text-black shadow-sm" : "text-[#494A4D]"}`}
-            >
-              注册
-            </button>
-          </div>
-        ) : null}
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div className="space-y-2">
-            <label htmlFor="username" className="block font-syne text-sm font-medium text-black">
-              用户名
-            </label>
-            <input
-              id="username"
-              autoComplete="username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              placeholder="your-admin-user"
-              className="w-full rounded-[11px] border border-[#EDEEEF] bg-white px-4 py-3 font-syne text-sm text-black outline-none transition placeholder:text-[#999999] focus:border-[#a49cfc] focus:ring-2 focus:ring-[#5146E5]/20"
-              disabled={isSubmitting}
-            />
+        <div className="aippt-soft-card rounded-[32px] p-7 sm:p-10">
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <p className="mb-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                {isSetupMode ? "初始化管理员" : isRegisterMode ? "注册普通用户" : "安全登录"}
+              </p>
+              <h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-950 sm:text-3xl">
+                {isSetupMode ? "创建管理员账号" : isRegisterMode ? "创建你的账号" : "登录 AIPPT"}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {isSetupMode
+                  ? "首次启动需要创建管理员账号，后续可在设置页管理普通用户。"
+                  : isRegisterMode
+                    ? "普通用户注册后，只能看到自己生成的 PPT。"
+                    : "请输入账号密码进入工作台。"}
+              </p>
+            </div>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+              <LockKeyhole className="h-5 w-5" />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="password" className="block font-syne text-sm font-medium text-black">
-              密码
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete={isSetupMode ? "new-password" : "current-password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="至少 6 个字符"
-              className="w-full rounded-[11px] border border-[#EDEEEF] bg-white px-4 py-3 font-syne text-sm text-black outline-none transition placeholder:text-[#999999] focus:border-[#a49cfc] focus:ring-2 focus:ring-[#5146E5]/20"
-              disabled={isSubmitting}
-            />
-          </div>
-
-          {isSetupMode || isRegisterMode ? (
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block font-syne text-sm font-medium text-black">
-                确认密码
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                placeholder="再次输入密码"
-                className="w-full rounded-[11px] border border-[#EDEEEF] bg-white px-4 py-3 font-syne text-sm text-black outline-none transition placeholder:text-[#999999] focus:border-[#a49cfc] focus:ring-2 focus:ring-[#5146E5]/20"
-                disabled={isSubmitting}
-              />
+          {!isSetupMode ? (
+            <div className="mb-7 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+              <button
+                type="button"
+                onClick={() => setAuthMode("login")}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  authMode === "login"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                登录
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthMode("register")}
+                className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                  authMode === "register"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                注册
+              </button>
             </div>
           ) : null}
 
-          {!isSetupMode && status.configured && authMode === "login" ? (
-            <p className="font-syne text-sm text-[#494A4D]">
-              此实例已完成设置。请使用已配置的用户名和密码。
-            </p>
-          ) : null}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label htmlFor="username" className="block text-sm font-semibold text-slate-800">
+                用户名
+              </label>
+              <input
+                id="username"
+                autoComplete="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="请输入用户名"
+                className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                disabled={isSubmitting}
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full rounded-[58px] border border-[#EDEEEF] bg-[#7C51F8] px-5 py-3 font-syne text-xs font-semibold text-white transition hover:bg-[#6d46e6] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isSubmitting
-              ? isSetupMode
-                ? "正在保存凭据..."
-                : "正在登录..."
-              : isSetupMode
-                ? "创建账户"
-                : "登录"}
-          </button>
-        </form>
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-slate-800">
+                密码
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete={isSetupMode || isRegisterMode ? "new-password" : "current-password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="至少 6 个字符"
+                className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {isSetupMode || isRegisterMode ? (
+              <div className="space-y-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-slate-800">
+                  确认密码
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="再次输入密码"
+                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-100"
+                  disabled={isSubmitting}
+                />
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-[0_16px_36px_rgba(79,70,229,0.24)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting
+                ? isSetupMode
+                  ? "正在创建..."
+                  : isRegisterMode
+                    ? "正在注册..."
+                    : "正在登录..."
+                : isSetupMode
+                  ? "创建管理员"
+                  : isRegisterMode
+                    ? "注册账号"
+                    : "登录"}
+              {!isSubmitting ? <ArrowRight className="h-4 w-4" /> : null}
+            </button>
+          </form>
+        </div>
       </section>
     </main>
   );

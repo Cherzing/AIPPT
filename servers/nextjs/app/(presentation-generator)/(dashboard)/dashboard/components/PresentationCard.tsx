@@ -1,27 +1,26 @@
-'use client'
-import React, { useEffect } from "react";
+"use client";
 
-import { Card } from "@/components/ui/card";
+import React, { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { AlertTriangle, CalendarDays, EllipsisVertical, Loader2, Trash, UserRound } from "lucide-react";
+
 import { DashboardApi } from "@/app/(presentation-generator)/services/api/dashboard";
-import { AlertTriangle, EllipsisVertical, Loader2, Trash } from "lucide-react";
+import SlideScale from "@/app/(presentation-generator)/components/PresentationRender";
+import { useFontLoader } from "@/app/(presentation-generator)/hooks/useFontLoad";
+import MarkdownRenderer from "@/components/MarkDownRender";
+import { notify } from "@/components/ui/sonner";
 import {
   Popover,
-  PopoverTrigger,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
-import { usePathname, useRouter } from "next/navigation";
-import { notify } from "@/components/ui/sonner";
-
-import { useFontLoader } from "@/app/(presentation-generator)/hooks/useFontLoad";
-import SlideScale from "@/app/(presentation-generator)/components/PresentationRender";
-import MarkdownRenderer from "@/components/MarkDownRender";
 import { trackEvent, MixpanelEvent } from "@/utils/mixpanel";
 
 export const PresentationCard = ({
   id,
   title,
   presentation,
-  onDeleted
+  onDeleted,
 }: {
   id: string;
   title: string;
@@ -33,8 +32,8 @@ export const PresentationCard = ({
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const handlePreview = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handlePreview = (event: React.MouseEvent) => {
+    event.preventDefault();
     trackEvent(MixpanelEvent.Dashboard_Presentation_Opened, {
       pathname,
       presentation_id: id,
@@ -43,47 +42,47 @@ export const PresentationCard = ({
     });
     router.push(`/presentation?id=${id}&type=standard`);
   };
+
   useEffect(() => {
-    applyTheme(presentation.theme)
-  }, [])
+    applyTheme(presentation.theme);
+  }, []);
+
   const applyTheme = async (theme: any) => {
-    const element = document.getElementById(`dashboard-presentation-card-${id}`)
-    if (!element) return;
+    const element = document.getElementById(`dashboard-presentation-card-${id}`);
+    if (!element || !theme?.data?.colors?.graph_0) {
+      return;
+    }
 
-    if (!theme || !theme.data || !theme.data.colors['graph_0']) { return; }
     const cssVariables = {
-      '--primary-color': theme.data.colors['primary'],
-      '--background-color': theme.data.colors['background'],
-      '--card-color': theme.data.colors['card'],
-      '--stroke': theme.data.colors['stroke'],
-      '--primary-text': theme.data.colors['primary_text'],
-      '--background-text': theme.data.colors['background_text'],
-      '--graph-0': theme.data.colors['graph_0'],
-      '--graph-1': theme.data.colors['graph_1'],
-      '--graph-2': theme.data.colors['graph_2'],
-      '--graph-3': theme.data.colors['graph_3'],
-      '--graph-4': theme.data.colors['graph_4'],
-      '--graph-5': theme.data.colors['graph_5'],
-      '--graph-6': theme.data.colors['graph_6'],
-      '--graph-7': theme.data.colors['graph_7'],
-      '--graph-8': theme.data.colors['graph_8'],
-      '--graph-9': theme.data.colors['graph_9'],
-    }
+      "--primary-color": theme.data.colors.primary,
+      "--background-color": theme.data.colors.background,
+      "--card-color": theme.data.colors.card,
+      "--stroke": theme.data.colors.stroke,
+      "--primary-text": theme.data.colors.primary_text,
+      "--background-text": theme.data.colors.background_text,
+      "--graph-0": theme.data.colors.graph_0,
+      "--graph-1": theme.data.colors.graph_1,
+      "--graph-2": theme.data.colors.graph_2,
+      "--graph-3": theme.data.colors.graph_3,
+      "--graph-4": theme.data.colors.graph_4,
+      "--graph-5": theme.data.colors.graph_5,
+      "--graph-6": theme.data.colors.graph_6,
+      "--graph-7": theme.data.colors.graph_7,
+      "--graph-8": theme.data.colors.graph_8,
+      "--graph-9": theme.data.colors.graph_9,
+    };
+
     Object.entries(cssVariables).forEach(([key, value]) => {
-      element.style.setProperty(key, value)
-    })
-    // 
+      element.style.setProperty(key, value);
+    });
+
     if (theme.data.fonts.textFont.url && theme.data.fonts.textFont.name) {
-      useFontLoader({ [theme.data.fonts.textFont.name]: theme.data.fonts.textFont.url })
+      useFontLoader({ [theme.data.fonts.textFont.name]: theme.data.fonts.textFont.url });
+      element.style.setProperty("font-family", `"${theme.data.fonts.textFont.name}"`);
+      element.style.setProperty("--heading-font-family", `"${theme.data.fonts.textFont.name}"`);
+      element.style.setProperty("--body-font-family", `"${theme.data.fonts.textFont.name}"`);
     }
-
-    // Apply fonts to preview container
-    element.style.setProperty('font-family', `"${theme.data.fonts.textFont.name}"`)
-    element.style.setProperty('--heading-font-family', `"${theme.data.fonts.textFont.name}"`)
-    element.style.setProperty('--body-font-family', `"${theme.data.fonts.textFont.name}"`)
-
-
-  }
+  };
 
   const handleDelete = async () => {
     if (isDeleting) return;
@@ -96,130 +95,149 @@ export const PresentationCard = ({
         presentation_id: id,
         slide_count: presentation?.slides?.length || 0,
       });
-      notify.success("Presentation deleted", "The presentation was removed from your dashboard.");
+      notify.success("文稿已删除", "该演示文稿已从工作台移除。");
       setShowDeleteDialog(false);
-      if (onDeleted) {
-        onDeleted(id);
-      }
+      onDeleted?.(id);
     } else {
-      notify.error("Could not delete presentation", response?.message || "Something went wrong while deleting the presentation.");
+      notify.error("删除失败", response?.message || "删除演示文稿时出现问题。");
     }
     setIsDeleting(false);
   };
+
   const firstSlide = presentation?.slides?.[0];
+  const createdDate = presentation?.created_at
+    ? new Date(presentation.created_at).toLocaleDateString()
+    : "未记录";
+
   return (
-    <Card
-      suppressHydrationWarning={true}
+    <article
       onClick={handlePreview}
-      className="bg-[#F8FBFB] font-syne shadow-none sm:shadow-none  presentation-card rounded-[12px] p-0 group hover:shadow-md transition-all duration-500 slide-theme cursor-pointer overflow-hidden flex flex-col"
+      className="group aippt-soft-card relative flex min-h-[320px] cursor-pointer flex-col overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.14)] aippt-focus"
+      tabIndex={0}
+      aria-label={`打开演示文稿：${title}`}
     >
       <div
         id={`dashboard-presentation-card-${id}`}
-        suppressHydrationWarning={true} className="flex flex-col flex-1 relative z-40">
-        {/* <p className=" text-xs font-syne absolute top-2 flex gap-1 capitalize  items-center left-2 rounded-[100px]  px-2.5 py-1 bg-[#3A3A3AF5] text-white font-semibold  z-40 ">
-
-          {presentation.type}
-        </p> */}
-
-        <img src="/card_bg.svg" alt="" className="absolute top-0 left-0 w-full h-full object-cover" />
-        <div className="scale-[0.75] mt-4  border border-gray-300 rounded-lg overflow-hidden">
-
-          <SlideScale slide={firstSlide} isClickable={false} />
+        suppressHydrationWarning
+        className="relative flex flex-1 flex-col"
+      >
+        <div className="relative overflow-hidden bg-gradient-to-br from-slate-100 via-indigo-50 to-white p-4">
+          <div className="absolute right-4 top-4 z-20 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-slate-500 shadow-sm">
+            PPT
+          </div>
+          <div className="relative mx-auto aspect-video w-full overflow-hidden rounded-2xl border border-white bg-white shadow-[0_16px_38px_rgba(15,23,42,0.12)]">
+            <div className="absolute inset-0">
+              <SlideScale
+                slide={firstSlide}
+                isClickable={false}
+                presentMode
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="w-full py-3 px-5 mt-auto z-40 relative bg-white  border-t border-[#EDEEEF]">
-          <div className="flex items-center justify-between gap-7 w-full">
-            <div className="flex flex-col items-start gap-1">
-              <div className="text-sm text-[#191919] font-semibold  overflow-hidden line-clamp-1">
-                <MarkdownRenderer content={title} className="text-sm mb-0  font-syne text-[#191919] font-semibold  overflow-hidden line-clamp-1" />
+        <div className="mt-auto border-t border-slate-200 bg-white px-5 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="line-clamp-1 text-base font-bold text-slate-950">
+                <MarkdownRenderer
+                  content={title || "未命名演示文稿"}
+                  className="mb-0 line-clamp-1 text-base font-bold text-slate-950"
+                />
               </div>
-              <p className="text-[#808080] text-sm font-syne">
-                {new Date(presentation?.created_at).toLocaleDateString()}
-              </p>
-              <p className="text-[#7A5AF8] text-xs font-syne">
-                所属用户：{presentation?.owner_user || "未记录"}
-              </p>
-
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  {createdDate}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-indigo-700">
+                  <UserRound className="h-3.5 w-3.5" />
+                  所属用户：{presentation?.owner_user || "未记录"}
+                </span>
+              </div>
             </div>
+
             <Popover>
-              <PopoverTrigger className="w-6 h-6 hover:bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:text-gray-700" onClick={(e) => e.stopPropagation()}>
-                <EllipsisVertical className="w-6 h-6 text-gray-500" />
+              <PopoverTrigger
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 aippt-focus"
+                onClick={(event) => event.stopPropagation()}
+                aria-label="文稿操作"
+              >
+                <EllipsisVertical className="h-5 w-5" />
               </PopoverTrigger>
-              <PopoverContent align="end" className="bg-white w-[200px]">
+              <PopoverContent align="end" className="w-[180px] rounded-2xl border-slate-200 bg-white p-2 shadow-xl">
                 <button
-                  className="flex items-center justify-between w-full px-2 py-1 hover:bg-gray-100"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm text-red-600 transition hover:bg-red-50"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
                     setShowDeleteDialog(true);
                   }}
                 >
-                  <p>Delete</p>
-                  <Trash className="w- h-4 text-red-500" />
+                  <span>删除文稿</span>
+                  <Trash className="h-4 w-4" />
                 </button>
               </PopoverContent>
             </Popover>
           </div>
-
         </div>
       </div>
+
       {showDeleteDialog && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center animate-[fadeIn_150ms_ease-out]"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (isDeleting) return;
-            setShowDeleteDialog(false);
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (!isDeleting) setShowDeleteDialog(false);
           }}
         >
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-slate-950/45 backdrop-blur-sm" />
           <div
-            className="relative w-[360px] rounded-2xl bg-white shadow-2xl animate-[scaleIn_200ms_ease-out]"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+            className="relative w-[380px] max-w-[calc(100vw-2rem)] rounded-[24px] bg-white shadow-2xl animate-[scaleIn_200ms_ease-out]"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
             }}
           >
-            <div className="flex flex-col items-center p-6 pb-4 text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
+            <div className="flex flex-col items-center p-7 pb-5 text-center">
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
                 <AlertTriangle className="h-6 w-6 text-red-500" />
               </div>
-              <h3 className="mb-2 text-lg font-semibold text-[#191919]">
-                Delete Presentation?
+              <h3 className="mb-2 text-lg font-bold text-slate-950">
+                删除这个演示文稿？
               </h3>
-              <p className="text-sm leading-relaxed text-gray-500">
-                You are about to delete{" "}
-                <span className="font-medium text-gray-700">&quot;{title}&quot;</span>.
-                This action cannot be undone.
+              <p className="text-sm leading-6 text-slate-500">
+                即将删除 <span className="font-semibold text-slate-700">“{title}”</span>。
+                此操作不可撤销。
               </p>
             </div>
-            <div className="flex border-t border-gray-100">
+            <div className="flex border-t border-slate-100">
               <button
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-3.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 px-4 py-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Cancel
+                取消
               </button>
               <button
                 onClick={() => void handleDelete()}
                 disabled={isDeleting}
-                className="flex flex-1 items-center justify-center gap-2 border-l border-gray-100 px-4 py-3.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex flex-1 items-center justify-center gap-2 border-l border-slate-100 px-4 py-4 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isDeleting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Deleting...
+                    删除中...
                   </>
                 ) : (
-                  "Delete"
+                  "确认删除"
                 )}
               </button>
             </div>
           </div>
         </div>
       )}
-    </Card>
+    </article>
   );
 };

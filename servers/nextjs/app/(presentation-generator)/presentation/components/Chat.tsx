@@ -98,7 +98,7 @@ const suggestions: { id: string; icon: ReactNode; suggestion: string }[] = [
         </defs>
       </svg>
     ),
-    suggestion: "Generate a full presentation from my topic",
+    suggestion: "根据我的主题生成完整演示文稿",
   },
   {
     id: "improve",
@@ -150,7 +150,7 @@ const suggestions: { id: string; icon: ReactNode; suggestion: string }[] = [
         </defs>
       </svg>
     ),
-    suggestion: "Improve this slide content",
+    suggestion: "优化当前幻灯片内容",
   },
   {
     id: "rewrite",
@@ -177,7 +177,7 @@ const suggestions: { id: string; icon: ReactNode; suggestion: string }[] = [
         />
       </svg>
     ),
-    suggestion: "Rewrite this content professionally",
+    suggestion: "用更专业的表达重写内容",
   },
   {
     id: "notes",
@@ -216,18 +216,18 @@ const suggestions: { id: string; icon: ReactNode; suggestion: string }[] = [
         />
       </svg>
     ),
-    suggestion: "Add speaker notes to this slide",
+    suggestion: "为当前幻灯片添加演讲备注",
   },
 ];
 
 const outlineQuickPrompts = [
-  "Expand outline",
-  "Shorten outline",
-  "Reorder sections",
-  "Merge similar slides",
-  "Split large sections",
-  "Improve conclusion",
-  "Improve introduction",
+  "扩展大纲",
+  "精简大纲",
+  "调整章节顺序",
+  "合并相似幻灯片",
+  "拆分过大的章节",
+  "优化结尾",
+  "优化开场",
 ];
 
 type ChatMessage = {
@@ -274,7 +274,7 @@ const createMessageId = () => {
 };
 
 const conversationStorageKey = (presentationId: string) =>
-  `presenton:chat:conversationId:${presentationId}`;
+  `aippt:chat:conversationId:${presentationId}`;
 
 const AssistantMarker = () => (
   <div className="mb-3 flex items-center gap-1.5 text-[#A4A7AE]">
@@ -1185,12 +1185,12 @@ const Chat = ({
                 fill="#7A5AF8"
               />
             </svg>
-            AI Assistant
+            AI 助手
           </h4>
           {isSending && (
             <span className="inline-flex items-center gap-1 rounded-full bg-[#F4F3FF] px-2 py-0.5 text-[10px] font-medium text-[#6941C6]">
               <Loader2 className="h-2.5 w-2.5 animate-spin" />
-              Live
+              生成中
             </span>
           )}
         </div>
@@ -1200,8 +1200,8 @@ const Chat = ({
             onClick={resetChat}
             disabled={isSending || isHistoryLoading}
             className="rounded-full p-1 text-[#8C8C8C] transition-colors hover:bg-[#F7F7F7] hover:text-[#191919] disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Reset chat"
-            title="Reset chat"
+            aria-label="重置聊天"
+            title="重置聊天"
           >
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -1212,14 +1212,14 @@ const Chat = ({
         {isHistoryLoading && messages.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-sm text-[#99A1AF]">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Loading chat…
+            正在加载聊天记录…
           </div>
         ) : messages.length === 0 ? (
           <>
             {isOutlineVariant ? (
               <div>
                 <h4 className="mb-2 text-[10px] font-normal leading-[15px] tracking-[0.367px] text-[#99A1AF]">
-                  QUICK PROMPTS
+                  快捷提示
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {outlineQuickPrompts.map((prompt) => (
@@ -1239,7 +1239,7 @@ const Chat = ({
             ) : (
               <div>
                 <h4 className="mb-2 text-[10px] font-normal leading-[15px] tracking-[0.367px] text-[#99A1AF]">
-                  SUGGESTIONS
+                  建议操作
                 </h4>
                 <div className="flex flex-col gap-1.5">
                   {suggestions.map((suggestion) => (
@@ -1303,7 +1303,7 @@ const Chat = ({
                     <div className="text-sm font-normal leading-5 text-[#535862]">
                       {isSending && message.role === "assistant"
                         ? message.activity?.[message.activity.length - 1]
-                            ?.label || "Working on it..."
+                            ?.label || "正在处理..."
                         : ""}
                     </div>
                   )}
@@ -1319,7 +1319,7 @@ const Chat = ({
                         ) : (
                           <ChevronRight className="h-3 w-3" />
                         )}
-                        <span>Thinking</span>
+                        <span>思考过程</span>
                         {message.activity.some(
                           (item) => item.state === "running"
                         ) && (
@@ -1345,7 +1345,7 @@ const Chat = ({
                           {message.toolCalls &&
                             message.toolCalls.length > 0 && (
                               <div className="pt-0.5 text-[11px] text-[#98A2B3]">
-                                Tools called: {message.toolCalls.join(", ")}
+                                已调用工具：{message.toolCalls.join(", ")}
                               </div>
                             )}
                         </div>
@@ -1380,8 +1380,8 @@ const Chat = ({
           onKeyDown={handleKeyDown}
           placeholder={
             isOutlineVariant
-              ? "Regenerate this outline"
-              : "Improve your slides..."
+              ? "重新生成这个大纲"
+              : "输入修改要求..."
           }
           aria-invalid={Boolean(errorMessage)}
         />
@@ -1391,8 +1391,8 @@ const Chat = ({
               type="button"
               disabled
               className="inline-flex h-[28px] items-center rounded-[64px] disabled:opacity-50"
-              aria-label="Attach files"
-              title="Attachments are not supported yet"
+              aria-label="添加附件"
+              title="暂不支持附件"
             >
               <Plus className="h-3 w-3 text-black" />
             </button>
@@ -1409,8 +1409,8 @@ const Chat = ({
             <ToolTip
               content={
                 isFollowAgentEnabled
-                  ? "Disable follow AI mode"
-                  : "Enable follow AI mode"
+                  ? "关闭跟随 AI 模式"
+                  : "开启跟随 AI 模式"
               }
             >
               <button
@@ -1420,13 +1420,13 @@ const Chat = ({
                 className={`inline-flex h-[28px] items-center gap-1 rounded-[64px]  text-[11px] font-medium transition-colors  disabled:cursor-not-allowed disabled:opacity-50`}
                 aria-label={
                   isFollowAgentEnabled
-                    ? "Disable follow AI mode"
-                    : "Enable follow AI mode"
+                    ? "关闭跟随 AI 模式"
+                    : "开启跟随 AI 模式"
                 }
                 title={
                   isFollowAgentEnabled
-                    ? "Follow AI is on: auto-jump to active slide"
-                    : "Follow AI is off"
+                    ? "跟随 AI 已开启：自动跳转到正在处理的幻灯片"
+                    : "跟随 AI 已关闭"
                 }
               >
                 <svg
@@ -1490,14 +1490,14 @@ const Chat = ({
                 type="button"
                 onClick={stopStreaming}
                 className="flex items-center gap-1.5 whitespace-nowrap rounded-[34px] border border-[#E4E7EC] bg-white px-3 py-2 text-sm font-medium text-[#344054] transition-colors hover:bg-[#F9FAFB]"
-                aria-label="Stop chat response"
+                aria-label="停止生成回复"
               >
                 <Loader2
                   className="h-3 w-3 animate-spin text-[#667085]"
                   aria-hidden="true"
                 />
                 <Square className="h-3 w-3 fill-current" aria-hidden="true" />
-                Stop
+                停止
               </button>
             ) : (
               <button
@@ -1511,7 +1511,7 @@ const Chat = ({
                 }}
               >
                 <Send className="h-3 w-3 text-[#191919]" />
-                Send
+                发送
               </button>
             )}
           </div>

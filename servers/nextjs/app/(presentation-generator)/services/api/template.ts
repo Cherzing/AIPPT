@@ -6,6 +6,7 @@ export interface CloneTemplatePayload {
     id: string;
     name?: string;
     description?: string;
+    category?: string;
 }
 
 export interface CloneLayoutPayload {

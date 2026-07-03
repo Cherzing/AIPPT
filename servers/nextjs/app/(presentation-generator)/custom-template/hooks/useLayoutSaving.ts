@@ -31,7 +31,7 @@ export const useLayoutSaving = (
 
 
 
-  const saveLayout = useCallback(async (layoutName: string, description: string, template_info_id: string): Promise<string | null> => {
+  const saveLayout = useCallback(async (layoutName: string, description: string, template_info_id: string, category: string): Promise<string | null> => {
     if (!slides.length) {
       notify.error("No slides to save", "Add at least one slide before saving the layout.");
       return null;
@@ -43,6 +43,7 @@ export const useLayoutSaving = (
       trackEvent(MixpanelEvent.CustomTemplate_Save_Started, {
         template_info_id,
         layout_name: layoutName,
+        category,
         layout_name_length: layoutName.length,
         description_length: description.length,
         slide_count: slides.length,
@@ -74,6 +75,7 @@ export const useLayoutSaving = (
             template_info_id: template_info_id,
             name: layoutName,
             description: description,
+            category,
             layouts: reactComponents,
 
           }),
@@ -105,6 +107,7 @@ export const useLayoutSaving = (
         template_info_id,
         saved_template_id: data.id,
         layout_name: layoutName,
+        category,
         slide_count: slides.length,
       });
 

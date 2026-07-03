@@ -7,7 +7,7 @@ export const Schema = z.object({
         label: z.string().max(20).describe("The label of the item"),
         value: z.string().max(50).describe("The value of the item")
     })).max(3).optional().describe("A list of items").default([
-        { label: "邮箱", value: "presenton@gmail.com" },
+        { label: "邮箱", value: "contact@aippt.local" },
         { label: "Phone", value: "+977-9800789088" },
         { label: "网站", value: "www.hello@gmail.com" }
     ])

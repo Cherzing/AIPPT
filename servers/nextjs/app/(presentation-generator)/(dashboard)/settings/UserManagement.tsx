@@ -191,21 +191,22 @@ export default function UserManagement() {
   };
 
   return (
-    <div className="w-full max-w-5xl overflow-y-auto pr-6 pb-28">
-      <div className="rounded-[20px] border border-[#EDEEEF] bg-white p-7">
+    <div className="w-full max-w-6xl overflow-y-auto pb-28 pr-6">
+      <div className="aippt-soft-card p-7">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h4 className="font-unbounded text-lg font-normal text-black">
+            <p className="aippt-section-eyebrow">管理员工具</p>
+            <h4 className="mt-3 text-lg font-bold text-slate-950">
               用户管理
             </h4>
-            <p className="mt-2 font-syne text-sm leading-relaxed text-[#494A4D]">
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">
               管理普通用户账号。管理员账号只用于系统配置，不允许在这里修改或删除。
             </p>
           </div>
           <button
             type="button"
             onClick={() => void loadUsers()}
-            className="inline-flex items-center gap-2 rounded-full border border-[#EDEEEF] px-4 py-2 font-syne text-xs text-[#191919] hover:bg-[#F6F6F9]"
+            className="aippt-ghost-button aippt-focus min-h-0 px-4 py-2 text-xs"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             刷新
@@ -214,25 +215,25 @@ export default function UserManagement() {
 
         <form
           onSubmit={createUser}
-          className="mt-7 grid gap-3 rounded-[16px] bg-[#F9FAFB] p-4 md:grid-cols-[1fr_1fr_auto]"
+          className="mt-7 grid gap-3 rounded-[20px] border border-[var(--aippt-border)] bg-white/55 p-4 md:grid-cols-[1fr_1fr_auto]"
         >
           <input
             value={username}
             onChange={(event) => setUsername(event.target.value)}
             placeholder="普通用户用户名"
-            className="rounded-[11px] border border-[#EDEEEF] bg-white px-4 py-3 font-syne text-sm outline-none focus:border-[#a49cfc]"
+            className="aippt-input"
           />
           <input
             value={password}
             type="password"
             onChange={(event) => setPassword(event.target.value)}
             placeholder="初始密码，至少 6 位"
-            className="rounded-[11px] border border-[#EDEEEF] bg-white px-4 py-3 font-syne text-sm outline-none focus:border-[#a49cfc]"
+            className="aippt-input"
           />
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center gap-2 rounded-[58px] bg-[#7C51F8] px-5 py-3 font-syne text-xs font-semibold text-white disabled:opacity-60"
+            className="aippt-gradient-button aippt-focus disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             创建用户
@@ -240,18 +241,18 @@ export default function UserManagement() {
         </form>
 
         <div className="mt-7 space-y-3">
-          <p className="font-syne text-xs font-semibold text-[#3A3A3A]">
+          <p className="text-xs font-semibold text-slate-600">
             管理员账号
           </p>
           {adminUsers.map((user) => (
             <div
               key={user.username}
-              className="rounded-[14px] border border-[#EDEEEF] bg-white px-4 py-3"
+              className="rounded-[18px] border border-[var(--aippt-border)] bg-white/75 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
             >
-              <div className="font-syne text-sm font-medium text-black">
+              <div className="text-sm font-semibold text-slate-950">
                 {user.username}
               </div>
-              <div className="mt-1 font-syne text-xs text-[#7A5AF8]">
+              <div className="mt-1 text-xs font-semibold text-indigo-600">
                 管理员
               </div>
             </div>
@@ -259,29 +260,29 @@ export default function UserManagement() {
         </div>
 
         <div className="mt-7 space-y-3">
-          <p className="font-syne text-xs font-semibold text-[#3A3A3A]">
+          <p className="text-xs font-semibold text-slate-600">
             普通用户
           </p>
           {isLoading ? (
-            <div className="flex items-center gap-2 rounded-[14px] border border-[#EDEEEF] px-4 py-5 font-syne text-sm text-[#494A4D]">
+            <div className="flex items-center gap-2 rounded-[18px] border border-[var(--aippt-border)] bg-white/70 px-4 py-5 text-sm text-slate-600">
               <Loader2 className="h-4 w-4 animate-spin" />
               正在加载用户...
             </div>
           ) : normalUsers.length === 0 ? (
-            <div className="rounded-[14px] border border-dashed border-[#D9D6FE] px-4 py-8 text-center font-syne text-sm text-[#494A4D]">
+            <div className="rounded-[18px] border border-dashed border-indigo-200 bg-indigo-50/45 px-4 py-8 text-center text-sm text-slate-600">
               暂无普通用户。可以使用上方表单创建。
             </div>
           ) : (
             normalUsers.map((user) => (
               <div
                 key={user.username}
-                className="grid gap-3 rounded-[14px] border border-[#EDEEEF] bg-white p-4 xl:grid-cols-[180px_220px_auto_220px_auto_auto] xl:items-center"
+                 className="grid gap-3 rounded-[20px] border border-[var(--aippt-border)] bg-white/75 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.05)] xl:grid-cols-[180px_220px_auto_220px_auto_auto] xl:items-center"
               >
                 <div>
-                  <div className="font-syne text-sm font-medium text-black">
+                  <div className="text-sm font-semibold text-slate-950">
                     {user.username}
                   </div>
-                  <div className="mt-1 font-syne text-xs text-[#494A4D]">
+                  <div className="mt-1 text-xs text-slate-500">
                     普通用户
                   </div>
                 </div>
@@ -295,12 +296,12 @@ export default function UserManagement() {
                     }))
                   }
                   placeholder="新用户名"
-                  className="rounded-[11px] border border-[#EDEEEF] px-3 py-2 font-syne text-xs outline-none focus:border-[#a49cfc]"
+                  className="aippt-input min-h-10 px-3 py-2 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => void renameUser(user.username)}
-                  className="rounded-full border border-[#D9D6FE] px-4 py-2 font-syne text-xs font-semibold text-[#5146E5] hover:bg-[#F4F3FF]"
+                  className="aippt-ghost-button aippt-focus min-h-10 px-4 py-2 text-xs"
                 >
                   修改用户名
                 </button>
@@ -315,19 +316,19 @@ export default function UserManagement() {
                     }))
                   }
                   placeholder="新密码"
-                  className="rounded-[11px] border border-[#EDEEEF] px-3 py-2 font-syne text-xs outline-none focus:border-[#a49cfc]"
+                  className="aippt-input min-h-10 px-3 py-2 text-xs"
                 />
                 <button
                   type="button"
                   onClick={() => void resetPassword(user.username)}
-                  className="rounded-full border border-[#D9D6FE] px-4 py-2 font-syne text-xs font-semibold text-[#5146E5] hover:bg-[#F4F3FF]"
+                  className="aippt-ghost-button aippt-focus min-h-10 px-4 py-2 text-xs"
                 >
                   重置密码
                 </button>
                 <button
                   type="button"
                   onClick={() => void deleteUser(user.username)}
-                  className="inline-flex items-center justify-center gap-1 rounded-full border border-[#FEE4E2] px-4 py-2 font-syne text-xs font-semibold text-[#D92D20] hover:bg-[#FFF5F5]"
+                  className="aippt-focus inline-flex min-h-10 items-center justify-center gap-1 rounded-full border border-red-100 bg-white/70 px-4 py-2 text-xs font-semibold text-red-600 transition hover:-translate-y-0.5 hover:bg-red-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   删除

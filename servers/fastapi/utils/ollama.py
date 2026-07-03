@@ -65,8 +65,8 @@ def _ollama_unreachable_error(ollama_url: str | None = None) -> HTTPException:
         status_code=503,
         detail=(
             f"Could not connect to Ollama at {resolved_ollama_url}. "
-            "Make sure Ollama is running and reachable from AI PPT. "
-            "When AI PPT runs in Docker, use host.docker.internal instead of localhost."
+            "Make sure Ollama is running and reachable from AIPPT. "
+            "When AIPPT runs in Docker, use host.docker.internal instead of localhost."
         ),
     )
 

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import { ArrowUpRight, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowUpRight, ChevronRight, Loader2, Sparkles } from "lucide-react";
+
 import { templates } from "@/app/presentation-templates";
 import { TemplateLayoutsWithSettings } from "@/app/presentation-templates/utils";
 import {
@@ -11,15 +12,88 @@ import {
   useCustomTemplatePreview,
   useCustomTemplateSummaries,
 } from "@/app/hooks/useCustomTemplates";
-import CreateCustomTemplate from "./CreateCustomTemplate";
-import Link from "next/link";
+import { Card } from "@/components/ui/card";
 import { MixpanelEvent, trackEvent } from "@/utils/mixpanel";
+
 import {
   CustomTemplatePreview,
   InbuiltTemplatePreview,
   LayoutsBadge,
   TemplatePreviewStage,
 } from "../../../components/TemplatePreviewComponents";
+import CreateCustomTemplate from "./CreateCustomTemplate";
+
+const TEMPLATE_CATEGORIES = [
+  "全部",
+  "通用模板",
+  "报告模板",
+  "电厂专区",
+  "自定义模板",
+] as const;
+
+type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];
+
+type InbuiltTemplateItem = {
+  kind: "inbuilt";
+  id: string;
+  name: string;
+  description: string;
+  category: Exclude<TemplateCategory, "全部">;
+  template: TemplateLayoutsWithSettings;
+};
+
+type CustomTemplateItem = {
+  kind: "custom";
+  id: string;
+  name: string;
+  description: string;
+  category: Exclude<TemplateCategory, "全部">;
+  template: CustomTemplates;
+};
+
+type TemplateItem = InbuiltTemplateItem | CustomTemplateItem;
+
+function getInbuiltTemplateCategory(
+  template: TemplateLayoutsWithSettings
+): Exclude<TemplateCategory, "全部"> {
+  const configuredCategory = template.settings?.category?.trim();
+  if (
+    configuredCategory === "通用模板" ||
+    configuredCategory === "报告模板" ||
+    configuredCategory === "电厂专区" ||
+    configuredCategory === "自定义模板"
+  ) {
+    return configuredCategory;
+  }
+  if (template.id === "taicang-coal-power-report") return "电厂专区";
+  if (template.id.includes("report") || template.id.startsWith("neo")) {
+    return "报告模板";
+  }
+  return "通用模板";
+}
+
+function getCustomTemplateCategory(
+  template: CustomTemplates
+): Exclude<TemplateCategory, "全部"> {
+  const configuredCategory = template.category?.trim();
+  if (
+    configuredCategory === "通用模板" ||
+    configuredCategory === "报告模板" ||
+    configuredCategory === "电厂专区" ||
+    configuredCategory === "自定义模板"
+  ) {
+    return configuredCategory;
+  }
+  return "自定义模板";
+}
+
+function CategoryBadge({ category }: { category: string }) {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+      {category}
+    </span>
+  );
+}
 
 export const CustomTemplateCard = React.memo(function CustomTemplateCard({
   template,
@@ -28,21 +102,24 @@ export const CustomTemplateCard = React.memo(function CustomTemplateCard({
 }) {
   const router = useRouter();
   const { previewLayouts, loading } = useCustomTemplatePreview(`${template.id}`);
+  const category = getCustomTemplateCategory(template);
+
   const handleOpen = useCallback(() => {
     trackEvent(MixpanelEvent.Templates_Custom_Opened, {
       template_id: template.id,
       template_name: template.name,
+      category,
     });
     if (template.id.startsWith("custom-")) {
       router.push(`/template-preview?slug=${template.id}`);
     } else {
       router.push(`/template-preview?slug=custom-${template.id}`);
     }
-  }, [router, template.id, template.name]);
+  }, [category, router, template.id, template.name]);
 
   return (
     <Card
-      className="cursor-pointer flex flex-col shadow-none sm:shadow-none relative hover:shadow-sm transition-all duration-200 group overflow-hidden rounded-[22px] border border-[#E8E9EC] bg-white"
+      className="aippt-soft-card group relative flex cursor-pointer flex-col overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.14)]"
       onClick={handleOpen}
     >
       <TemplatePreviewStage>
@@ -53,54 +130,69 @@ export const CustomTemplateCard = React.memo(function CustomTemplateCard({
           templateId={template.id}
         />
       </TemplatePreviewStage>
-      <div className="relative z-40 flex items-center justify-between border-t border-[#EDEEEF] bg-white px-6 py-5">
-        <h3 className="max-w-[min(191px,65%)] text-base font-bold text-gray-900">
-          {template.name}
-        </h3>
-        <ArrowUpRight className="h-4 w-4 shrink-0 text-gray-400 transition-colors group-hover:text-purple-600" />
+      <div className="relative z-40 flex items-center justify-between gap-4 border-t border-slate-200 bg-white px-6 py-5">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 flex items-center gap-2">
+            <CategoryBadge category={category} />
+          </div>
+          <h3 className="truncate text-base font-bold text-slate-950">
+            {template.name}
+          </h3>
+        </div>
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-400 transition-colors group-hover:text-indigo-600" />
       </div>
     </Card>
   );
 }, (prev, next) => (
   prev.template.id === next.template.id &&
   prev.template.name === next.template.name &&
-  prev.template.layoutCount === next.template.layoutCount
+  prev.template.layoutCount === next.template.layoutCount &&
+  prev.template.category === next.template.category
 ));
 
 const InbuiltTemplateCard = React.memo(function InbuiltTemplateCard({
   template,
+  category,
   onOpen,
 }: {
   template: TemplateLayoutsWithSettings;
+  category: string;
   onOpen: (id: string) => void;
 }) {
   const handleOpen = useCallback(() => onOpen(template.id), [onOpen, template.id]);
 
   return (
     <Card
-      key={template.id}
-      className="group relative cursor-pointer overflow-hidden rounded-[22px] border border-[#E8E9EC] bg-white shadow-none sm:shadow-none transition-all duration-200 hover:shadow-sm"
+      className="aippt-soft-card group relative cursor-pointer overflow-hidden rounded-[24px] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.14)]"
       onClick={handleOpen}
     >
       <TemplatePreviewStage>
         <LayoutsBadge count={template.layouts.length} />
         <InbuiltTemplatePreview layouts={template.layouts} templateId={template.id} />
       </TemplatePreviewStage>
-      <div className="relative z-40 flex items-center justify-between gap-4 border-t border-[#EDEEEF] bg-white px-6 py-5">
+      <div className="relative z-40 flex items-center justify-between gap-4 border-t border-slate-200 bg-white px-6 py-5">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-bold text-gray-900">{template.name}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-gray-500">{template.description}</p>
+          <div className="mb-2 flex items-center gap-2">
+            <CategoryBadge category={category} />
+          </div>
+          <h3 className="text-base font-bold text-slate-950">{template.name}</h3>
+          <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">
+            {template.description}
+          </p>
         </div>
-        <ArrowUpRight className="h-4 w-4 shrink-0 text-gray-400 transition-colors group-hover:text-blue-600" />
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-400 transition-colors group-hover:text-indigo-600" />
       </div>
     </Card>
   );
 });
 
 const LayoutPreview = () => {
-  const [tab, setTab] = useState<"custom" | "default">("default");
+  const [activeCategory, setActiveCategory] = useState<TemplateCategory>("全部");
   const router = useRouter();
-  const { templates: customTemplates, loading: customLoading } = useCustomTemplateSummaries();
+  const {
+    templates: customTemplates,
+    loading: customLoading,
+  } = useCustomTemplateSummaries();
 
   useEffect(() => {
     trackEvent(MixpanelEvent.Templates_Page_Viewed);
@@ -118,125 +210,146 @@ const LayoutPreview = () => {
     router.push(`/template-preview?slug=${id}`);
   }, [router]);
 
-  const { nonNeoInbuilt, neoInbuilt } = useMemo(() => {
-    const nonNeo: TemplateLayoutsWithSettings[] = [];
-    const neo: TemplateLayoutsWithSettings[] = [];
-    for (const template of templates) {
-      if (template.id.startsWith("neo")) neo.push(template);
-      else nonNeo.push(template);
-    }
-    return { nonNeoInbuilt: nonNeo, neoInbuilt: neo };
-  }, []);
-
-  const customTemplateCards = useMemo(
-    () => customTemplates.map((template: CustomTemplates) => (
-      <CustomTemplateCard key={template.id} template={template} />
-    )),
-    [customTemplates],
+  const inbuiltItems = useMemo<InbuiltTemplateItem[]>(
+    () =>
+      templates.map((template) => ({
+        kind: "inbuilt",
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        category: getInbuiltTemplateCategory(template),
+        template,
+      })),
+    []
   );
 
+  const customItems = useMemo<CustomTemplateItem[]>(
+    () =>
+      customTemplates.map((template) => ({
+        kind: "custom",
+        id: template.id,
+        name: template.name,
+        description: "用户自定义模板",
+        category: getCustomTemplateCategory(template),
+        template,
+      })),
+    [customTemplates]
+  );
+
+  const allItems = useMemo<TemplateItem[]>(
+    () => [...inbuiltItems, ...customItems],
+    [customItems, inbuiltItems]
+  );
+
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<TemplateCategory, number>();
+    TEMPLATE_CATEGORIES.forEach((category) => counts.set(category, 0));
+    counts.set("全部", allItems.length);
+    allItems.forEach((item) => {
+      counts.set(item.category, (counts.get(item.category) ?? 0) + 1);
+    });
+    return counts;
+  }, [allItems]);
+
+  const visibleItems = useMemo(
+    () =>
+      activeCategory === "全部"
+        ? allItems
+        : allItems.filter((item) => item.category === activeCategory),
+    [activeCategory, allItems]
+  );
+
+  const showCreateTemplateCard =
+    activeCategory === "全部" || activeCategory === "自定义模板";
+
   return (
-    <div className="min-h-screen relative font-syne">
-      <div className="sticky top-0 right-0 z-50 py-[28px] px-6 backdrop-blur">
-        <div className="flex xl:flex-row flex-col gap-6 xl:gap-0 items-center justify-between">
-          <h3 className="text-[28px] tracking-[-0.84px] font-unbounded font-normal text-[#101828] flex items-center gap-2">
-            {"\u6a21\u677f"}
-          </h3>
-          <div className="flex gap-2.5 max-sm:w-full max-md:justify-center max-sm:flex-wrap">
+    <div className="aippt-page-shell font-syne">
+      <div className="aippt-page-content">
+        <div className="aippt-topbar">
+          <div className="aippt-soft-card flex flex-col gap-5 px-6 py-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="aippt-section-eyebrow">
+                <Sparkles className="h-3.5 w-3.5" />
+                模板库
+              </p>
+              <h1 className="mt-2 text-2xl font-bold tracking-[-0.04em] text-slate-950 sm:text-[28px]">
+                按类别选择 PPT 模板
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                使用内置母版或上传自定义模板。新增模板保存时可选择类别，模板库会自动归入对应专区。
+              </p>
+            </div>
             <Link
               href="/custom-template"
               onClick={() => trackEvent(MixpanelEvent.Templates_New_Template_Clicked)}
-              className="inline-flex items-center font-syne font-semibold gap-2 rounded-xl px-4 py-2.5 text-black text-sm shadow-sm hover:shadow-md"
-              aria-label={"\u65b0\u5efa\u6a21\u677f"}
-              style={{
-                borderRadius: "48px",
-                background: "linear-gradient(270deg, #D5CAFC 2.4%, #E3D2EB 27.88%, #F4DCD3 69.23%, #FDE4C2 100%)",
-              }}
+              className="aippt-gradient-button aippt-focus w-full sm:w-auto"
+              aria-label="新建模板"
             >
-              <span className="hidden md:inline">{"\u65b0\u5efa\u6a21\u677f"}</span>
-              <span className="md:hidden">{"\u65b0\u5efa"}</span>
-              <ChevronRight className="w-4 h-4" />
+              <span className="hidden md:inline">新建模板</span>
+              <span className="md:hidden">新建</span>
+              <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
-      </div>
 
-      <div className="l mx-auto px-6 py-8">
-        <div className="p-1 rounded-[40px] bg-[#ffffff] w-fit border border-[#EDEEEF] flex items-center justify-center">
-          <button
-            className="px-5 py-2 text-xs font-medium text-[#3A3A3A] rounded-[70px]"
-            onClick={() => {
-              trackEvent(MixpanelEvent.Templates_Tab_Switched, { tab: "custom" });
-              setTab("custom");
-            }}
-            style={{
-              background: tab === "custom" ? "#F4F3FF" : "transparent",
-              color: tab === "custom" ? "#5146E5" : "#3A3A3A",
-            }}
-          >
-            {"\u81ea\u5b9a\u4e49"}
-          </button>
-          <svg xmlns="http://www.w3.org/2000/svg" className="mx-1" width="2" height="17" viewBox="0 0 2 17" fill="none">
-            <path d="M1 0V16.5" stroke="#EDECEC" strokeWidth="2" />
-          </svg>
-          <button
-            className="px-5 py-2 text-xs font-medium text-[#3A3A3A] rounded-[70px]"
-            onClick={() => {
-              trackEvent(MixpanelEvent.Templates_Tab_Switched, { tab: "default" });
-              setTab("default");
-            }}
-            style={{
-              background: tab === "default" ? "#F4F3FF" : "transparent",
-              color: tab === "default" ? "#5146E5" : "#3A3A3A",
-            }}
-          >
-            {"\u5185\u7f6e"}
-          </button>
+        <div className="mb-8 space-y-4">
+          <div className="aippt-segmented flex-wrap">
+            {TEMPLATE_CATEGORIES.map((category) => (
+              <button
+                key={category}
+                className="aippt-segment aippt-focus"
+                data-active={activeCategory === category}
+                onClick={() => {
+                  trackEvent(MixpanelEvent.Templates_Tab_Switched, {
+                    category,
+                  });
+                  setActiveCategory(category);
+                }}
+              >
+                {category}
+                <span className="ml-2 rounded-full bg-white/70 px-2 py-0.5 text-xs text-slate-500">
+                  {categoryCounts.get(category) ?? 0}
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="text-sm text-slate-500">
+            当前显示：{activeCategory}，共 {visibleItems.length} 个模板
+          </p>
         </div>
 
-        {tab === "default" && (
-          <section className="my-12 space-y-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {nonNeoInbuilt.map((template) => (
-                <InbuiltTemplateCard
-                  key={template.id}
-                  template={template}
-                  onOpen={handleOpenPreview}
-                />
-              ))}
+        {customLoading && customItems.length === 0 ? (
+          <div className="aippt-soft-card flex items-center justify-center py-14">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <span className="ml-3 text-slate-600">正在加载自定义模板……</span>
+          </div>
+        ) : (
+          <section>
+            <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {showCreateTemplateCard && <CreateCustomTemplate />}
+              {visibleItems.map((item) =>
+                item.kind === "inbuilt" ? (
+                  <InbuiltTemplateCard
+                    key={item.id}
+                    template={item.template}
+                    category={item.category}
+                    onOpen={handleOpenPreview}
+                  />
+                ) : (
+                  <CustomTemplateCard key={item.id} template={item.template} />
+                )
+              )}
             </div>
-            {neoInbuilt.length > 0 && (
-              <div>
-                <h4 className="text-base font-semibold text-[#101828] mb-6 font-syne tracking-tight">
-                  {"\u62a5\u544a\u7c7b"}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {neoInbuilt.map((template) => (
-                    <InbuiltTemplateCard
-                      key={template.id}
-                      template={template}
-                      onOpen={handleOpenPreview}
-                    />
-                  ))}
-                </div>
+            {visibleItems.length === 0 && !showCreateTemplateCard ? (
+              <div className="aippt-soft-card mt-6 flex flex-col items-center justify-center py-14 text-center">
+                <p className="text-base font-semibold text-slate-900">
+                  当前类别暂无模板
+                </p>
+                <p className="mt-2 text-sm text-slate-500">
+                  新增自定义模板时选择“{activeCategory}”，保存后会展示在这里。
+                </p>
               </div>
-            )}
-          </section>
-        )}
-
-        {tab === "custom" && (
-          <section className="my-12">
-            {customLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                <span className="ml-3 text-gray-600">{"\u6b63\u5728\u52a0\u8f7d\u81ea\u5b9a\u4e49\u6a21\u677f..."}</span>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 items-center lg:grid-cols-4 gap-6">
-                <CreateCustomTemplate />
-                {customTemplateCards}
-              </div>
-            )}
+            ) : null}
           </section>
         )}
       </div>

@@ -26,20 +26,21 @@ const SettingSideBar = ({
       ?.icon || "/providers/pexel.png";
 
   return (
-    <div className="w-full max-w-[230px] h-screen px-3 pt-[22px] bg-[#F9FAFB] flex flex-col">
-      <p className="text-xs text-black font-medium border-b mt-[3.15rem] border-[#E1E1E5] pb-3.5">
-        筛选：
+    <div className="sticky top-0 flex h-screen w-full max-w-[248px] flex-col px-4 py-6">
+      <div className="aippt-soft-card flex min-h-0 flex-1 flex-col p-4">
+      <p className="border-b border-[var(--aippt-border)] pb-3.5 text-xs font-semibold text-slate-500">
+        配置中心
       </p>
       <div className="mt-6 flex-1">
-        <p className="text-[#3A3A3A] text-xs font-medium pb-2.5">
+        <p className="pb-2.5 text-xs font-medium text-slate-500">
           选择提供商
         </p>
         <div className="space-y-2.5">
           <button
-            className={`w-full rounded-[6px] px-3 py-4 flex items-center gap-1.5 border ${
+            className={`aippt-focus flex w-full items-center gap-2 rounded-[14px] border px-3 py-3.5 transition ${
               selectedProvider === "text-provider"
-                ? "bg-[#F4F3FF] border-[#D9D6FE]"
-                : "bg-white border-[#EDEEEF]"
+                ? "border-[#D9D6FE] bg-[#F4F3FF] text-[#5146E5]"
+                : "border-[var(--aippt-border)] bg-white/75 text-slate-700 hover:bg-white"
             }`}
             onClick={() => setSelectedProvider("text-provider")}
           >
@@ -47,16 +48,16 @@ const SettingSideBar = ({
               <img
                 src={textProviderIcon}
                 className="object-cover w-full h-full overflow-hidden"
-                alt="text provider"
+                alt="文本提供商"
               />
             </div>
-            <p className="text-[#191919] text-xs font-medium">文本提供商</p>
+            <p className="text-xs font-medium">文本提供商</p>
           </button>
           <button
-            className={`w-full rounded-[6px] px-3 py-4 flex items-center gap-1.5 border ${
+            className={`aippt-focus flex w-full items-center gap-2 rounded-[14px] border px-3 py-3.5 transition ${
               selectedProvider === "image-provider"
-                ? "bg-[#F4F3FF] border-[#D9D6FE]"
-                : "bg-white border-[#EDEEEF]"
+                ? "border-[#D9D6FE] bg-[#F4F3FF] text-[#5146E5]"
+                : "border-[var(--aippt-border)] bg-white/75 text-slate-700 hover:bg-white"
             }`}
             onClick={() => setSelectedProvider("image-provider")}
           >
@@ -64,57 +65,58 @@ const SettingSideBar = ({
               <img
                 src={imageProviderIcon}
                 className="object-cover w-full h-full overflow-hidden"
-                alt="image provider"
+                alt="图片提供商"
               />
             </div>
-            <p className="text-[#191919] text-xs font-medium">图片提供商</p>
+            <p className="text-xs font-medium">图片提供商</p>
           </button>
           <button
-            className={`w-full rounded-[6px] px-3 py-4 flex items-center gap-1.5 border ${
+            className={`aippt-focus flex w-full items-center gap-2 rounded-[14px] border px-3 py-3.5 transition ${
               selectedProvider === "web-search-provider"
-                ? "bg-[#F4F3FF] border-[#D9D6FE]"
-                : "bg-white border-[#EDEEEF]"
+                ? "border-[#D9D6FE] bg-[#F4F3FF] text-[#5146E5]"
+                : "border-[var(--aippt-border)] bg-white/75 text-slate-700 hover:bg-white"
             }`}
             onClick={() => setSelectedProvider("web-search-provider")}
           >
             <div className="relative w-[18px] h-[18px] rounded-full overflow-hidden border border-[#EDEEEF] flex items-center justify-center bg-white">
               <Search className="w-3 h-3 text-[#5146E5]" />
             </div>
-            <p className="text-[#191919] text-xs font-medium">联网搜索提供商</p>
+            <p className="text-xs font-medium">联网搜索提供商</p>
           </button>
         </div>
       </div>
 
-      <div className="border-t border-[#E1E1E5] py-5 relative z-50">
-        <p className="text-[#3A3A3A] text-xs font-medium pb-2.5">其他</p>
+      <div className="relative z-50 border-t border-[var(--aippt-border)] py-5">
+        <p className="pb-2.5 text-xs font-medium text-slate-500">其他</p>
         <div className="space-y-2.5">
           <button
-            className={`w-full rounded-[6px] p-3 py-4 flex items-center gap-1.5 border ${
+            className={`aippt-focus flex w-full items-center gap-2 rounded-[14px] border p-3 py-3.5 transition ${
               selectedProvider === "user-management"
-                ? "bg-[#F4F3FF] border-[#D9D6FE]"
-                : "bg-white border-[#EDEEEF]"
+                ? "border-[#D9D6FE] bg-[#F4F3FF] text-[#5146E5]"
+                : "border-[var(--aippt-border)] bg-white/75 text-slate-700 hover:bg-white"
             }`}
             onClick={() => setSelectedProvider("user-management")}
           >
             <div className="relative w-6 h-6 rounded-full overflow-hidden border border-[#EDEEEF] flex items-center justify-center bg-white">
               <Users className="w-3.5 h-3.5 text-[#5146E5]" />
             </div>
-            <p className="text-[#191919] text-xs font-medium">用户管理</p>
+            <p className="text-xs font-medium">用户管理</p>
           </button>
           <button
-            className={`w-full rounded-[6px] p-3 py-4 flex items-center gap-1.5 border ${
+            className={`aippt-focus flex w-full items-center gap-2 rounded-[14px] border p-3 py-3.5 transition ${
               selectedProvider === "session"
-                ? "bg-[#F4F3FF] border-[#D9D6FE]"
-                : "bg-white border-[#EDEEEF]"
+                ? "border-[#D9D6FE] bg-[#F4F3FF] text-[#5146E5]"
+                : "border-[var(--aippt-border)] bg-white/75 text-slate-700 hover:bg-white"
             }`}
             onClick={() => setSelectedProvider("session")}
           >
             <div className="relative w-6 h-6 rounded-full overflow-hidden border border-[#EDEEEF] flex items-center justify-center bg-white">
               <LogOut className="w-3.5 h-3.5 text-[#5146E5]" />
             </div>
-            <p className="text-[#191919] text-xs font-medium">退出登录</p>
+            <p className="text-xs font-medium">退出登录</p>
           </button>
         </div>
+      </div>
       </div>
     </div>
   );

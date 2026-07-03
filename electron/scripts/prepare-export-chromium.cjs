@@ -11,7 +11,7 @@ const {
 
 const buildId = (process.env.EXPORT_CHROME_BUILD_ID || "146.0.7680.76").trim();
 const cacheDir = path.join(__dirname, "..", "resources", "chromium");
-const manifestPath = path.join(cacheDir, "presenton-runtime.json");
+const manifestPath = path.join(cacheDir, "AIPPT-runtime.json");
 const windowsRequiredRuntimeFiles = [
   "chrome.dll",
   "chrome_100_percent.pak",
@@ -126,7 +126,7 @@ function validateExecutable(executablePath) {
     return { ok: true };
   }
 
-  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), "presenton-chromium-probe-"));
+  const profileDir = fs.mkdtempSync(path.join(os.tmpdir(), "AIPPT-chromium-probe-"));
   try {
     const result = spawnSync(
       executablePath,

@@ -14,6 +14,7 @@ export interface TemplateSetting {
     ordered: boolean;
     default?: boolean;
     icon_weight?: string;
+    category?: string;
 }
 
 export interface TemplateResponse {

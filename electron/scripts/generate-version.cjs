@@ -18,9 +18,9 @@ const update = {
   version,
   message: process.env.UPDATE_MESSAGE || existing.message || "",
   downloads: {
-    linux: `https://github.com/presenton/presenton/releases/download/electron-v${version}/Presenton-${version}.deb`,
-    mac: `https://github.com/presenton/presenton/releases/download/electron-v${version}/Presenton-${version}.dmg`,
-    windows: `https://github.com/presenton/presenton/releases/download/electron-v${version}/Presenton-${version}.exe`,
+    linux: `https://github.com/AIPPT/AIPPT/releases/download/electron-v${version}/AIPPT-${version}.deb`,
+    mac: `https://github.com/AIPPT/AIPPT/releases/download/electron-v${version}/AIPPT-${version}.dmg`,
+    windows: `https://github.com/AIPPT/AIPPT/releases/download/electron-v${version}/AIPPT-${version}.exe`,
   },
 };
 

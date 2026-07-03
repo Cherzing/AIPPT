@@ -1,5 +1,3 @@
-﻿# syntax=docker/dockerfile:1.4
-
 FROM python:3.11-slim-trixie AS fastapi-builder
 
 WORKDIR /app/servers/fastapi
@@ -21,7 +19,7 @@ RUN uv pip install --python /opt/venv/bin/python --no-deps .
 RUN uv pip install --python /opt/venv/bin/python \
     "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
 ENV HF_HOME=/root/.cache/huggingface \
-    PRESENTON_FASTEMBED_ICON_CACHE_DIR=/root/.cache/presenton/fastembed-icons
+    AIPPT_FASTEMBED_ICON_CACHE_DIR=/root/.cache/aippt/fastembed-icons
 # Warm FastEmbed caches into the image (not a BuildKit cache mount, or HF weights would be missing).
 RUN /opt/venv/bin/python scripts/warm_fastembed_cache.py
 
@@ -45,16 +43,20 @@ FROM node:20-bookworm-slim AS assets-builder
 WORKDIR /app
 
 ARG TARGETARCH
+ARG NPM_REGISTRY=https://registry.npmmirror.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates unzip \
     && rm -rf /var/lib/apt/lists/*
 
-COPY package.json /app/
+COPY package.json package-lock.json /app/
 
-RUN mkdir -p /app/document-extraction-liteparse \
-    && npm --prefix /app/document-extraction-liteparse init -y \
-    && npm --prefix /app/document-extraction-liteparse install @llamaindex/liteparse@1.4.0 --omit=dev
+RUN npm ci --omit=dev --no-fund --no-audit --loglevel=notice \
+      --registry="${NPM_REGISTRY}" --replace-registry-host=always \
+      --fetch-retries=2 --fetch-timeout=60000 --fetch-retry-maxtimeout=120000 \
+    && mkdir -p /app/document-extraction-liteparse \
+    && cp package.json package-lock.json /app/document-extraction-liteparse/ \
+    && cp -a node_modules /app/document-extraction-liteparse/node_modules
 
 COPY electron/resources/document-extraction/liteparse_runner.mjs /app/document-extraction-liteparse/liteparse_runner.mjs
 COPY scripts/sync-presentation-export.cjs /app/scripts/sync-presentation-export.cjs
@@ -62,9 +64,8 @@ COPY scripts/sync-presentation-export.cjs /app/scripts/sync-presentation-export.
 RUN rm -rf /app/presentation-export \
     && EXPORT_RUNTIME_ARCH="${TARGETARCH}" node /app/scripts/sync-presentation-export.cjs --force \
     && find /app/presentation-export/py -maxdepth 1 -type f -name "convert-linux-*" -exec chmod +x {} \; \
-    && cd /app/presentation-export \
-    && npm init -y \
-    && npm install "sharp@^0.34.5" --include=optional --omit=dev --no-fund --no-audit --no-package-lock
+    && cp package.json package-lock.json /app/presentation-export/ \
+    && cp -a node_modules /app/presentation-export/node_modules
 
 
 FROM python:3.11-slim-trixie AS runtime
@@ -76,13 +77,13 @@ ARG TARGETARCH
 
 # LiteParse uses Node + @llamaindex/liteparse (same runner as Electron); OCR uses Tesseract.
 ENV APP_DATA_DIRECTORY=/app_data \
-    TEMP_DIRECTORY=/tmp/presenton \
+    TEMP_DIRECTORY=/tmp/aippt \
     EXPORT_PACKAGE_ROOT=/app/presentation-export \
     EXPORT_RUNTIME_DIR=/app/presentation-export \
     BUILT_PYTHON_MODULE_PATH=/app/presentation-export/py/convert-linux-current \
-    PRESENTON_APP_ROOT=/app \
+    AIPPT_APP_ROOT=/app \
     HF_HOME=/root/.cache/huggingface \
-    PRESENTON_FASTEMBED_ICON_CACHE_DIR=/root/.cache/presenton/fastembed-icons \
+    AIPPT_FASTEMBED_ICON_CACHE_DIR=/root/.cache/aippt/fastembed-icons \
     PATH="/opt/venv/bin:${PATH}" \
     NODE_ENV=production \
     START_OLLAMA=false \
@@ -110,7 +111,7 @@ RUN mkdir -p /app_data/exports /app_data/images /app_data/uploads /app_data/font
 COPY --from=fastapi-builder /opt/venv /opt/venv
 COPY --from=fastapi-builder /app/servers/fastapi /app/servers/fastapi
 COPY --from=fastapi-builder /root/.cache/huggingface /root/.cache/huggingface
-COPY --from=fastapi-builder /root/.cache/presenton/fastembed-icons /root/.cache/presenton/fastembed-icons
+COPY --from=fastapi-builder /root/.cache/aippt/fastembed-icons /root/.cache/aippt/fastembed-icons
 
 COPY --from=assets-builder /app/package.json /app/package.json
 COPY --from=assets-builder /app/document-extraction-liteparse /app/document-extraction-liteparse
@@ -134,7 +135,7 @@ COPY --from=nextjs-builder /app/servers/nextjs/public /app/servers/nextjs/public
 COPY --from=nextjs-builder /app/servers/nextjs/.next-build/static /app/servers/nextjs/.next-build/static
 
 COPY start.js LICENSE NOTICE ./
-COPY scripts/presenton-terminal-banner.mjs /app/scripts/presenton-terminal-banner.mjs
+COPY scripts/aippt-terminal-banner.mjs /app/scripts/aippt-terminal-banner.mjs
 COPY scripts/user-config-env.mjs /app/scripts/user-config-env.mjs
 COPY nginx.conf /etc/nginx/nginx.conf
 

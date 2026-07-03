@@ -5,31 +5,31 @@ import Header from "@/app/(presentation-generator)/(dashboard)/dashboard/compone
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "AI PPT | 智能演示文稿生成器",
-  description: "AI PPT 智能演示文稿生成与管理平台",
+  title: "AIPPT | 智能演示文稿生成器",
+  description: "AIPPT 智能演示文稿生成与管理平台",
   alternates: {
     canonical: "http://localhost:3000/upload",
   },
   keywords: [
-    "AI PPT",
+    "AIPPT",
     "AI 演示文稿",
     "PPT 生成",
     "智能排版",
     "文档转演示文稿",
   ],
   openGraph: {
-    title: "创建演示文稿 | AI PPT",
-    description: "AI PPT 智能演示文稿生成与管理平台",
+    title: "创建演示文稿 | AIPPT",
+    description: "AIPPT 智能演示文稿生成与管理平台",
     type: "website",
     url: "http://localhost:3000/upload",
-    siteName: "AI PPT",
+    siteName: "AIPPT",
   },
   twitter: {
     card: "summary_large_image",
-    title: "创建演示文稿 | AI PPT",
-    description: "AI PPT 智能演示文稿生成与管理平台",
-    site: "AI PPT",
-    creator: "AI PPT",
+    title: "创建演示文稿 | AIPPT",
+    description: "AIPPT 智能演示文稿生成与管理平台",
+    site: "AIPPT",
+    creator: "AIPPT",
   },
 };
 

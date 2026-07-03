@@ -1,7 +1,7 @@
-const presentonHttpHostPort =
-  process.env.PRESENTON_HTTP_HOST_PORT ||
-  process.env.PRESENTON_HOST_HTTP_PORT ||
-  process.env.PRESENTON_PUBLIC_PORT ||
+const AIPPTHttpHostPort =
+  process.env.AIPPT_HTTP_HOST_PORT ||
+  process.env.AIPPT_HOST_HTTP_PORT ||
+  process.env.AIPPT_PUBLIC_PORT ||
   "5001";
 
 const fastApiProxyBase =
@@ -33,7 +33,7 @@ const nextConfig = {
       },
       {
         source: '/app_data/fonts/:path*',
-        destination: `http://localhost:${presentonHttpHostPort}/app_data/fonts/:path*`,
+        destination: `http://localhost:${AIPPTHttpHostPort}/app_data/fonts/:path*`,
       },
     ];
   },

@@ -967,10 +967,10 @@ const ThemePanel: React.FC = () => {
 
 
   return (
-    <div className="space-y-6 px-6 font-syne">
-      <div className='py-[28px] flex justify-between'>
+    <div className="space-y-6 px-8 pb-12 font-syne">
+      <div className='aippt-soft-card mt-7 flex flex-wrap items-center justify-between gap-4 px-6 py-5'>
 
-        <h3 className=" text-[28px]  tracking-[-0.84px] font-unbounded font-normal text-[#101828] flex items-center gap-2">
+        <h3 className="flex items-center gap-2 font-unbounded text-[28px] font-normal tracking-[-0.84px] text-slate-950">
           主题
         </h3>
         <Link
@@ -979,7 +979,7 @@ const ThemePanel: React.FC = () => {
             pathname,
             source: "theme_page_header",
           })}
-          className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-black text-sm font-semibold font-syne shadow-sm hover:shadow-md"
+          className="aippt-focus inline-flex items-center gap-2 rounded-full px-4 py-2.5 font-syne text-sm font-semibold text-slate-950 shadow-[0_12px_28px_rgba(124,81,248,0.16)] transition hover:-translate-y-0.5"
           aria-label="新建主题"
           style={{
             borderRadius: "48px",
@@ -993,8 +993,8 @@ const ThemePanel: React.FC = () => {
         </Link>
       </div>
       {/* Tabs */}
-      <div className='p-1 rounded-[40px] bg-[#F7F6F9] w-fit border border-[#F4F4F4] flex items-center justify-center '>
-        <button className='px-5  py-2 text-xs font-medium text-[#3A3A3A] rounded-[70px]'
+      <div className='flex w-fit items-center justify-center rounded-[40px] border border-[var(--aippt-border)] bg-white/70 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]'>
+        <button className='aippt-focus rounded-[70px] px-5 py-2 text-xs font-medium text-[#3A3A3A] transition'
           onClick={() => {
             trackEvent(MixpanelEvent.Theme_Tab_Switched, { pathname, tab: 'custom' })
             setTab('custom')
@@ -1006,7 +1006,7 @@ const ThemePanel: React.FC = () => {
         <svg xmlns="http://www.w3.org/2000/svg" className='mx-1' width="2" height="17" viewBox="0 0 2 17" fill="none">
           <path d="M1 0V16.5" stroke="#EDECEC" strokeWidth="2" />
         </svg>
-        <button className='px-5  py-2 text-xs font-medium text-[#3A3A3A] rounded-[70px]'
+        <button className='aippt-focus rounded-[70px] px-5 py-2 text-xs font-medium text-[#3A3A3A] transition'
           onClick={() => {
             trackEvent(MixpanelEvent.Theme_Tab_Switched, { pathname, tab: 'default' })
             setTab('default')
@@ -1018,7 +1018,7 @@ const ThemePanel: React.FC = () => {
       </div>
       {/* 内置主题 */}
 
-      {tab === 'default' && <div className="flex flex-wrap gap-6">
+      {tab === 'default' && <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {
           defaultThemes.map((theme) => (
             <ThemeCard
@@ -1036,7 +1036,7 @@ const ThemePanel: React.FC = () => {
       {/* 自定义主题区域 */}
       {tab === 'custom' && customThemes.length > 0 && (
 
-        <div className="flex flex-wrap gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {customThemes.map((theme) => (
             <ThemeCard
               key={theme.id}
@@ -1057,13 +1057,13 @@ const ThemePanel: React.FC = () => {
       <Sheet open={isSheetOpen} onOpenChange={handleCloseSheet} >
 
 
-        <SheetContent side="bottom" className="h-[90vh] font-syne w-full p-0 [&>button]:hidden focus:outline-none" >
+        <SheetContent side="bottom" className="h-[90vh] w-full rounded-t-[28px] border border-[var(--aippt-border)] bg-white/95 p-0 font-syne shadow-[0_-24px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl [&>button]:hidden focus:outline-none" >
           <div className="flex h-full">
               {/* 左侧编辑器 */}
             <div
               onClick={handleClickOutside}
-              className="min-w-[530px]   border-r border-[#EDEEEF]">
-              <div className="flex items-center justify-between px-5 rounded-md py-3 mx-2.5 my-2.5 bg-[#F6F6F9]  ">
+              className="min-w-[530px] border-r border-[var(--aippt-border)]">
+              <div className="mx-2.5 my-2.5 flex items-center justify-between rounded-2xl border border-[var(--aippt-border)] bg-[#F6F6F9]/80 px-5 py-3">
                 <input id="theme-name" name="theme-name" className="text-lg font-semibold text-[#4C4D50] bg-transparent w-full outline-none border-none px-2  rounded" autoFocus={false} defaultValue={selectedTheme.name} onBlur={(e) => setSelectedTheme({ ...selectedTheme, name: e.target.value })}>
 
                 </input>
@@ -1146,12 +1146,12 @@ const ThemePanel: React.FC = () => {
                 }
               }}
               // ref={previewContainerRef}
-              className=" w-full p-3 bg-gray-50">
+              className="w-full bg-slate-50/80 p-3">
               <div className="space-y-4">
                 <div
                   ref={slideContainerRef}
                   style={{ backgroundColor: 'var(--page-background-color)' }}
-                  className="overflow-y-auto overflow-x-hidden custom_scrollbar space-y-4 h-[90vh] rounded-lg shadow-lg border bg-white"
+                  className="custom_scrollbar h-[90vh] space-y-4 overflow-y-auto overflow-x-hidden rounded-3xl border border-[var(--aippt-border)] bg-white shadow-[0_18px_48px_rgba(15,23,42,0.10)]"
                 >
                   {template && template.map((layout) => {
                     const {

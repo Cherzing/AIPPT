@@ -1,6 +1,6 @@
 # macOS Development & Distribution
 
-Guides for building and signing the Presenton Electron app on macOS.
+Guides for building and signing the AIPPT Electron app on macOS.
 
 | Guide | Description |
 |-------|-------------|

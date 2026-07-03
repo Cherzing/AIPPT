@@ -442,17 +442,17 @@ def test_export_includes_optional_fastapi_param():
                 dummy,
                 title="safe",
                 export_as="pdf",
-                cookie_header="presenton_session=abc; theme=dark",
+                cookie_header="aippt_session=abc; theme=dark",
             )
 
         pdf_call = mock_pdf.await_args.kwargs
         assert "pdf-maker" in pdf_call["url"]
         assert (
-            "#exportCookie=presenton_session%3Dabc%3B+theme%3Ddark"
+            "#exportCookie=aippt_session%3Dabc%3B+theme%3Ddark"
             in pdf_call["url"]
         )
         assert pdf_call["fastapi_url"] == "https://fast.example"
-        assert pdf_call["cookie_header"] == "presenton_session=abc; theme=dark"
+        assert pdf_call["cookie_header"] == "aippt_session=abc; theme=dark"
 
         mock_pptx = AsyncMock(return_value=fake_result)
         with patch.dict(

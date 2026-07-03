@@ -1,7 +1,7 @@
 # Electron Dependency Strategy
 
 This is the working strategy for reducing first-run dependency installers in
-the Electron app while keeping Presenton Apache-2.0.
+the Electron app while keeping AIPPT Apache-2.0.
 
 ## Recommendation
 
@@ -37,7 +37,7 @@ Bundled Chromium:
 
 ```text
 electron/resources/chromium/
-  presenton-runtime.json
+  AIPPT-runtime.json
   chrome/<platform-build-id>/...
 ```
 
@@ -54,7 +54,7 @@ Bundled ImageMagick:
 
 ```text
 electron/resources/imagemagick/<platform>-<arch>/
-  presenton-runtime.json
+  AIPPT-runtime.json
   ...
 ```
 

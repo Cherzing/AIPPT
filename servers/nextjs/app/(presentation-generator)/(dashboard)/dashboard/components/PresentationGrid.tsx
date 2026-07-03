@@ -17,22 +17,17 @@ export const PresentationGrid = ({
   onPresentationDeleted,
 }: PresentationGridProps) => {
   const ShimmerCard = () => (
-    <div className="flex min-h-[216px] flex-col overflow-hidden rounded-[12px] border border-[#EDEEEF] bg-[#F8FBFB] shadow-none animate-pulse">
-      <div className="relative flex-1 overflow-hidden p-4">
-        <img
-          src="/card_bg.svg"
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-70"
-        />
-        <div className="relative mx-auto mt-2 aspect-video w-[88%] rounded-lg border border-gray-200 bg-gray-200" />
+    <div className="aippt-soft-card flex min-h-[286px] animate-pulse flex-col overflow-hidden rounded-[24px]">
+      <div className="relative flex-1 overflow-hidden bg-slate-100 p-4">
+        <div className="mx-auto aspect-video w-full rounded-2xl border border-slate-200 bg-slate-200" />
       </div>
-      <div className="relative z-10 border-t border-[#EDEEEF] bg-white px-5 py-3">
-        <div className="flex items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="h-3.5 w-24 rounded bg-gray-200" />
-            <div className="h-3 w-16 rounded bg-gray-200" />
+      <div className="border-t border-slate-200 bg-white px-5 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-3/4 rounded bg-slate-200" />
+            <div className="h-3 w-1/2 rounded bg-slate-200" />
           </div>
-          <div className="h-5 w-1 rounded-full bg-gray-200" />
+          <div className="h-9 w-9 rounded-full bg-slate-200" />
         </div>
       </div>
     </div>
@@ -40,7 +35,7 @@ export const PresentationGrid = ({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 w-full">
+      <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
         {[...Array(12)].map((_, i) => (
           <ShimmerCard key={i} />
         ))}
@@ -50,14 +45,14 @@ export const PresentationGrid = ({
 
   if (error) {
     return (
-      <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-[#EDEEEF] bg-white/80">
+      <div className="aippt-soft-card flex min-h-[220px] items-center justify-center rounded-[24px]">
         <div className="text-center text-gray-500">
           <p className="mb-2">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="text-primary hover:text-primary/80 underline"
+            className="font-semibold text-indigo-600 underline-offset-4 hover:underline"
           >
-            Try again
+            重新加载
           </button>
         </div>
       </div>
@@ -69,7 +64,7 @@ export const PresentationGrid = ({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
       {presentations.map((presentation) => (
         <PresentationCard
           key={presentation.id}

@@ -148,7 +148,7 @@ export default function OllamaConfig({
         notify.success(
           "正在使用容器内 Ollama",
           requestedUrl
-            ? "host.docker.internal 未响应，AI PPT 已将 Ollama URL 切换为 localhost。"
+            ? "host.docker.internal 未响应，AIPPT 已将 Ollama URL 切换为 localhost。"
             : "host.docker.internal 未响应，本次检查改用 localhost。"
         );
       }

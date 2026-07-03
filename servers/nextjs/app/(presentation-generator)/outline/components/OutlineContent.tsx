@@ -28,6 +28,11 @@ interface OutlineContentProps {
   onAddSlide: () => void;
 }
 
+const DND_SCREEN_READER_INSTRUCTIONS = {
+  draggable:
+    "按空格键拾取可拖拽项目。拖拽时使用方向键移动。再次按空格键放下，或按 Esc 取消。",
+};
+
 const OutlineContent: React.FC<OutlineContentProps> = ({
   outlines,
   isLoading,
@@ -87,6 +92,9 @@ const OutlineContent: React.FC<OutlineContentProps> = ({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={onDragEnd}
+            accessibility={{
+              screenReaderInstructions: DND_SCREEN_READER_INSTRUCTIONS,
+            }}
           >
             <SortableContext
               items={outlines.map((_, index) => `slide-${index}`)}

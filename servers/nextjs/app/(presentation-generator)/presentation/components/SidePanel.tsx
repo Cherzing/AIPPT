@@ -34,6 +34,11 @@ interface SidePanelProps {
   loading: boolean;
 }
 
+const DND_SCREEN_READER_INSTRUCTIONS = {
+  draggable:
+    "按空格键拾取可拖拽项目。拖拽时使用方向键移动。再次按空格键放下，或按 Esc 取消。",
+};
+
 const SidePanel = ({
   selectedSlide,
   onSlideClick,
@@ -166,6 +171,9 @@ const SidePanel = ({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            accessibility={{
+              screenReaderInstructions: DND_SCREEN_READER_INSTRUCTIONS,
+            }}
           >
             <div className="overflow-y-auto w-full hide-scrollbar min-h-0 flex-1 space-y-3.5">
               {isStreaming ? (
@@ -208,12 +216,13 @@ const SidePanel = ({
 
           <button
             type="button"
+            aria-label="新增幻灯片"
             onClick={handleAddSlideClick}
             className="py-4 gap-2 flex flex-col duration-300 items-center justify-center rounded-lg cursor-pointer mx-auto"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="text-[11px] font-normal text-[#000000]">
-              ????
+              新增幻灯片
             </span>
           </button>
         </div>

@@ -93,9 +93,9 @@ const exactTranslations: Record<string, string> = {
   "Failed to load presentation": "加载演示文稿失败",
   "The presentation could not be loaded. Please try again.": "无法加载演示文稿，请重试。",
   "No presentation id found": "未找到演示文稿 ID",
-  "Welcome on board!": "欢迎使用 Presenton！",
+  "Welcome on board!": "欢迎使用 AIPPT！",
   "Usage analytics": "使用情况分析",
-  "Help improve Presenton by sharing anonymous usage data.": "共享匿名使用数据，帮助改进 Presenton。",
+  "Help improve AIPPT by sharing anonymous usage data.": "共享匿名使用数据，帮助改进 AIPPT。",
   "Celebrate again!": "再次庆祝",
   "Go to your dashboard": "前往仪表盘",
 
@@ -196,9 +196,9 @@ const exactTranslations: Record<string, string> = {
   "The theme was removed from your library.": "该主题已从你的库中移除。",
   "Start with a blank canvas": "从空白画布开始",
 
-  "Launching Presenton...": "正在启动 Presenton...",
+  "Launching AIPPT...": "正在启动 AIPPT...",
   "Please wait a moment": "请稍候",
-  "Launching Presenton": "正在启动 Presenton",
+  "Launching AIPPT": "正在启动 AIPPT",
   "Opening your workspace": "正在打开工作区",
 };
 

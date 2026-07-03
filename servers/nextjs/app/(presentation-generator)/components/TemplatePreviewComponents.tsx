@@ -1,12 +1,12 @@
 "use client";
-import React, { memo, useMemo } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { TemplateWithData } from "@/app/presentation-templates/utils";
 import { CompiledLayout } from "@/app/hooks/compileLayout";
 
 export function TemplatePreviewStage({ children }: { children: React.ReactNode }) {
     return (
-        <div className="relative overflow-hidden px-5 pb-5 pt-5 h-[230px]">
+        <div className="relative aspect-video overflow-hidden bg-white">
             <img
                 src="/card_bg.svg"
                 alt=""
@@ -36,19 +36,44 @@ export const ScaledSlidePreview = memo(function ScaledSlidePreview({
     index: number;
     isOutline?: boolean;
 }) {
-    const PREVIEW_SCALE = isOutline ? 0.2 : 0.24;
-    const SLIDE_HEIGHT = 720 * PREVIEW_SCALE;
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+    const [box, setBox] = useState({ width: 0, height: 0 });
+    const PREVIEW_SCALE = useMemo(() => {
+        if (isOutline) return 0.2;
+        if (!box.width || !box.height) return 0.24;
+        return Math.max(box.width / 1280, box.height / 720);
+    }, [box.height, box.width, isOutline]);
+    const slideFrameHeight = isOutline ? `${720 * PREVIEW_SCALE}px` : "100%";
     const SLIDE_WIDTH = 1280;
     const SLIDE_NATIVE_HEIGHT = 720;
+    const scaledSlideWidth = SLIDE_WIDTH * PREVIEW_SCALE;
+    const scaledSlideHeight = SLIDE_NATIVE_HEIGHT * PREVIEW_SCALE;
+    const slideLeft = isOutline ? 0 : (box.width - scaledSlideWidth) / 2;
+    const slideTop = isOutline ? 0 : (box.height - scaledSlideHeight) / 2;
+
+    useEffect(() => {
+        if (isOutline || !wrapperRef.current) return;
+        const element = wrapperRef.current;
+        const observer = new ResizeObserver(() => {
+            setBox({ width: element.clientWidth, height: element.clientHeight });
+        });
+        observer.observe(element);
+        setBox({ width: element.clientWidth, height: element.clientHeight });
+        return () => observer.disconnect();
+    }, [isOutline]);
+
     return (
         <div
+            ref={wrapperRef}
             key={`${id}-preview-${index}`}
-            className="relative"
-            style={{ height: `${SLIDE_HEIGHT}px`, overflow: "hidden" }}
+            className={isOutline ? "relative" : "relative h-full w-full overflow-hidden"}
+            style={{ height: slideFrameHeight, overflow: "hidden" }}
         >
             <div
-                className={`absolute top-0 ${isOutline ? "left-0" : "left-8"} pointer-events-none`}
+                className="absolute pointer-events-none"
                 style={{
+                    left: slideLeft,
+                    top: slideTop,
                     width: SLIDE_WIDTH,
                     height: SLIDE_NATIVE_HEIGHT,
                     transformOrigin: "top left",
@@ -70,9 +95,12 @@ export const InbuiltTemplatePreview = memo(function InbuiltTemplatePreview({
     templateId: string;
     isOutline?: boolean;
 }) {
-    const previewLayouts = useMemo(() => layouts.slice(0, 2), [layouts]);
+    const previewLayouts = useMemo(
+        () => layouts.slice(0, isOutline ? 2 : 1),
+        [isOutline, layouts]
+    );
     return (
-        <div className="relative z-10 flex flex-col gap-3 overflow-hidden">
+        <div className="relative z-10 h-full overflow-hidden">
             {previewLayouts.map((layout, index) => {
                 const LayoutComponent = layout.component;
                 return (
@@ -97,7 +125,7 @@ export const CustomTemplatePreview = memo(function CustomTemplatePreview({
     isOutline?: boolean;
 }) {
     return (
-        <div className="relative z-10 flex flex-col gap-3">
+        <div className="relative z-10 h-full overflow-hidden">
             {loading ? (
                 [...Array(2)].map((_, index) => (
                     <div
@@ -108,7 +136,7 @@ export const CustomTemplatePreview = memo(function CustomTemplatePreview({
                     </div>
                 ))
             ) : (
-                previewLayouts.slice(0, 2).map((layout, index) => {
+                previewLayouts.slice(0, isOutline ? 2 : 1).map((layout, index) => {
                     const LayoutComponent = layout.component;
                     return (
                         <ScaledSlidePreview key={`${templateId}-preview-${index}`} id={templateId} index={index} isOutline={isOutline}>

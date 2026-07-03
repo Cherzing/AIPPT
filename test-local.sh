@@ -79,7 +79,7 @@ if [ -d "servers/fastapi" ]; then
         $PYTHON_CMD -m pip install pytest pytest-asyncio pytest-cov 2>&1 | tail -5 || true
     fi && \
     export APP_DATA_DIRECTORY=/tmp/app_data && \
-    export TEMP_DIRECTORY=/tmp/presenton && \
+    export TEMP_DIRECTORY=/tmp/aippt && \
     export DATABASE_URL=sqlite+aiosqlite:///./test.db && \
     export DISABLE_ANONYMOUS_TRACKING=true && \
     export DISABLE_IMAGE_GENERATION=true && \
@@ -112,8 +112,8 @@ fi
 # Test 3: Docker Build (optional, skip if Docker not available)
 if command -v docker &> /dev/null && [ -f "Dockerfile" ]; then
     run_test "Docker Build" "
-    docker build -t presenton:test -f Dockerfile . && \
-    docker images | grep presenton:test
+    docker build -t AIPPT:test -f Dockerfile . && \
+    docker images | grep AIPPT:test
     "
 else
     if [ ! -f "Dockerfile" ]; then

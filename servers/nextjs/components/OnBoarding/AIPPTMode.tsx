@@ -830,7 +830,7 @@ const AIPPTMode = ({
                 <div className="space-y-4">
                     {selectedWebProvider.value === "auto" && (
                         <div className="rounded-lg border border-[#D9D6FE] bg-[#F4F3FF] p-3 text-xs leading-5 text-[#5146E5]">
-                            AI PPT will use model-native web grounding when available. If the selected text model does not support it, web search stays off until you choose an external provider.
+                            AIPPT 会优先使用模型原生联网能力。若所选文本模型不支持联网，需选择外部搜索提供商后再启用。
                         </div>
                     )}
 
@@ -970,7 +970,7 @@ const AIPPTMode = ({
 
     return (
         <div className='w-full max-w-[660px] font-syne pb-10'>
-            <p className='px-2.5 py-0.5 w-fit text-[#7A5AF8] rounded-[50px]  border border-[#EDEEEF] text-[10px] font-medium mb-5 font-syne'>PRESENTON</p>
+            <p className='px-2.5 py-0.5 w-fit text-[#7A5AF8] rounded-[50px]  border border-[#EDEEEF] text-[10px] font-medium mb-5 font-syne'>AIPPT</p>
             <div className=''>
 
                 <h2 className='mb-4 text-black text-[26px] font-normal font-unbounded '>
@@ -980,7 +980,7 @@ const AIPPTMode = ({
                     {providerStep === 1
                         ? "Start with ChatGPT, run a local model, or connect another AI provider."
                         : providerStep === 2
-                            ? "Choose how AI PPT creates visuals, or continue without image generation."
+                            ? "选择 AIPPT 的图片生成方式，或继续使用无图片生成模式。"
                             : "Add current web context to presentations, or continue with web search disabled."}
                 </p>
             </div>
@@ -1401,7 +1401,7 @@ const AIPPTMode = ({
                                                         currentModel
                                                             ? availableModels.find(model => model === currentModel) || currentModel
                                                             :
-                                                            "Select a model"
+                                                            "选择模型"
                                                     }
                                                 </span>
 
@@ -1414,9 +1414,9 @@ const AIPPTMode = ({
                                             style={{ width: "var(--radix-popover-trigger-width)" }}
                                         >
                                             <Command>
-                                                <CommandInput placeholder="Search models..." />
+                                                <CommandInput placeholder="搜索模型..." />
                                                 <CommandList>
-                                                    <CommandEmpty>No model found.</CommandEmpty>
+                                                    <CommandEmpty>未找到模型。</CommandEmpty>
                                                     <CommandGroup>
                                                         {availableModels.map((model, index) => (
                                                             <CommandItem
@@ -1498,7 +1498,7 @@ const AIPPTMode = ({
                     </div>
                     <div>
 
-                        <h3 className="text-xl font-normal text-[#191919] ">Image Generation Settings</h3>
+                        <h3 className="text-xl font-normal text-[#191919] ">图片生成设置</h3>
                         <p className=" text-sm  text-gray-500">
                             Choosing where images come from
                         </p>
@@ -1509,7 +1509,7 @@ const AIPPTMode = ({
                         {/* Image Provider Selection */}
                         <div className="w-full">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Select Image Provider
+                                选择图片提供商
                             </label>
                             <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3">
                                 {imageProviderRows.map((row, rowIndex) => (
@@ -1582,13 +1582,13 @@ const AIPPTMode = ({
                             <Search className="h-9 w-9 text-[#5146E5]" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-normal text-[#191919]">Web Search Settings</h3>
-                            <p className="text-sm text-gray-500">Bring current information into generated presentations</p>
+                            <h3 className="text-xl font-normal text-[#191919]">联网搜索设置</h3>
+                            <p className="text-sm text-gray-500">为生成的演示文稿引入最新信息</p>
                         </div>
                     </div>
                     {llmConfig.WEB_GROUNDING && <div className="space-y-4">
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">Select Web Search Provider</label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">选择联网搜索提供商</label>
                                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                                     {webSearchProviderRows.map((row, rowIndex) => (
                                         <React.Fragment key={`web-search-provider-row-${rowIndex}`}>
@@ -1651,10 +1651,10 @@ const AIPPTMode = ({
                     onClick={handleContinue}
                     className='border font-syne border-[#EDEEEF] bg-[#7C51F8]  rounded-[58px] px-5 py-2.5 text-white text-xs  font-semibold'>
                     {providerStep === 1
-                        ? "Continue to image provider"
+                        ? "继续配置图片提供商"
                         : providerStep === 2
-                            ? llmConfig.DISABLE_IMAGE_GENERATION ? "Disable image generation & Continue" : "Continue to web search"
-                            : llmConfig.WEB_GROUNDING ? "Save & Finish" : "Disable web search & Finish"}
+                            ? llmConfig.DISABLE_IMAGE_GENERATION ? "禁用图片生成并继续" : "继续配置联网搜索"
+                            : llmConfig.WEB_GROUNDING ? "保存并完成" : "禁用联网搜索并完成"}
                 </button>
             </div>
         </div>

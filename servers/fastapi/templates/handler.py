@@ -56,6 +56,7 @@ class TemplateDetail(BaseModel):
     id: str
     name: str
     total_layouts: Optional[int] = None
+    category: Optional[str] = None
 
 
 class TemplateLayoutData(BaseModel):
@@ -71,6 +72,7 @@ class TemplateData(BaseModel):
     init_id: Optional[uuid.UUID] = None
     name: str
     description: Optional[str] = None
+    category: Optional[str] = None
     created_at: datetime
 
 
@@ -129,6 +131,7 @@ class SaveTemplateRequest(BaseModel):
     template_info_id: uuid.UUID
     name: str
     description: Optional[str] = None
+    category: Optional[str] = None
     layouts: List[SaveTemplateLayoutData]
 
 
@@ -136,6 +139,7 @@ class SaveTemplateResponse(BaseModel):
     id: uuid.UUID
     name: str
     description: Optional[str] = None
+    category: Optional[str] = None
     created_at: datetime
 
 
@@ -143,10 +147,12 @@ class CloneTemplateRequest(BaseModel):
     id: str
     name: str
     description: Optional[str] = None
+    category: Optional[str] = None
 
 
 class UpdateTemplateRequest(BaseModel):
     id: uuid.UUID
+    category: Optional[str] = None
     layouts: List[SaveTemplateLayoutData]
 
 
@@ -160,6 +166,11 @@ class CloneSlideLayoutRequest(BaseModel):
     template_id: str
     layout_id: str
     layout_name: Optional[str] = None
+
+
+def _normalize_template_category(category: Optional[str]) -> str:
+    value = (category or "").strip()
+    return value or "自定义模板"
 
 
 def _strip_code_fences(value: str) -> str:
@@ -392,13 +403,14 @@ async def get_all_templates(
         select(
             TemplateModel.id,
             TemplateModel.name,
+            TemplateModel.category,
             func.count(PresentationLayoutCodeModel.id).label("total_layouts"),
         )
         .join(
             PresentationLayoutCodeModel,
             PresentationLayoutCodeModel.presentation == TemplateModel.id,
         )
-        .group_by(TemplateModel.id, TemplateModel.name)
+        .group_by(TemplateModel.id, TemplateModel.name, TemplateModel.category)
     )
     rows = result.all()
 
@@ -412,9 +424,10 @@ async def get_all_templates(
         TemplateDetail(
             id=f"custom-{template_id}",
             name=template_name,
+            category=category,
             total_layouts=total_layouts,
         )
-        for template_id, template_name, total_layouts in rows
+        for template_id, template_name, category, total_layouts in rows
     )
     return templates
 
@@ -452,6 +465,7 @@ async def get_layouts(
             init_id=None,
             name=template_meta.name,
             description=template_meta.description,
+            category=template_meta.category,
             created_at=template_meta.created_at,
         )
 
@@ -709,6 +723,7 @@ async def save_template(
         id=uuid.uuid4(),
         name=request.name,
         description=request.description,
+        category=_normalize_template_category(request.category),
     )
     sql_session.add(template)
 
@@ -731,6 +746,7 @@ async def save_template(
         id=template.id,
         name=template.name,
         description=template.description,
+        category=template.category,
         created_at=template.created_at,
     )
 
@@ -769,6 +785,9 @@ async def clone_template(
         description=template.description
         if request.description is None
         else request.description,
+        category=_normalize_template_category(
+            request.category if request.category is not None else template.category
+        ),
     )
     sql_session.add(new_template)
 
@@ -791,6 +810,7 @@ async def clone_template(
         id=new_template.id,
         name=new_template.name,
         description=new_template.description,
+        category=new_template.category,
         created_at=new_template.created_at,
     )
 
@@ -805,6 +825,9 @@ async def update_template(
     template = await sql_session.get(TemplateModel, request.id)
     if not template:
         raise HTTPException(status_code=400, detail="未找到模板")
+
+    if request.category is not None:
+        template.category = _normalize_template_category(request.category)
 
     validated_layouts: list[tuple[SaveTemplateLayoutData, ValidatedLayoutCode]] = []
     for layout in request.layouts:
@@ -842,6 +865,7 @@ async def update_template(
         id=template.id,
         name=template.name,
         description=template.description,
+        category=template.category,
         created_at=template.created_at,
     )
 

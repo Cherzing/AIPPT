@@ -343,19 +343,19 @@ const SettingsPage = () => {
 
 
   return (
-    <div className="h-screen font-syne flex flex-col overflow-hidden relative">
-      <main className="w-full mx-auto gap-6   overflow-hidden flex ">
+    <div className="min-h-screen font-syne relative">
+      <main className="mx-auto flex w-full gap-6 overflow-hidden">
         <SettingSideBar
           selectedProvider={selectedProvider}
           setSelectedProvider={selectSettingsSection}
         />
-        <div className="w-full">
-          <div className="sticky top-0 right-0 z-50 py-[28px]   backdrop-blur mb-4 ">
-            <div className="flex  gap-3 items-center ">
-              <h3 className=" text-[28px] tracking-[-0.84px] font-unbounded font-normal text-black flex items-center gap-2">
+        <div className="w-full min-w-0 pr-8">
+          <div className="sticky top-0 right-0 z-50 mb-5 py-7 backdrop-blur-xl">
+            <div className="aippt-soft-card flex flex-wrap items-center gap-4 px-6 py-5">
+              <h3 className="flex items-center gap-2 font-unbounded text-[28px] font-normal tracking-[-0.84px] text-slate-950">
                 设置
               </h3>
-              <p className="text-[10px] px-2.5 py-0.5 rounded-[50px] text-[#7A5AF8] border border-[#EDEEEF]  font-medium ">
+              <p className="rounded-full border border-[var(--aippt-border)] bg-white/75 px-3 py-1.5 text-[11px] font-medium text-[var(--aippt-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                 {textSummary} · {imageSummary} · {webSearchSummary}
               </p>
             </div>
@@ -369,7 +369,7 @@ const SettingsPage = () => {
           {selectedProvider === 'web-search-provider' && <WebSearchProvider llmConfig={llmConfig} setLlmConfig={setLlmConfig} />}
           {selectedProvider === 'user-management' && <UserManagement />}
           {selectedProvider === "session" && (
-            <div className="w-full max-w-lg space-y-5 rounded-[20px] border border-[#EDEEEF] bg-white p-7">
+            <div className="aippt-soft-card w-full max-w-lg space-y-5 p-7">
               <div>
                 <h4 className="font-unbounded text-lg font-normal text-black">退出登录</h4>
                 <p className="mt-2 font-syne text-sm leading-relaxed text-[#494A4D]">
@@ -378,7 +378,7 @@ const SettingsPage = () => {
               </div>
               <LogoutButton
                 label="退出登录"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-[58px] border border-[#EDEEEF] bg-[#7C51F8] px-5 py-3 font-syne text-xs font-semibold text-white transition hover:bg-[#6d46e6] disabled:cursor-not-allowed disabled:opacity-60"
+                className="aippt-focus inline-flex w-full items-center justify-center gap-2 rounded-[58px] border border-transparent bg-[var(--aippt-primary)] px-5 py-3 font-syne text-xs font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#6d46e6] disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           )}
@@ -388,7 +388,7 @@ const SettingsPage = () => {
 
       {/* Fixed Bottom Button — hidden on Sign out; nothing to save there */}
       {selectedProvider !== "session" && selectedProvider !== "user-management" ? (
-        <div className=" mx-auto fixed bottom-20 right-5 ">
+        <div className="fixed bottom-8 right-8 z-50 mx-auto">
           <button
             onClick={handleSaveConfig}
             disabled={buttonState.isDisabled}
@@ -397,9 +397,9 @@ const SettingsPage = () => {
                 "linear-gradient(270deg, #D5CAFC 2.4%, #E3D2EB 27.88%, #F4DCD3 69.23%, #FDE4C2 100%)",
               color: "#101323",
             }}
-            className={`w-full font-syne font-semibold flex items-center justify-center gap-2 py-3 px-5 rounded-[58px] transition-all duration-500 ${buttonState.isDisabled
+            className={`aippt-focus flex w-full items-center justify-center gap-2 rounded-[58px] px-5 py-3 font-syne font-semibold shadow-[0_18px_42px_rgba(124,81,248,0.22)] transition-all duration-300 ${buttonState.isDisabled
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200"
+              : "hover:-translate-y-0.5"
               } text-white`}
           >
             {buttonState.isLoading ? (

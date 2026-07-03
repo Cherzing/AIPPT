@@ -1,43 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ArrowUpDown, FileText, Plus, Sparkles } from "lucide-react";
 
 import { DashboardApi } from "@/app/(presentation-generator)/services/api/dashboard";
 import { PresentationGrid } from "@/app/(presentation-generator)/(dashboard)/dashboard/components/PresentationGrid";
-import Link from "next/link";
-import { ArrowUpDown } from "lucide-react";
 import { trackEvent, MixpanelEvent } from "@/utils/mixpanel";
-import { usePathname } from "next/navigation";
-
-const actionCardBase =
-  "absolute aspect-[16/9] h-[46.238px] w-[82.201px] rounded-[4.474px] border border-white/50 bg-cover bg-center bg-no-repeat shadow-[0_8px_18px_rgba(16,24,40,0.18)] transition-all duration-500 ease-out opacity-100 translate-y-0 scale-100";
-
-const FloatingActionCards = () => (
-  <div className="pointer-events-none absolute right-[14px] top-[-36px] z-0 block h-[64px] w-[158px]">
-    <div
-      className={`${actionCardBase} left-0 top-0 border-none group-hover/action:-translate-x-2 group-hover/action:-rotate-3 group-focus-visible/action:-translate-x-2 group-focus-visible/action:-rotate-3`}
-      style={{
-        backgroundImage: "url('/create_presentation_card_3.png')",
-      }}
-    />
-    <div
-      className={`${actionCardBase} left-[39px] top-1 z-10 border-none group-hover/action:-translate-y-1 group-hover/action:scale-105 group-focus-visible/action:-translate-y-1 group-focus-visible/action:scale-105`}
-      style={{
-        backgroundImage: "url('/create_presentation_card_2.png')",
-      }}
-    />
-    <div
-      className={`${actionCardBase} left-[76px] top-0 border-none group-hover/action:translate-x-2 group-hover/action:rotate-3 group-focus-visible/action:translate-x-2 group-focus-visible/action:rotate-3`}
-      style={{
-        backgroundImage: "url('/create_presentation_card_1.png')",
-      }}
-    />
-  </div>
-);
 
 const DashboardPage: React.FC = () => {
   const pathname = usePathname();
-  const [presentations, setPresentations] = useState<any>(null);
+  const [presentations, setPresentations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deckSortDirection, setDeckSortDirection] = useState<"desc" | "asc">(
@@ -45,21 +19,15 @@ const DashboardPage: React.FC = () => {
   );
 
   const sortedPresentations = useMemo(() => {
-    if (!presentations) return presentations;
-
     return [...presentations].sort((a: any, b: any) => {
       const first = new Date(a.updated_at ?? a.created_at).getTime();
       const second = new Date(b.updated_at ?? b.created_at).getTime();
-
       return deckSortDirection === "desc" ? second - first : first - second;
     });
   }, [presentations, deckSortDirection]);
 
   useEffect(() => {
-    const loadData = async () => {
-      await fetchPresentations();
-    };
-    loadData();
+    void fetchPresentations();
   }, []);
 
   const fetchPresentations = async () => {
@@ -70,14 +38,10 @@ const DashboardPage: React.FC = () => {
       setError(null);
       const data = await DashboardApi.getPresentations();
       fetchedCount = data.length;
-      data.sort(
-        (a: any, b: any) =>
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      );
       setPresentations(data);
-    } catch (err) {
+    } catch {
       hasError = true;
-      setError(null);
+      setError("无法加载演示文稿，请稍后重试。");
       setPresentations([]);
     } finally {
       trackEvent(MixpanelEvent.Dashboard_Page_Viewed, {
@@ -90,57 +54,105 @@ const DashboardPage: React.FC = () => {
   };
 
   const removePresentation = (presentationId: string) => {
-    setPresentations((prev: any) =>
-      prev ? prev.filter((p: any) => p.id !== presentationId) : []
-    );
+    setPresentations((prev) => prev.filter((p) => p.id !== presentationId));
   };
 
   return (
-    <div className="min-h-screen w-full px-3 pb-10 sm:px-6 relative">
-      <div className="sticky top-0 right-0 z-50 py-[28px] backdrop-blur mb-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[28px] tracking-[-0.84px] font-syne font-normal text-[#101828] flex items-center gap-2">
-            演示文稿
-          </h3>
+    <main className="aippt-page-shell">
+      <section className="aippt-page-content mb-7 grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
+        <div className="aippt-soft-card overflow-hidden rounded-[var(--aippt-radius)] p-7">
+          <div className="mb-8 flex items-start justify-between gap-6">
+            <div>
+              <p className="mb-3 inline-flex rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+                AIPPT 工作台
+              </p>
+              <h1 className="text-3xl font-bold tracking-[-0.04em] text-slate-950 sm:text-4xl">
+                管理、生成和迭代你的演示文稿
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                从主题、文档或模板开始，快速生成可编辑的 PPT，并在这里统一管理历史作品。
+              </p>
+            </div>
+            <div className="hidden h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_18px_42px_rgba(79,70,229,0.25)] sm:flex">
+              <Sparkles className="h-6 w-6" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+              <p className="text-xs font-medium text-slate-500">演示文稿</p>
+              <p className="mt-2 text-3xl font-bold text-slate-950">
+                {presentations.length}
+              </p>
+            </div>
+            <div className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+              <p className="text-xs font-medium text-slate-500">排序方式</p>
+              <p className="mt-2 text-base font-semibold text-slate-950">
+                {deckSortDirection === "desc" ? "最近更新优先" : "最早创建优先"}
+              </p>
+            </div>
+            <Link
+              href="/templates"
+              className="rounded-3xl border border-indigo-100 bg-indigo-50/80 p-5 transition hover:-translate-y-0.5 hover:bg-indigo-100 aippt-focus"
+            >
+              <p className="text-xs font-medium text-indigo-600">模板库</p>
+              <p className="mt-2 text-base font-semibold text-indigo-950">
+                选择母版开始创作
+              </p>
+            </Link>
+          </div>
         </div>
-      </div>
-      <section className="relative z-10 overflow-visible  ">
-        <h2 className="font-syne text-base bg-transparent font-medium pb-3.5  text-[#333333] ">
-          操作
-        </h2>
+
         <Link
           href="/upload"
           onClick={() =>
             trackEvent(MixpanelEvent.Dashboard_New_Presentation_Clicked, {
               pathname,
-              source: "dashboard_actions_card",
+              source: "dashboard_hero_card",
             })
           }
-          className="group/action bg-white z-50 mt-2  relative  block w-[304px] max-w-full overflow-visible rounded-[10.8px] outline-none focus-visible:ring-2 focus-visible:ring-[#7A5AF8] focus-visible:ring-offset-4 cursor-pointer"
-          aria-label="Create presentation"
+          className="group aippt-soft-card relative flex min-h-[260px] overflow-hidden rounded-[var(--aippt-radius)] p-7 transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(79,70,229,0.18)] aippt-focus"
+          aria-label="创建演示文稿"
         >
-          <FloatingActionCards />
-
-          <img
-            src="/create_presentation_bg.png"
-            alt="Background of the create presentation card"
-            className="relative bg-white z-10 h-[89.983px] w-[304px] max-w-full rounded-[10.8px] object-cover"
-          />
-          <span className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 text-center font-syne text-sm font-medium text-[#191919]">
-            Create Presentation
-          </span>
+          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-200/50 blur-2xl transition group-hover:scale-125" />
+          <div className="absolute bottom-6 right-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-[0_18px_42px_rgba(79,70,229,0.25)] transition group-hover:scale-105">
+            <Plus className="h-7 w-7" />
+          </div>
+          <div className="relative z-10 flex max-w-[18rem] flex-col justify-between">
+            <div>
+              <p className="mb-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                AI 生成
+              </p>
+              <h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-950">
+                创建演示文稿
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                输入主题或上传文档，生成结构化、可编辑、可导出的 PPT。
+              </p>
+            </div>
+            <span className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600">
+              立即开始 <Plus className="h-4 w-4" />
+            </span>
+          </div>
         </Link>
       </section>
-      <section className="relative z-10 mt-12">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-syne text-base font-medium  text-[#333333] ">
-            文稿
-          </h2>
+
+      <section className="aippt-page-content">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-slate-950">我的文稿</h2>
+              <p className="text-xs text-slate-500">普通用户只显示自己的文稿，管理员显示全部文稿。</p>
+            </div>
+          </div>
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-[#2F3033] transition-colors hover:bg-[#F3F3F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7A5AF8]"
-            title="Toggle deck sort order"
-            aria-label="Toggle deck sort order"
+            className="flex h-11 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 aippt-focus"
+            title="切换排序"
+            aria-label="切换排序"
             onClick={() =>
               setDeckSortDirection((current) =>
                 current === "desc" ? "asc" : "desc"
@@ -152,6 +164,7 @@ const DashboardPage: React.FC = () => {
                 deckSortDirection === "asc" ? "rotate-180" : ""
               }`}
             />
+            排序
           </button>
         </div>
         <PresentationGrid
@@ -161,7 +174,7 @@ const DashboardPage: React.FC = () => {
           onPresentationDeleted={removePresentation}
         />
       </section>
-    </div>
+    </main>
   );
 };
 
