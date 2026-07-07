@@ -159,14 +159,14 @@ const SidePanel = ({
     : null;
 
   return (
-    <div className="px-4 w-[120px] h-full">
+    <div className="h-full w-full px-3">
       <div
         className={`
           relative  h-full z-50 xl:z-auto 
           transition-all duration-300 ease-in-out
         `}
       >
-        <div className="w-full h-full hide-scrollbar overflow-hidden slide-theme flex flex-col">
+        <div className="flex h-full w-full flex-col overflow-hidden slide-theme">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -175,7 +175,7 @@ const SidePanel = ({
               screenReaderInstructions: DND_SCREEN_READER_INSTRUCTIONS,
             }}
           >
-            <div className="overflow-y-auto w-full hide-scrollbar min-h-0 flex-1 space-y-3.5">
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
               {isStreaming ? (
                 presentationData &&
                 presentationData?.slides.map((slide: any, index: number) => (
@@ -218,10 +218,10 @@ const SidePanel = ({
             type="button"
             aria-label="新增幻灯片"
             onClick={handleAddSlideClick}
-            className="py-4 gap-2 flex flex-col duration-300 items-center justify-center rounded-lg cursor-pointer mx-auto"
+            className="mx-auto my-3 flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 duration-200 hover:border-blue-300 hover:bg-blue-50"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="text-[11px] font-normal text-[#000000]">
+            <span className="text-xs font-medium">
               新增幻灯片
             </span>
           </button>

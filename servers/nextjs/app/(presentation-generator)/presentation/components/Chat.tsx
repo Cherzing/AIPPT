@@ -241,6 +241,7 @@ type ChatMessage = {
 type ChatProps = {
   presentationId: string;
   variant?: "presentation" | "outline";
+  displayMode?: "panel" | "floating";
   currentSlide?: number;
   onBeforeSend?: () => Promise<void> | void;
   onPresentationChanged?: () => Promise<void> | void;
@@ -529,6 +530,7 @@ const readTraceSlideIndex = (trace: ChatStreamTrace) => {
 const Chat = ({
   presentationId,
   variant = "presentation",
+  displayMode = "panel",
   currentSlide,
   onBeforeSend,
   onPresentationChanged,
@@ -542,6 +544,7 @@ const Chat = ({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isHistoryLoading, setIsHistoryLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isFloatingOpen, setIsFloatingOpen] = useState(false);
   const [isFollowAgentEnabled, setIsFollowAgentEnabled] = useState(true);
   const [activeMutationToolCount, setActiveMutationToolCount] = useState(0);
   const [activeAssistantMessageId, setActiveAssistantMessageId] = useState<
@@ -1163,8 +1166,14 @@ const Chat = ({
 
   const isOutlineVariant = variant === "outline";
 
-  return (
-    <div className={cn("flex h-full w-full flex-col bg-white", "")}>
+  const chatContent = (
+    <div
+      className={cn(
+        "flex h-full w-full flex-col bg-white",
+        displayMode === "floating" &&
+          "overflow-hidden rounded-2xl border border-slate-200 shadow-[0_24px_80px_rgba(15,23,42,0.22)]"
+      )}
+    >
       <div className="flex items-center justify-between px-4 pt-8">
         <div className="flex items-center gap-2">
           <h4 className="flex items-center gap-2 text-sm font-semibold text-[#101828]">
@@ -1194,6 +1203,7 @@ const Chat = ({
             </span>
           )}
         </div>
+        <div className="flex items-center gap-1">
         {!isOutlineVariant && (
           <button
             type="button"
@@ -1206,6 +1216,18 @@ const Chat = ({
             <RefreshCw className="h-4 w-4" />
           </button>
         )}
+        {displayMode === "floating" && (
+          <button
+            type="button"
+            onClick={() => setIsFloatingOpen(false)}
+            className="rounded-full px-2 py-1 text-sm font-semibold text-[#667085] transition-colors hover:bg-[#F7F7F7] hover:text-[#191919]"
+            aria-label="关闭 AI 助手"
+            title="关闭 AI 助手"
+          >
+            ×
+          </button>
+        )}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-9 [scrollbar-color:#C7CBD6_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#C7CBD6] [&::-webkit-scrollbar-track]:bg-transparent">
@@ -1519,6 +1541,34 @@ const Chat = ({
       </form>
     </div>
   );
+
+  if (displayMode === "floating") {
+    return (
+      <div className="pointer-events-none fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {isFloatingOpen && (
+          <div className="pointer-events-auto h-[min(620px,calc(100vh-132px))] w-[min(390px,calc(100vw-32px))]">
+            {chatContent}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setIsFloatingOpen((previous) => !previous)}
+          className="pointer-events-auto inline-flex h-14 items-center gap-2 rounded-full bg-gradient-to-r from-[#7A5AF8] via-[#A855F7] to-[#F97316] px-5 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(122,90,248,0.35)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_rgba(122,90,248,0.42)]"
+          aria-expanded={isFloatingOpen}
+          aria-label={isFloatingOpen ? "收起 AI 助手" : "打开 AI 助手"}
+          title={isFloatingOpen ? "收起 AI 助手" : "打开 AI 助手"}
+        >
+          <MessageCircleMore className="h-5 w-5" aria-hidden="true" />
+          AI 助手
+          {isSending && (
+            <span className="ml-1 h-2 w-2 rounded-full bg-white/90 shadow-[0_0_0_4px_rgba(255,255,255,0.28)]" />
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  return chatContent;
 };
 
 export default Chat;

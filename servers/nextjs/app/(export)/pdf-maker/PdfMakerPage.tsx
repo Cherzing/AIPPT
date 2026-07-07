@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import "@/app/(presentation-generator)/utils/prism-languages";
@@ -22,6 +22,13 @@ const PDF_PRINT_STYLE = `
   body {
     margin: 0 !important;
     padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-family: var(--font-inter), "Noto Sans CJK SC", "Microsoft YaHei", "PingFang SC", "Source Han Sans SC", Arial, sans-serif !important;
   }
 
   #presentation-slides-wrapper {
@@ -34,7 +41,7 @@ const PDF_PRINT_STYLE = `
   }
 
   #presentation-slides-wrapper .slides-export-stack {
-    width: 100% !important;
+    width: var(--pdf-page-width) !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -44,21 +51,21 @@ const PDF_PRINT_STYLE = `
   }
 
   #presentation-slides-wrapper .main-slide {
-    width: 1280px !important;
-    min-width: 1280px !important;
-    max-width: 1280px !important;
-    height: 720px !important;
-    min-height: 720px !important;
-    max-height: 720px !important;
-    flex: 0 0 720px !important;
+    width: var(--pdf-page-width) !important;
+    min-width: var(--pdf-page-width) !important;
+    max-width: var(--pdf-page-width) !important;
+    height: var(--pdf-page-height) !important;
+    min-height: var(--pdf-page-height) !important;
+    max-height: var(--pdf-page-height) !important;
+    flex: 0 0 var(--pdf-page-height) !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
   }
 
   #presentation-slides-wrapper .slide-export-inner {
-    width: 1280px !important;
-    height: 720px !important;
+    width: var(--pdf-page-width) !important;
+    height: var(--pdf-page-height) !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
@@ -66,7 +73,7 @@ const PDF_PRINT_STYLE = `
 
   @media print {
     @page {
-      size: 1280px 720px;
+      size: var(--pdf-page-width) var(--pdf-page-height);
       margin: 0;
     }
 
@@ -87,6 +94,44 @@ const PDF_PRINT_STYLE = `
     }
   }
 `;
+
+function getSlideSize(slides: any[]) {
+  for (const slide of slides) {
+    const document = slide?.content?.__aippt;
+    if (
+      document &&
+      typeof document.width === "number" &&
+      typeof document.height === "number" &&
+      document.width > 0 &&
+      document.height > 0
+    ) {
+      return { width: document.width, height: document.height };
+    }
+  }
+  return { width: 1280, height: 720 };
+}
+
+async function waitForImages(root: ParentNode) {
+  const images = Array.from(root.querySelectorAll("img"));
+  await Promise.all(
+    images.map((image) => {
+      if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        image.addEventListener("load", () => resolve(), { once: true });
+        image.addEventListener("error", () => resolve(), { once: true });
+      });
+    }),
+  );
+}
+
+async function waitForExportReady() {
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  if ("fonts" in document) {
+    await document.fonts.ready.catch(() => undefined);
+  }
+  await waitForImages(document);
+  await new Promise<void>((resolve) => setTimeout(resolve, 250));
+}
 
 type PresentationPageProps = {
   presentation_id: string;
@@ -212,9 +257,32 @@ const PresentationPage = ({ presentation_id, exportCookie }: PresentationPagePro
 
   const slides = presentationData?.slides ?? [];
   const isLoading = contentLoading || slides.length === 0;
+  const pageSize = useMemo(() => getSlideSize(slides), [slides]);
+
+  useEffect(() => {
+    if (isLoading || error) return;
+    let cancelled = false;
+    document.documentElement.dataset.aipptPdfReady = "false";
+    waitForExportReady().then(() => {
+      if (cancelled) return;
+      document.documentElement.dataset.aipptPdfReady = "true";
+      window.dispatchEvent(new Event("aippt-pdf-ready"));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoading, error, slides.length]);
 
   return (
-    <div className="m-0 flex flex-col overflow-visible p-0">
+    <div
+      className="m-0 flex flex-col overflow-visible p-0"
+      style={
+        {
+          "--pdf-page-width": `${pageSize.width}px`,
+          "--pdf-page-height": `${pageSize.height}px`,
+        } as React.CSSProperties
+      }
+    >
       {error ? (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
           <div
@@ -253,7 +321,11 @@ const PresentationPage = ({ presentation_id, exportCookie }: PresentationPagePro
                   {Array.from({ length: 2 }).map((_, index) => (
                     <Skeleton
                       key={index}
-                      className="m-0 h-[720px] w-[1280px] bg-gray-400 p-0"
+                      className="m-0 bg-gray-400 p-0"
+                      style={{
+                        width: pageSize.width,
+                        height: pageSize.height,
+                      }}
                     />
                   ))}
                 </div>

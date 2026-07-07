@@ -8,7 +8,7 @@ interface SlideThumbnailCardProps extends React.HTMLAttributes<HTMLDivElement> {
   selected: boolean;
 }
 
-const SCALE = 0.061;
+const SCALE = 0.1;
 
 export const SlideThumbnailCard = forwardRef<
   HTMLDivElement,
@@ -22,17 +22,19 @@ export const SlideThumbnailCard = forwardRef<
         borderColor: selected ? "#5141e5" : "var(--stroke, #e5e7eb)",
         ...style,
       }}
-      className={`cursor-pointer border relative p-1.5 rounded-[12px] overflow-hidden transition-all duration-200 ${
-        selected ? "border-[#BDB4FE]" : "border-[#EDEEEF]"
+      className={`relative cursor-pointer overflow-visible rounded-[4px] border bg-white p-1 transition-all duration-200 ${
+        selected ? "border-[#FF4D2D] shadow-sm" : "border-transparent hover:border-[#FFD4C9]"
       } ${className}`}
       {...props}
     >
-      <p className="pointer-events-none absolute -left-1 top-1/2 z-50 flex h-[18px] min-w-[18px] -translate-y-1/2 items-center justify-center rounded-full border border-[#EDEEEF] bg-white px-1 text-[10px] font-medium text-[#191919] shadow-sm">
+      <p className={`pointer-events-none absolute -left-6 top-1/2 z-50 flex h-5 min-w-5 -translate-y-1/2 items-center justify-center rounded-sm px-1 text-xs font-medium ${
+        selected ? "text-[#FF4D2D]" : "text-slate-500"
+      }`}>
         {index + 1}
       </p>
 
       <div
-        className="relative"
+        className="relative rounded-[3px] bg-white"
         style={{ height: `${720 * SCALE}px`, overflow: "hidden" }}
       >
         <div
@@ -44,7 +46,7 @@ export const SlideThumbnailCard = forwardRef<
             transform: `scale(${SCALE})`,
           }}
         >
-          <V1ContentRender slide={slide} isEditMode={true} />
+          <V1ContentRender slide={slide} isEditMode={false} />
         </div>
       </div>
     </div>

@@ -4,6 +4,22 @@ import { V1ContentRender } from "../../(presentation-generator)/components/V1Con
 
 const BASE_WIDTH = 1280;
 const BASE_HEIGHT = 720;
+const EDITOR_TOP_SPACE = 56;
+const EDITOR_INSPECTOR_SPACE = 312;
+
+function hasAipptEditorChrome(slide: any, isEditMode: boolean, presentMode: boolean, fixedSize: boolean) {
+  if (!isEditMode || presentMode || fixedSize) return false;
+  const content = slide?.content;
+  if (content?.__aippt?.width === 1280 && content?.__aippt?.height === 720) {
+    return true;
+  }
+  const layoutGroup = typeof slide?.layout_group === "string" ? slide.layout_group : "";
+  const layout = typeof slide?.layout === "string" ? slide.layout : "";
+  return (
+    layoutGroup === "taicang-coal-power-report" ||
+    layout.includes("coal-power-")
+  );
+}
 
 const SlideScale = ({
   slide,
@@ -25,6 +41,13 @@ const SlideScale = ({
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
+  const [aipptInspectorOpen, setAipptInspectorOpen] = useState(false);
+  const showAipptEditorChrome = hasAipptEditorChrome(
+    slide,
+    isEditMode,
+    presentMode,
+    fixedSize,
+  );
 
   const scale = useMemo(() => {
     if (fixedSize) return 1;
@@ -35,17 +58,35 @@ const SlideScale = ({
       const sy = h / BASE_HEIGHT;
       return Math.min(sx, sy);
     }
-    const safeWidth = Math.max(0, box.w + 20);
-    if (!safeWidth) return 1;
-    return Math.min((safeWidth / BASE_WIDTH) * 0.98, 1);
-  }, [fixedSize, presentMode, box.w, box.h]);
+    const reservedTop = showAipptEditorChrome ? EDITOR_TOP_SPACE : 0;
+    const reservedRight =
+      showAipptEditorChrome && aipptInspectorOpen ? EDITOR_INSPECTOR_SPACE : 0;
+    const chromeWidth = BASE_WIDTH + reservedRight;
+    const chromeHeight = BASE_HEIGHT + reservedTop;
+    if (!box.w || !box.h) return 1;
+    const sx = box.w / chromeWidth;
+    const sy = box.h / chromeHeight;
+    return Math.min(sx, sy, 1.25) * 0.995;
+  }, [
+    fixedSize,
+    presentMode,
+    box.w,
+    box.h,
+    showAipptEditorChrome,
+    aipptInspectorOpen,
+  ]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const el = containerRef.current;
     const ro = new ResizeObserver(() => {
-      setBox({ w: el.clientWidth, h: el.clientHeight });
+      const next = { w: el.clientWidth, h: el.clientHeight };
+      setBox((previous) =>
+        Math.abs(previous.w - next.w) < 1 && Math.abs(previous.h - next.h) < 1
+          ? previous
+          : next,
+      );
     });
 
     ro.observe(el);
@@ -62,7 +103,7 @@ const SlideScale = ({
           : `relative w-full ${
               presentMode
                 ? "flex h-full min-h-0 items-center justify-center shadow-none"
-                : "shadow-md"
+                : "h-full bg-[#f4f5f7] shadow-none"
             }`
       }
     >
@@ -70,17 +111,18 @@ const SlideScale = ({
         className={
           presentMode || fixedSize
             ? "relative mx-auto shrink-0"
-            : "relative mx-auto max-w-[1280px]"
+          : "relative mx-auto shrink-0"
         }
         style={{
-          width: `${BASE_WIDTH * scale}px`,
-          height: `${BASE_HEIGHT * scale}px`,
-          overflow: "hidden",
+          width: `${(BASE_WIDTH + (showAipptEditorChrome && aipptInspectorOpen ? EDITOR_INSPECTOR_SPACE : 0)) * scale}px`,
+          height: `${(BASE_HEIGHT + (showAipptEditorChrome ? EDITOR_TOP_SPACE : 0)) * scale}px`,
+          overflow: showAipptEditorChrome ? "visible" : "hidden",
         }}
       >
         <div
-          className="absolute top-0 left-0"
+          className="absolute left-0"
           style={{
+            top: showAipptEditorChrome ? EDITOR_TOP_SPACE : 0,
             width: BASE_WIDTH,
             height: BASE_HEIGHT,
             transformOrigin: "top left",
@@ -109,6 +151,7 @@ const SlideScale = ({
               slide={slide}
               isEditMode={isEditMode}
               theme={theme}
+              onAipptInspectorChange={setAipptInspectorOpen}
             />
           </div>
         </div>

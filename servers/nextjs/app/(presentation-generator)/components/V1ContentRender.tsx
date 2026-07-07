@@ -7,14 +7,29 @@ import TiptapTextReplacer from "../components/TiptapTextReplacer";
 import { validate as uuidValidate } from 'uuid';
 import { getLayoutByLayoutId } from "@/app/presentation-templates";
 import { useCustomTemplateDetails } from "@/app/hooks/useCustomTemplates";
-import { updateSlideContent } from "@/store/slices/presentationGeneration";
+import AipptEditableCanvas from "./aippt-canvas/AipptEditableCanvas";
+import AipptSlideCanvas from "./aippt-canvas/AipptSlideCanvas";
+import { repairCoalPowerAipptSlideDocument } from "@/lib/pptx-model/coal-power-template";
+import { updateSlide, updateSlideContent } from "@/store/slices/presentationGeneration";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
+import type { AipptSlideDocument } from "@/lib/pptx-model/types";
 
 
 
 
-export const V1ContentRender = ({ slide, isEditMode, theme }: { slide: any, isEditMode: boolean, theme?: any, enableEditMode?: boolean }) => {
+export const V1ContentRender = ({
+    slide,
+    isEditMode,
+    theme,
+    onAipptInspectorChange,
+}: {
+    slide: any,
+    isEditMode: boolean,
+    theme?: any,
+    enableEditMode?: boolean,
+    onAipptInspectorChange?: (open: boolean) => void,
+}) => {
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -26,6 +41,22 @@ export const V1ContentRender = ({ slide, isEditMode, theme }: { slide: any, isEd
         safeSlide.content && typeof safeSlide.content === "object"
             ? safeSlide.content
             : {};
+    const storedAipptDocument =
+        slideContent.__aippt &&
+            typeof slideContent.__aippt === "object" &&
+            slideContent.__aippt.width === 1280 &&
+            slideContent.__aippt.height === 720 &&
+            Array.isArray(slideContent.__aippt.elements)
+            ? (slideContent.__aippt as AipptSlideDocument)
+            : null;
+    const aipptDocument =
+        repairCoalPowerAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, storedAipptDocument) ?? storedAipptDocument;
 
     const customTemplateId = slideLayoutGroup.startsWith("custom-") ? slideLayoutGroup.split("custom-")[1] : slideLayoutGroup;
     const isCustomTemplate = uuidValidate(customTemplateId) || slideLayoutGroup.startsWith("custom-");
@@ -65,6 +96,37 @@ export const V1ContentRender = ({ slide, isEditMode, theme }: { slide: any, isEd
             <div className="flex flex-col items-center justify-center aspect-video h-full bg-gray-100 rounded-lg">
                 <Loader2 className="w-4 h-4 animate-spin" />
             </div>
+        );
+    }
+
+    if (aipptDocument) {
+        const updateAipptDocument = (nextDocument: AipptSlideDocument) => {
+            dispatch(
+                updateSlide({
+                    index: safeSlide.index ?? 0,
+                    slide: {
+                        ...safeSlide,
+                        content: {
+                            ...slideContent,
+                            __aippt: nextDocument,
+                        },
+                    },
+                })
+            );
+        };
+
+        return (
+            <SlideErrorBoundary label={`Slide ${(safeSlide.index ?? 0) + 1}`}>
+                {isEditMode ? (
+                    <AipptEditableCanvas
+                        document={aipptDocument}
+                        onChange={updateAipptDocument}
+                        onInspectorChange={onAipptInspectorChange}
+                    />
+                ) : (
+                    <AipptSlideCanvas document={aipptDocument} />
+                )}
+            </SlideErrorBoundary>
         );
     }
 

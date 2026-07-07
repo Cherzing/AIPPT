@@ -63,6 +63,17 @@ const IDLE_LOADING_STATE: LoadingState = {
   extra_info: "",
 };
 
+function isAipptNativeSlide(slide: any) {
+  if (!slide) return false;
+  const content = slide?.content;
+  if (content?.__aippt?.width === 1280 && content?.__aippt?.height === 720) {
+    return true;
+  }
+  const layoutGroup = typeof slide?.layout_group === "string" ? slide.layout_group : "";
+  const layout = typeof slide?.layout === "string" ? slide.layout : "";
+  return layoutGroup === "taicang-coal-power-report" || layout.includes("coal-power-");
+}
+
 const PresentationPage: React.FC<PresentationPageProps> = ({
   presentation_id,
 }) => {
@@ -224,6 +235,8 @@ const PresentationPage: React.FC<PresentationPageProps> = ({
   );
 
   const totalSlides = presentationData?.slides?.length ?? 0;
+  const currentSlideData = presentationData?.slides?.[selectedSlide] ?? null;
+  const isNativeEditor = isAipptNativeSlide(currentSlideData);
   const highlightedSlideIndex = glowingSlideIndex;
   const targetedSlidesSet = useMemo(
     () => new Set(chatTargetedSlides),
@@ -346,8 +359,8 @@ const PresentationPage: React.FC<PresentationPageProps> = ({
         className="relative flex h-full flex-col overflow-hidden"
       >
         <PresentationHeader presentation_id={presentation_id} isPresentationSaving={isSaving} currentSlide={selectedSlide} />
-        <div className="flex flex-1 min-h-0 gap-6 overflow-hidden">
-          <div className="w-[120px] h-full shrink-0 self-start sticky top-0 pt-[18px]">
+        <div className="flex flex-1 min-h-0 overflow-hidden border-t border-slate-200/80 bg-[#F3F4F6]">
+          <div className="h-full w-[176px] shrink-0 border-r border-slate-200 bg-white/96 pt-4 shadow-[1px_0_0_rgba(15,23,42,0.03)]">
             <SidePanel
               selectedSlide={selectedSlide}
               onSlideClick={handleSlideClick}
@@ -355,64 +368,54 @@ const PresentationPage: React.FC<PresentationPageProps> = ({
               loading={loading}
             />
           </div>
-          <div className="w-full min-w-0 h-full flex-1 pt-[18px]">
+          <div className="min-w-0 flex-1 bg-[#F2F3F5]">
             <div
               ref={slidesScrollContainerRef}
-              className="font-inter h-full overflow-y-auto hide-scrollbar scroll-pt-[18px]"
+              className="font-inter h-full overflow-hidden"
             >
-              <div className="w-full max-w-[1280px] min-h-full mx-auto flex flex-col items-center pb-8">
+              <div className="flex h-full w-full items-center justify-center overflow-hidden px-3 py-3">
                 {!presentationData ||
                   loading ||
                   !presentationData?.slides ||
                   presentationData?.slides.length === 0 ? (
-                  <div className="relative w-full h-[calc(100vh-120px)] mx-auto hide-scrollbar">
-                    <div className="">
-                      {Array.from({ length: 2 }).map((_, index) => (
-                        <Skeleton
-                          key={index}
-                          className="aspect-video bg-gray-400 my-4 w-full mx-auto "
-                        />
-                      ))}
-                    </div>
+                  <div className="relative mx-auto h-[calc(100vh-180px)] w-full max-w-[1280px]">
+                    <Skeleton className="aspect-video w-full bg-gray-300" />
                   </div>
-                ) : (
-                  <>
-                    {presentationData &&
-                      presentationData.slides &&
-                      presentationData.slides.length > 0 &&
-                      presentationData.slides.map((slide: any, index: number) => (
+                ) : currentSlideData ? (
+                  <div className="h-full w-full">
                         <SlideContent
-                          key={`${slide.type}-${index}-${slide.index}`}
-                          slide={slide}
-                          index={index}
+                      key={`${currentSlideData.type}-${selectedSlide}-${currentSlideData.index}`}
+                      slide={currentSlideData}
+                      index={selectedSlide}
                           presentationId={presentation_id}
                           isChatEditing={
                             highlightedSlideIndex !== null &&
-                            index === highlightedSlideIndex
+                        selectedSlide === highlightedSlideIndex
                           }
                           isChatTargeted={
                             isChatSending &&
-                            highlightedSlideIndex !== index &&
-                            targetedSlidesSet.has(index)
+                        highlightedSlideIndex !== selectedSlide &&
+                        targetedSlidesSet.has(selectedSlide)
                           }
+                      showInlineAddSlide={false}
                         />
-                      ))}
-                  </>
-                )}
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
-          <div className="w-full max-w-[370px] h-full shrink-0 self-start sticky top-0">
-            <Chat
-              presentationId={presentation_id}
-              currentSlide={selectedSlide}
-              onPresentationChanged={handlePresentationChanged}
-              onChatSendingStateChange={handleChatSendingStateChange}
-              onFollowModeChange={setIsFollowModeEnabled}
-              onAgentSlideFocus={handleAgentSlideFocus}
-            />
-          </div>
         </div>
+        {!isNativeEditor && (
+          <Chat
+            presentationId={presentation_id}
+            displayMode="floating"
+            currentSlide={selectedSlide}
+            onPresentationChanged={handlePresentationChanged}
+            onChatSendingStateChange={handleChatSendingStateChange}
+            onFollowModeChange={setIsFollowModeEnabled}
+            onAgentSlideFocus={handleAgentSlideFocus}
+          />
+        )}
       </div>
     </div>
   );
