@@ -43,6 +43,9 @@ export const Step4TemplateCreation: React.FC<Step4TemplateCreationProps> = ({
   return (
     <SchemaHighlightProvider>
       <div className="mt-8 mx-auto">
+        <div className="mb-4 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-800">
+          模板制作仍支持代码版式。若需要高保真 PPTX/PDF 导出，请为模板提供原生元素结构；否则系统会使用兼容预览或结构化转换。
+        </div>
         <div className="transition-all duration-300 flex-1">
           <div className="flex items-stretch gap-2">
             {/* Slides List */}
@@ -78,4 +81,3 @@ export const Step4TemplateCreation: React.FC<Step4TemplateCreationProps> = ({
     </SchemaHighlightProvider>
   );
 };
-

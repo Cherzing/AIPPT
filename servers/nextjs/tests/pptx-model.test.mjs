@@ -454,3 +454,48 @@ test("edits slide documents with duplicate, reorder, and style operations", asyn
   assert.equal(inserted[11].lineType, "polyline");
   assert.equal(inserted[12].lineType, "curve");
 });
+
+test("updates native image source and prompt without changing other elements", async () => {
+  const { updateAipptImageElementSource } = await importModule("lib/pptx-model/editing.ts");
+  const document = {
+    id: "slide-image-edit",
+    width: 1280,
+    height: 720,
+    elements: [
+      {
+        id: "hero-image",
+        type: "image",
+        x: 100,
+        y: 120,
+        w: 420,
+        h: 240,
+        src: "/old.png",
+        fit: "cover",
+        prompt: "old image prompt",
+      },
+      {
+        id: "title",
+        type: "text",
+        x: 80,
+        y: 80,
+        w: 300,
+        h: 60,
+        text: "Title",
+        style: { fontFace: "Microsoft YaHei", fontSize: 24, color: "111827" },
+      },
+    ],
+  };
+
+  const updated = updateAipptImageElementSource(
+    document,
+    "hero-image",
+    "/new.png",
+    "new generated prompt",
+  );
+
+  assert.equal(updated.elements[0].src, "/new.png");
+  assert.equal(updated.elements[0].prompt, "new generated prompt");
+  assert.equal(updated.elements[0].fit, "cover");
+  assert.equal(updated.elements[1], document.elements[1]);
+  assert.equal(document.elements[0].src, "/old.png");
+});

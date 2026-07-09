@@ -14,16 +14,8 @@ import {
   exportCoalPowerNativePptx,
   type NativePresentation,
 } from "@/lib/native-pptx";
-import {
-  buildCoalPowerAipptSlideDocument,
-  isCoalPowerLayout,
-  repairCoalPowerAipptSlideDocument,
-} from "@/lib/pptx-model/coal-power-template";
-import {
-  exportAipptModelPptx,
-  isAipptSlideDocument,
-} from "@/lib/pptx-model/export-pptx";
-import type { AipptPresentationDocument } from "@/lib/pptx-model/types";
+import { presentationToAipptDocument } from "@/lib/pptx-model/export-routing";
+import { exportAipptModelPptx } from "@/lib/pptx-model/export-pptx";
 
 function isValidFormat(value: unknown): value is BundledPresentationExportFormat {
   return value === "pdf" || value === "pptx";
@@ -139,32 +131,6 @@ async function tryNativePptxExport(params: {
   });
 
   return exportedPath;
-}
-
-function presentationToAipptDocument(
-  presentation: NativePresentation,
-): AipptPresentationDocument | null {
-  const slides = presentation.slides ?? [];
-  if (!slides.length) return null;
-
-  const documents = slides
-    .map((slide) => {
-      const storedDocument = slide.content?.__aippt;
-      if (isAipptSlideDocument(storedDocument) && isCoalPowerLayout(slide)) {
-        return repairCoalPowerAipptSlideDocument(slide, storedDocument);
-      }
-      if (isAipptSlideDocument(storedDocument)) return storedDocument;
-      if (isCoalPowerLayout(slide)) return buildCoalPowerAipptSlideDocument(slide);
-      return null;
-    })
-    .filter(isAipptSlideDocument);
-
-  if (documents.length !== slides.length) return null;
-
-  return {
-    title: presentation.title ?? "AIPPT",
-    slides: documents,
-  };
 }
 
 async function tryAipptModelPptxExport(params: {

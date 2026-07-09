@@ -1,24 +1,79 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { V1ContentRender } from "../../(presentation-generator)/components/V1ContentRender";
+import { repairCoalPowerAipptSlideDocument } from "@/lib/pptx-model/coal-power-template";
+import { convertLegacyTemplateSlideToAippt } from "@/lib/pptx-model/legacy-template-converter";
+import { validateNativeSlideDocument } from "@/lib/pptx-model/native-schema";
+import { getSlideNativeCapability } from "@/lib/pptx-model/template-capabilities";
+import type { AipptSlideDocument, AipptSlideElement } from "@/lib/pptx-model/types";
 
 const BASE_WIDTH = 1280;
 const BASE_HEIGHT = 720;
 const EDITOR_TOP_SPACE = 56;
 const EDITOR_INSPECTOR_SPACE = 312;
 
+function hasRenderableAipptElement(element: AipptSlideElement): boolean {
+  if (element.type === "group") {
+    return element.elements.some(hasRenderableAipptElement);
+  }
+
+  return (
+    typeof element.id === "string" &&
+    element.id.length > 0 &&
+    Number.isFinite(element.x) &&
+    Number.isFinite(element.y) &&
+    Number.isFinite(element.w) &&
+    Number.isFinite(element.h) &&
+    element.w > 0 &&
+    element.h > 0
+  );
+}
+
+function hasRenderableAipptElements(document: AipptSlideDocument): boolean {
+  return document.elements.some(hasRenderableAipptElement);
+}
+
 function hasAipptEditorChrome(slide: any, isEditMode: boolean, presentMode: boolean, fixedSize: boolean) {
   if (!isEditMode || presentMode || fixedSize) return false;
-  const content = slide?.content;
-  if (content?.__aippt?.width === 1280 && content?.__aippt?.height === 720) {
+
+  const content =
+    slide?.content && typeof slide.content === "object"
+      ? slide.content
+      : {};
+  const storedValidation = validateNativeSlideDocument(content.__aippt);
+  if (storedValidation.valid && storedValidation.document.meta?.fidelity !== "D") {
     return true;
   }
-  const layoutGroup = typeof slide?.layout_group === "string" ? slide.layout_group : "";
-  const layout = typeof slide?.layout === "string" ? slide.layout : "";
-  return (
-    layoutGroup === "taicang-coal-power-report" ||
-    layout.includes("coal-power-")
+
+  const coalPowerDocument = repairCoalPowerAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
   );
+  if (coalPowerDocument) return true;
+
+  const capability = getSlideNativeCapability({
+    layout: typeof slide?.layout === "string" ? slide.layout : "",
+    layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+    content,
+  });
+  if (capability.mode === "legacy-only") {
+    return true;
+  }
+  if (capability.level !== "B" || capability.mode !== "convertible") return false;
+
+  const convertedDocument = convertLegacyTemplateSlideToAippt({
+    layout: typeof slide?.layout === "string" ? slide.layout : "",
+    layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+    content,
+  });
+  const convertedValidation = validateNativeSlideDocument(convertedDocument);
+  return convertedValidation.valid && hasRenderableAipptElements(convertedValidation.document);
 }
 
 const SlideScale = ({

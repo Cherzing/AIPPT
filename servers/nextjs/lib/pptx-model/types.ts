@@ -1,6 +1,31 @@
 export type AipptAlign = "left" | "center" | "right" | "justify";
 export type AipptValign = "top" | "middle" | "bottom";
 
+export type AipptNativeFidelity = "A" | "B" | "C" | "D";
+
+export type AipptNativeSourceRenderer =
+  | "native"
+  | "coal-power-builder"
+  | "legacy-template-converter"
+  | "ppt-importer"
+  | "manual-template-authoring";
+
+export type AipptNativeConversionStatus =
+  | "complete"
+  | "partial"
+  | "background-fallback"
+  | "legacy-only";
+
+export type AipptNativeMeta = {
+  version: 1;
+  fidelity: AipptNativeFidelity;
+  sourceRenderer: AipptNativeSourceRenderer;
+  conversionStatus: AipptNativeConversionStatus;
+  sourceTemplate?: string;
+  sourceLayout?: string;
+  warnings?: string[];
+};
+
 export type AipptBox = {
   x: number;
   y: number;
@@ -53,6 +78,7 @@ export type AipptImageElement = AipptBaseElement & {
   type: "image";
   src: string;
   fit?: "stretch" | "cover" | "contain";
+  prompt?: string;
 };
 
 export type AipptShapeElement = AipptBaseElement & {
@@ -182,6 +208,7 @@ export type AipptSlideDocument = {
   id: string;
   width: number;
   height: number;
+  meta?: AipptNativeMeta;
   background?: AipptSlideBackground;
   elements: AipptSlideElement[];
   deletedElementIds?: string[];

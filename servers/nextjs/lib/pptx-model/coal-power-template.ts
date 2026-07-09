@@ -397,15 +397,22 @@ function applyStoredElementOverrides(
   storedElements: Map<string, AipptSlideElement>,
 ): AipptSlideElement[] {
   return elements.map((element) => {
+    const storedElement = storedElements.get(element.id);
     if (element.type === "group") {
-      const storedElement = storedElements.get(element.id);
       return {
         ...element,
         ...(storedElement?.type === "group" ? storedElement : {}),
         elements: applyStoredElementOverrides(element.elements, storedElements),
       };
     }
-    return storedElements.get(element.id) ?? element;
+    if (!storedElement || storedElement.type !== element.type) return element;
+    if (element.type === "text" && storedElement.type === "text") {
+      return {
+        ...element,
+        text: storedElement.text,
+      };
+    }
+    return element;
   });
 }
 

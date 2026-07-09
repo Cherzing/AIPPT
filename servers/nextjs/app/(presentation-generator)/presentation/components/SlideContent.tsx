@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Loader2,
   PlusIcon,
@@ -19,6 +19,14 @@ import { trackEvent, MixpanelEvent } from "@/utils/mixpanel";
 import { addToHistory } from "@/store/slices/undoRedoSlice";
 import NewSlide from "./NewSlide";
 import SlideScale from "../../components/PresentationRender";
+import { getSlideNativeCapability } from "@/lib/pptx-model/template-capabilities";
+
+const fidelityModeLabels = {
+  A: "高保真原生编辑",
+  B: "结构化原生编辑",
+  C: "导入背景编辑",
+  D: "兼容编辑",
+} as const;
 
 interface SlideContentProps {
   slide: any;
@@ -43,6 +51,16 @@ const SlideContent = ({
   const { presentationData, isStreaming } = useSelector(
     (state: RootState) => state.presentationGeneration
   );
+  const slideContent =
+    slide?.content && typeof slide.content === "object" ? slide.content : {};
+  const fidelityModeLabel = useMemo(() => {
+    const capability = getSlideNativeCapability({
+      layout: slideLayout,
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content: slideContent,
+    });
+    return fidelityModeLabels[capability.level];
+  }, [slide?.layout_group, slideContent, slideLayout]);
 
   // Use the centralized group layouts hook
 
@@ -209,6 +227,9 @@ const SlideContent = ({
                 boxShadow: "0 2px 13.2px 0 rgba(0, 0, 0, 0.10)",
               }}
             >
+              <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600">
+                {fidelityModeLabel}
+              </span>
               <button
                 type="button"
                 aria-label="删除幻灯片"

@@ -33,6 +33,22 @@ export function updateAipptElement(
   return { ...document, elements: updateList(document.elements) };
 }
 
+export function updateAipptImageElementSource(
+  document: AipptSlideDocument,
+  id: string,
+  src: string,
+  prompt?: string,
+): AipptSlideDocument {
+  return updateAipptElement(document, id, (element) => {
+    if (element.type !== "image") return element;
+    return {
+      ...element,
+      src,
+      prompt: prompt ?? element.prompt,
+    };
+  });
+}
+
 export function deleteAipptElement(
   document: AipptSlideDocument,
   id: string,

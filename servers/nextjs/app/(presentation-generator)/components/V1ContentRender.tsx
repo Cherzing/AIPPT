@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import EditableLayoutWrapper from "../components/EditableLayoutWrapper";
 import SlideErrorBoundary from "../components/SlideErrorBoundary";
 import TiptapTextReplacer from "../components/TiptapTextReplacer";
@@ -14,6 +14,51 @@ import { updateSlide, updateSlideContent } from "@/store/slices/presentationGene
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
 import type { AipptSlideDocument } from "@/lib/pptx-model/types";
+import { validateNativeSlideDocument } from "@/lib/pptx-model/native-schema";
+import { getSlideNativeCapability } from "@/lib/pptx-model/template-capabilities";
+import {
+    createLegacyOnlyAipptDocument,
+    isLegacyTemplateOverlayDocument,
+    toLegacyTemplateOverlayDocument,
+} from "@/lib/pptx-model/legacy-overlay";
+
+const fidelityModeText = {
+    A: {
+        label: "高保真原生编辑",
+        hint: "",
+    },
+    B: {
+        label: "结构化原生编辑",
+        hint: "当前模板已转换为结构化编辑，复杂样式可能与原模板存在差异。",
+    },
+    C: {
+        label: "导入背景编辑",
+        hint: "当前导入页以背景保留原貌，可在其上添加和编辑新元素。",
+    },
+    D: {
+        label: "兼容编辑",
+        hint: "当前模板使用兼容编辑，暂不支持完整原生导出。",
+    },
+} as const;
+
+function FidelityModeBadge({
+    level,
+}: {
+    level: keyof typeof fidelityModeText,
+}) {
+    const text = fidelityModeText[level];
+
+    return (
+        <div className="pointer-events-none absolute left-3 top-3 z-40">
+            <span
+                className="pointer-events-auto block rounded-full border border-slate-200/80 bg-white/90 px-2.5 py-1 text-[11px] font-medium text-slate-600 shadow-sm"
+                title={text.hint || text.label}
+            >
+                {text.label}
+            </span>
+        </div>
+    );
+}
 
 
 
@@ -41,22 +86,109 @@ export const V1ContentRender = ({
         safeSlide.content && typeof safeSlide.content === "object"
             ? safeSlide.content
             : {};
-    const storedAipptDocument =
-        slideContent.__aippt &&
-            typeof slideContent.__aippt === "object" &&
-            slideContent.__aippt.width === 1280 &&
-            slideContent.__aippt.height === 720 &&
-            Array.isArray(slideContent.__aippt.elements)
-            ? (slideContent.__aippt as AipptSlideDocument)
+
+    const capability = useMemo(
+        () =>
+            getSlideNativeCapability({
+                layout: slideLayout,
+                layout_group: slideLayoutGroup,
+                content: slideContent,
+            }),
+        [slideLayout, slideLayoutGroup, slideContent],
+    );
+
+    const storedAipptValidation = useMemo(() => {
+        const validation = validateNativeSlideDocument(slideContent.__aippt);
+        return validation;
+    }, [slideContent.__aippt]);
+
+    const storedAipptDocument = useMemo(() => {
+        return storedAipptValidation.valid &&
+            storedAipptValidation.document.meta?.fidelity !== "D" &&
+            !isLegacyTemplateOverlayDocument(storedAipptValidation.document)
+            ? storedAipptValidation.document
             : null;
-    const aipptDocument =
-        repairCoalPowerAipptSlideDocument({
+    }, [storedAipptValidation]);
+
+    const legacyOverlayDocument = useMemo(() => {
+        if (
+            storedAipptValidation.valid &&
+            isLegacyTemplateOverlayDocument(storedAipptValidation.document)
+        ) {
+            return toLegacyTemplateOverlayDocument(storedAipptValidation.document);
+        }
+
+        const shouldUseLegacyBackground =
+            (capability.mode === "legacy-only" && capability.level === "D") ||
+            (capability.mode === "convertible" && capability.level === "B");
+
+        return shouldUseLegacyBackground
+            ? createLegacyOnlyAipptDocument({
+                id: safeSlide.id ?? safeSlide.index,
+                layout: slideLayout,
+                layoutGroup: slideLayoutGroup,
+            })
+            : null;
+    }, [
+        capability.mode,
+        capability.level,
+        safeSlide.id,
+        safeSlide.index,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptValidation,
+    ]);
+
+    const hasPersistedLegacyOverlay = useMemo(() => {
+        return storedAipptValidation.valid &&
+            isLegacyTemplateOverlayDocument(storedAipptValidation.document) &&
+            storedAipptValidation.document.meta?.fidelity === "D";
+    }, [storedAipptValidation]);
+
+    useEffect(() => {
+        if (!legacyOverlayDocument || hasPersistedLegacyOverlay) return;
+        dispatch(
+            updateSlide({
+                index: safeSlide.index ?? 0,
+                slide: {
+                    ...safeSlide,
+                    content: {
+                        ...slideContent,
+                        __aippt: legacyOverlayDocument,
+                    },
+                },
+            })
+        );
+    }, [
+        legacyOverlayDocument,
+        hasPersistedLegacyOverlay,
+        dispatch,
+        safeSlide,
+        slideContent,
+    ]);
+
+    const repairedCoalPowerDocument = useMemo(
+        () =>
+            repairCoalPowerAipptSlideDocument({
             id: safeSlide.id,
             index: safeSlide.index,
             layout: slideLayout,
             layout_group: slideLayoutGroup,
             content: slideContent,
-        }, storedAipptDocument) ?? storedAipptDocument;
+        }, storedAipptDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            storedAipptDocument,
+        ],
+    );
+
+    const aipptDocument =
+        repairedCoalPowerDocument ?? storedAipptDocument;
+    const fidelityLevel = aipptDocument?.meta?.fidelity ?? capability.level;
 
     const customTemplateId = slideLayoutGroup.startsWith("custom-") ? slideLayoutGroup.split("custom-")[1] : slideLayoutGroup;
     const isCustomTemplate = uuidValidate(customTemplateId) || slideLayoutGroup.startsWith("custom-");
@@ -117,15 +249,18 @@ export const V1ContentRender = ({
 
         return (
             <SlideErrorBoundary label={`Slide ${(safeSlide.index ?? 0) + 1}`}>
-                {isEditMode ? (
-                    <AipptEditableCanvas
-                        document={aipptDocument}
-                        onChange={updateAipptDocument}
-                        onInspectorChange={onAipptInspectorChange}
-                    />
-                ) : (
-                    <AipptSlideCanvas document={aipptDocument} />
-                )}
+                <div className="relative h-full w-full">
+                    <FidelityModeBadge level={fidelityLevel} />
+                    {isEditMode ? (
+                        <AipptEditableCanvas
+                            document={aipptDocument}
+                            onChange={updateAipptDocument}
+                            onInspectorChange={onAipptInspectorChange}
+                        />
+                    ) : (
+                        <AipptSlideCanvas document={aipptDocument} />
+                    )}
+                </div>
             </SlideErrorBoundary>
         );
     }
@@ -151,10 +286,81 @@ export const V1ContentRender = ({
     }
     const LayoutComp = Layout as React.ComponentType<{ data: any }>;
 
+    if (legacyOverlayDocument) {
+        const updateLegacyOverlayDocument = (nextDocument: AipptSlideDocument) => {
+            dispatch(
+                updateSlide({
+                    index: safeSlide.index ?? 0,
+                    slide: {
+                        ...safeSlide,
+                        content: {
+                            ...slideContent,
+                            __aippt: nextDocument,
+                        },
+                    },
+                })
+            );
+        };
+        const legacyBackgroundContent = (
+            <div className="h-[720px] w-[1280px]">
+                <TiptapTextReplacer
+                    key={`legacy-background-${safeSlide.id ?? safeSlide.index ?? "slide"}`}
+                    slideData={slideContent}
+                    slideIndex={safeSlide.index ?? 0}
+                    readOnly
+                >
+                    <LayoutComp data={{
+                        ...slideContent,
+                        _logo_url__: theme ? theme.logo_url : null,
+                        __companyName__: (theme && theme.company_name) ? theme.company_name : null,
+                    }} />
+                </TiptapTextReplacer>
+            </div>
+        );
+        const legacyBackgroundLayer = isEditMode ? (
+            <EditableLayoutWrapper
+                slideIndex={safeSlide.index ?? 0}
+                slideData={slideContent}
+                properties={safeSlide.properties}
+            >
+                {legacyBackgroundContent}
+            </EditableLayoutWrapper>
+        ) : (
+            legacyBackgroundContent
+        );
+
+        return (
+            <SlideErrorBoundary label={`Slide ${(safeSlide.index ?? 0) + 1}`}>
+                <div className="relative h-[720px] w-[1280px]">
+                    <FidelityModeBadge level="D" />
+                    {isEditMode ? (
+                        <AipptEditableCanvas
+                            document={legacyOverlayDocument}
+                            onChange={updateLegacyOverlayDocument}
+                            onInspectorChange={onAipptInspectorChange}
+                            backgroundLayer={legacyBackgroundLayer}
+                        />
+                    ) : (
+                        <>
+                            {legacyBackgroundLayer}
+                            <div className="pointer-events-none absolute inset-0 z-10">
+                                <AipptSlideCanvas
+                                    document={legacyOverlayDocument}
+                                    transparentBackground
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+            </SlideErrorBoundary>
+        );
+    }
+
     if (isEditMode) {
         return (
             <SlideErrorBoundary label={`Slide ${(safeSlide.index ?? 0) + 1}`}>
-                <div ref={containerRef} className={` `}>
+                <div ref={containerRef} className="relative">
+                    <FidelityModeBadge level={fidelityLevel} />
 
                     <EditableLayoutWrapper
                         slideIndex={safeSlide.index ?? 0}

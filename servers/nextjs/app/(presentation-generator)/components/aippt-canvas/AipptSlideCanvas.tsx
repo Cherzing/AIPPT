@@ -29,6 +29,7 @@ function boxStyle(element: AipptSlideElement): React.CSSProperties {
     opacity: element.opacity,
     boxSizing: "border-box",
     cursor: element.locked ? "not-allowed" : "grab",
+    pointerEvents: resolveSlideElementPointerEvents(true),
   };
 }
 
@@ -658,12 +659,37 @@ export function renderAipptElement(
   return null;
 }
 
+export function resolveSlideCanvasBackground(
+  document: Pick<AipptSlideDocument, "background">,
+  transparentBackground = false,
+) {
+  if (document.background?.type === "solid") {
+    return normalizeColor(document.background.color);
+  }
+  return transparentBackground ? "transparent" : "#FFFFFF";
+}
+
+export function resolveSlideCanvasPointerEvents(
+  transparentBackground = false,
+  passthroughBackgroundInteractions = false,
+) {
+  return transparentBackground && passthroughBackgroundInteractions ? "none" : undefined;
+}
+
+export function resolveSlideElementPointerEvents(interactive = true) {
+  return interactive ? "auto" : undefined;
+}
+
 export default function AipptSlideCanvas({
   document,
   hiddenElementIds = [],
+  transparentBackground = false,
+  passthroughBackgroundInteractions = false,
 }: {
   document: AipptSlideDocument;
   hiddenElementIds?: string[];
+  transparentBackground?: boolean;
+  passthroughBackgroundInteractions?: boolean;
 }) {
   const hiddenElementIdSet = new Set(hiddenElementIds);
 
@@ -671,10 +697,11 @@ export default function AipptSlideCanvas({
     <div
       className="relative h-[720px] w-[1280px] overflow-hidden"
       style={{
-        background:
-          document.background?.type === "solid"
-            ? normalizeColor(document.background.color)
-            : "#FFFFFF",
+        background: resolveSlideCanvasBackground(document, transparentBackground),
+        pointerEvents: resolveSlideCanvasPointerEvents(
+          transparentBackground,
+          passthroughBackgroundInteractions,
+        ),
       }}
     >
       {document.background?.type === "image" && (

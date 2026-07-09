@@ -37,9 +37,11 @@ import {
   createAipptTextElement,
   duplicateAipptElement,
   moveAipptElementLayer,
+  updateAipptImageElementSource,
 } from "@/lib/pptx-model/editing";
 
 import AipptSlideCanvas from "./AipptSlideCanvas";
+import ImageEditor from "../ImageEditor";
 
 type DragState =
   | {
@@ -340,10 +342,12 @@ export default function AipptEditableCanvas({
   document,
   onChange,
   onInspectorChange,
+  backgroundLayer,
 }: {
   document: AipptSlideDocument;
   onChange: (document: AipptSlideDocument) => void;
   onInspectorChange?: (open: boolean) => void;
+  backgroundLayer?: React.ReactNode;
 }) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -367,12 +371,19 @@ export default function AipptEditableCanvas({
     rowIndex: number;
     cellIndex: number;
   } | null>(null);
+  const [imageEditorElementId, setImageEditorElementId] = useState<string | null>(null);
   const [selectedShape, setSelectedShape] = useState<AipptShapeElement["shape"]>("roundRect");
   const [selectedLinePreset, setSelectedLinePreset] = useState<LinePreset>(LINE_PRESETS[0]);
   const selectedElement = useMemo(
     () => (selectedId ? findElement(document.elements, selectedId) : null),
     [document.elements, selectedId],
   );
+  const imageEditorElement = useMemo(() => {
+    const element = imageEditorElementId
+      ? findElement(document.elements, imageEditorElementId)
+      : null;
+    return element?.type === "image" ? element : null;
+  }, [document.elements, imageEditorElementId]);
   const hiddenElementIds =
     (selectedElement?.type === "text" || selectedElement?.type === "table") && selectedId
       ? [selectedId]
@@ -967,6 +978,18 @@ export default function AipptEditableCanvas({
     commit(updateElement(document, selectedId, updater));
   };
 
+  const openSelectedImageEditor = () => {
+    if (selectedElement?.type !== "image") return;
+    setImageEditorElementId(selectedElement.id);
+  };
+
+  const handleNativeImageChange = (newImageUrl: string, prompt?: string) => {
+    if (!imageEditorElementId) return;
+    commit(updateAipptImageElementSource(document, imageEditorElementId, newImageUrl, prompt));
+    setSelectedId(imageEditorElementId);
+    setImageEditorElementId(null);
+  };
+
   const updateTextStyle = (
     patch: Partial<Extract<AipptSlideElement, { type: "text" }>["style"]>,
   ) => {
@@ -1322,8 +1345,22 @@ export default function AipptEditableCanvas({
         </div>
       )}
 
-      <div onMouseDown={onCanvasMouseDown}>
-        <AipptSlideCanvas document={document} hiddenElementIds={hiddenElementIds} />
+      {backgroundLayer && (
+        <div className="pointer-events-auto absolute inset-0 z-0 overflow-hidden">
+          {backgroundLayer}
+        </div>
+      )}
+      <div
+        className="relative z-10"
+        style={{ pointerEvents: backgroundLayer && !activeTool ? "none" : undefined }}
+        onMouseDown={onCanvasMouseDown}
+      >
+        <AipptSlideCanvas
+          document={document}
+          hiddenElementIds={hiddenElementIds}
+          transparentBackground={Boolean(backgroundLayer)}
+          passthroughBackgroundInteractions={Boolean(backgroundLayer) && !activeTool}
+        />
       </div>
       {activeTool && (
         <div className="pointer-events-none absolute left-4 top-4 z-[1200] rounded bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-white">
@@ -1672,6 +1709,16 @@ export default function AipptEditableCanvas({
         )}
         {selectedElement?.type === "image" && (
           <div className="space-y-3">
+            <button
+              type="button"
+              style={editorButtonStyle(false)}
+              onClick={openSelectedImageEditor}
+            >
+              <span style={toolbarButtonLabelStyle()}>
+                <ImageIcon size={15} />
+                AI/上传替换图片
+              </span>
+            </button>
             <label className="block text-xs font-semibold text-slate-600">
               图片地址
               <input
@@ -1923,6 +1970,15 @@ export default function AipptEditableCanvas({
             </div>
           </div>
         </>
+      )}
+      {imageEditorElement && (
+        <ImageEditor
+          initialImage={imageEditorElement.src}
+          slideIndex={0}
+          promptContent={imageEditorElement.prompt ?? imageEditorElement.name ?? ""}
+          onClose={() => setImageEditorElementId(null)}
+          onImageChange={handleNativeImageChange}
+        />
       )}
     </div>
   );

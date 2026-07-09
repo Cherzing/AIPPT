@@ -30,6 +30,7 @@ import { applyPresentationThemeToElement } from "../utils/applyPresentationTheme
 
 import PresentationHeader from "./PresentationHeader";
 import Chat from "./Chat";
+import { canUseNativeEditor } from "@/lib/pptx-model/template-capabilities";
 
 interface LoadingState {
   isLoading: boolean;
@@ -62,17 +63,6 @@ const IDLE_LOADING_STATE: LoadingState = {
   duration: 0,
   extra_info: "",
 };
-
-function isAipptNativeSlide(slide: any) {
-  if (!slide) return false;
-  const content = slide?.content;
-  if (content?.__aippt?.width === 1280 && content?.__aippt?.height === 720) {
-    return true;
-  }
-  const layoutGroup = typeof slide?.layout_group === "string" ? slide.layout_group : "";
-  const layout = typeof slide?.layout === "string" ? slide.layout : "";
-  return layoutGroup === "taicang-coal-power-report" || layout.includes("coal-power-");
-}
 
 const PresentationPage: React.FC<PresentationPageProps> = ({
   presentation_id,
@@ -236,7 +226,9 @@ const PresentationPage: React.FC<PresentationPageProps> = ({
 
   const totalSlides = presentationData?.slides?.length ?? 0;
   const currentSlideData = presentationData?.slides?.[selectedSlide] ?? null;
-  const isNativeEditor = isAipptNativeSlide(currentSlideData);
+  const isNativeEditor = currentSlideData
+    ? canUseNativeEditor(currentSlideData)
+    : false;
   const highlightedSlideIndex = glowingSlideIndex;
   const targetedSlidesSet = useMemo(
     () => new Set(chatTargetedSlides),
@@ -307,9 +299,13 @@ const PresentationPage: React.FC<PresentationPageProps> = ({
 
   // Presentation Mode View
   if (isPresentMode) {
+    if (slidesLength === 0) {
+      return null;
+    }
+
     return (
       <PresentationMode
-        slides={presentationData?.slides!}
+        slides={presentationData?.slides ?? []}
         currentSlide={presentSlideFromUrl}
         theme={presentationData?.theme ?? undefined}
         isFullscreen={isFullscreen}
