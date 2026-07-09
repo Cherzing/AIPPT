@@ -301,13 +301,29 @@ export const V1ContentRender = ({
                 })
             );
         };
-        const legacyBackgroundContent = (
+        const handleLegacyTextContentChange = (
+            content: string,
+            dataPath: string,
+            slideIndex?: number
+        ) => {
+            if (dataPath && slideIndex !== undefined) {
+                dispatch(
+                    updateSlideContent({
+                        slideIndex,
+                        dataPath,
+                        content,
+                    })
+                );
+            }
+        };
+        const renderLegacyBackgroundContent = (readOnly: boolean) => (
             <div className="h-[720px] w-[1280px]">
                 <TiptapTextReplacer
-                    key={`legacy-background-${safeSlide.id ?? safeSlide.index ?? "slide"}`}
+                    key={`legacy-background-${safeSlide.id ?? safeSlide.index ?? "slide"}-${readOnly ? "readonly" : "editable"}`}
                     slideData={slideContent}
                     slideIndex={safeSlide.index ?? 0}
-                    readOnly
+                    readOnly={readOnly}
+                    onContentChange={handleLegacyTextContentChange}
                 >
                     <LayoutComp data={{
                         ...slideContent,
@@ -323,10 +339,10 @@ export const V1ContentRender = ({
                 slideData={slideContent}
                 properties={safeSlide.properties}
             >
-                {legacyBackgroundContent}
+                {renderLegacyBackgroundContent(false)}
             </EditableLayoutWrapper>
         ) : (
-            legacyBackgroundContent
+            renderLegacyBackgroundContent(true)
         );
 
         return (
