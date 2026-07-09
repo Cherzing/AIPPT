@@ -30,7 +30,7 @@ test("legacy overlay background text is editable and writes changes back to slid
     "legacy background text replacer should receive an onContentChange handler",
   );
   assert.match(
-    backgroundContent,
+    legacyBlock,
     /updateSlideContent\(/,
     "legacy text edits should be persisted through updateSlideContent",
   );
