@@ -1,6 +1,7 @@
 import type { NativePresentation } from "@/lib/native-pptx";
 import {
   buildCoalPowerAipptSlideDocument,
+  getCoalPowerStoredDocumentCandidate,
   isCoalPowerLayout,
   repairCoalPowerAipptSlideDocument,
 } from "@/lib/pptx-model/coal-power-template";
@@ -23,6 +24,18 @@ export function presentationToAipptDocument(
     if (storedDocument !== undefined) {
       const validation = validateNativeSlideDocument(storedDocument);
       if (!validation.valid) {
+        if (isCoalPowerLayout(slide)) {
+          const storedCandidate = getCoalPowerStoredDocumentCandidate(storedDocument);
+          if (storedCandidate) {
+            const repairedDocument = repairCoalPowerAipptSlideDocument(
+              slide,
+              storedCandidate,
+            );
+            if (!repairedDocument) return null;
+            documents.push(repairedDocument);
+            continue;
+          }
+        }
         console.info("[export-presentation] native export rejected", {
           slideIndex,
           layout: slide.layout,

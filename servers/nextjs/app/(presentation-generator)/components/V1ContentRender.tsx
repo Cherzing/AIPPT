@@ -9,7 +9,11 @@ import { getLayoutByLayoutId } from "@/app/presentation-templates";
 import { useCustomTemplateDetails } from "@/app/hooks/useCustomTemplates";
 import AipptEditableCanvas from "./aippt-canvas/AipptEditableCanvas";
 import AipptSlideCanvas from "./aippt-canvas/AipptSlideCanvas";
-import { repairCoalPowerAipptSlideDocument } from "@/lib/pptx-model/coal-power-template";
+import {
+    getCoalPowerStoredDocumentCandidate,
+    isCoalPowerLayout,
+    repairCoalPowerAipptSlideDocument,
+} from "@/lib/pptx-model/coal-power-template";
 import { updateSlide, updateSlideContent } from "@/store/slices/presentationGeneration";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
@@ -110,6 +114,22 @@ export const V1ContentRender = ({
             : null;
     }, [storedAipptValidation]);
 
+    const coalPowerStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isCoalPowerLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getCoalPowerStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
     const legacyOverlayDocument = useMemo(() => {
         if (
             storedAipptValidation.valid &&
@@ -175,14 +195,14 @@ export const V1ContentRender = ({
             layout: slideLayout,
             layout_group: slideLayoutGroup,
             content: slideContent,
-        }, storedAipptDocument),
+        }, coalPowerStoredDocument),
         [
             safeSlide.id,
             safeSlide.index,
             slideLayout,
             slideLayoutGroup,
             slideContent,
-            storedAipptDocument,
+            coalPowerStoredDocument,
         ],
     );
 
@@ -323,7 +343,7 @@ export const V1ContentRender = ({
                     slideData={slideContent}
                     slideIndex={safeSlide.index ?? 0}
                     readOnly={readOnly}
-                    onContentChange={handleLegacyTextContentChange}
+                    onContentChange={readOnly ? undefined : handleLegacyTextContentChange}
                 >
                     <LayoutComp data={{
                         ...slideContent,

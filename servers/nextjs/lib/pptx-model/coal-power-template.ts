@@ -1,4 +1,5 @@
 import type {
+  AipptNativeMeta,
   AipptSlideDocument,
   AipptSlideElement,
   AipptTableCell,
@@ -17,6 +18,17 @@ const LINE = "D6DDE3";
 const WHITE = "FFFFFF";
 const FONT = "Microsoft YaHei";
 const SERIF = "SimSun";
+const BLUE_WHITE_BLUE = "007DC7";
+const BLUE_WHITE_LIGHT_BLUE = "129BE7";
+const BLUE_WHITE_ORANGE = "E46C1A";
+const BLUE_WHITE_TEXT = "333333";
+const BLUE_WHITE_PALE = "F3F8FC";
+const BLUE_WHITE_GRID = "D9E3EA";
+const BLUE_WHITE_CARD_LINE = "E2EDF3";
+const BLUE_WHITE_IMAGE_FILL = "E6EEF4";
+const BLUE_WHITE_IMAGE_LINE = "C7D7E2";
+const BLUE_WHITE_LOGO = asset("native/image1.png");
+const BLUE_WHITE_TEXTURE = asset("native/image2.jpg");
 
 type CoalSlideLike = {
   id?: string | null;
@@ -33,6 +45,27 @@ function asset(name: string) {
 function key(slide: CoalSlideLike) {
   const layout = slide.layout ?? "";
   return layout.includes(":") ? layout.split(":").pop() ?? layout : layout;
+}
+
+function coalPowerMeta(layout: string): AipptNativeMeta {
+  return {
+    version: 1,
+    fidelity: "A",
+    sourceRenderer: "coal-power-builder",
+    conversionStatus: "complete",
+    sourceTemplate: GROUP,
+    sourceLayout: layout,
+  };
+}
+
+function withCoalPowerMeta(
+  document: AipptSlideDocument,
+  layout: string,
+): AipptSlideDocument {
+  return {
+    ...document,
+    meta: coalPowerMeta(layout),
+  };
 }
 
 function str(value: unknown, fallback = "") {
@@ -93,6 +126,39 @@ function rect(
     h,
     fill: { color: fill },
     line: { color: line, width: line === fill ? 0 : 1 },
+  };
+}
+
+function locked(element: AipptSlideElement): AipptSlideElement {
+  return { ...element, locked: true };
+}
+
+function image(
+  id: string,
+  src: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  options: {
+    fit?: "stretch" | "cover" | "contain";
+    prompt?: string;
+    name?: string;
+    locked?: boolean;
+  } = {},
+): AipptSlideElement {
+  return {
+    id,
+    type: "image",
+    src,
+    x,
+    y,
+    w,
+    h,
+    fit: options.fit ?? "stretch",
+    prompt: options.prompt,
+    name: options.name,
+    locked: options.locked,
   };
 }
 
@@ -358,8 +424,686 @@ function buildClosing(slide: CoalSlideLike, data: Record<string, any>): AipptSli
   };
 }
 
+function blueWhiteId(slide: CoalSlideLike, name: string) {
+  return slide.id ?? `coal-blue-white-${name}-${slide.index ?? 0}`;
+}
+
+function blueWhiteDoc(
+  id: string,
+  elements: AipptSlideElement[],
+): AipptSlideDocument {
+  return {
+    id,
+    width: 1280,
+    height: 720,
+    background: { type: "solid", color: WHITE },
+    elements,
+  };
+}
+
+function blueWhiteTextStyle(
+  fontSize: number,
+  color = BLUE_WHITE_TEXT,
+  extra: Partial<AipptTextStyle> = {},
+): AipptTextStyle {
+  return textStyle(fontSize, color, {
+    fontFace: FONT,
+    lineSpacingMultiple: 1.18,
+    ...extra,
+  });
+}
+
+function blueWhiteLogo(position: "left" | "right" = "left") {
+  return locked(
+    image(
+      `blue-white-logo-${position}`,
+      BLUE_WHITE_LOGO,
+      position === "right" ? 1088 : 13,
+      position === "right" ? 58 : 18,
+      position === "right" ? 70 : 50,
+      position === "right" ? 70 : 50,
+      { fit: "contain", name: "Logo", locked: true },
+    ),
+  );
+}
+
+function blueWhiteTopRule() {
+  return locked(rect("blue-white-top-rule", 80, 51, 1170, 2, BLUE_WHITE_BLUE));
+}
+
+function blueWhiteBottomBand() {
+  return locked(rect("blue-white-bottom-band", 0, 693, 1280, 27, BLUE_WHITE_BLUE));
+}
+
+function blueWhiteWaveFooter() {
+  return [
+    locked({
+      ...rect("blue-white-wave-1", -140, 532, 760, 190, "24AEE0"),
+      shape: "ellipse",
+    } as AipptSlideElement),
+    locked({
+      ...rect("blue-white-wave-2", 250, 570, 780, 170, "039ED8"),
+      shape: "ellipse",
+    } as AipptSlideElement),
+    locked({
+      ...rect("blue-white-wave-3", 600, 588, 820, 160, "0089CF"),
+      shape: "ellipse",
+    } as AipptSlideElement),
+    locked(rect("blue-white-wave-base", 0, 630, 1280, 90, BLUE_WHITE_BLUE)),
+    locked(rect("blue-white-wave-bottom", 0, 695, 1280, 25, BLUE_WHITE_BLUE)),
+  ];
+}
+
+function blueWhiteHeader(title: string) {
+  return [
+    blueWhiteLogo("left"),
+    blueWhiteTopRule(),
+    locked(rect("blue-white-title-mark", 52, 72, 4, 38, BLUE_WHITE_BLUE)),
+    text(
+      "title",
+      title,
+      66,
+      72,
+      1100,
+      38,
+      blueWhiteTextStyle(28, BLUE_WHITE_BLUE, { bold: true }),
+    ),
+  ];
+}
+
+function editableImageValue(
+  value: unknown,
+  fallbackPrompt: string,
+): { src: string; prompt: string } {
+  if (value && typeof value === "object") {
+    const imageData = value as Record<string, unknown>;
+    const src = str(imageData.__image_url__);
+    const prompt = str(imageData.__image_prompt__, fallbackPrompt);
+    if (src) return { src, prompt };
+  }
+  return { src: BLUE_WHITE_TEXTURE, prompt: fallbackPrompt };
+}
+
+function buildBlueWhiteCover(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  return blueWhiteDoc(blueWhiteId(slide, "cover"), [
+    blueWhiteLogo("right"),
+    text(
+      "cover-title",
+      str(data.title, "Report Title"),
+      140,
+      241,
+      1000,
+      62,
+      blueWhiteTextStyle(40, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    text(
+      "cover-organization",
+      str(data.organization, "Organization"),
+      337,
+      344,
+      600,
+      28,
+      blueWhiteTextStyle(21, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    text(
+      "cover-presenter",
+      str(data.presenter, "Presenter / Department / Date"),
+      336,
+      404,
+      600,
+      26,
+      blueWhiteTextStyle(19, BLUE_WHITE_TEXT, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    ...blueWhiteWaveFooter(),
+  ]);
+}
+
+function buildBlueWhiteAgenda(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const items = arr<{ number?: string; title?: string }>(data.items);
+  return blueWhiteDoc(blueWhiteId(slide, "agenda"), [
+    blueWhiteLogo("left"),
+    blueWhiteTopRule(),
+    locked(rect("agenda-title-mark", 45, 80, 3, 39, BLUE_WHITE_BLUE)),
+    text(
+      "title",
+      str(data.title, "Agenda"),
+      60,
+      78,
+      420,
+      34,
+      blueWhiteTextStyle(28, BLUE_WHITE_BLUE, { bold: true }),
+    ),
+    ...items.slice(0, 8).flatMap((item, index) => {
+      const top = 148 + index * 55;
+      return [
+        text(
+          `agenda-number-${index}`,
+          str(item.number, String(index + 1).padStart(2, "0")),
+          89,
+          top,
+          38,
+          32,
+          blueWhiteTextStyle(27, BLUE_WHITE_BLUE, { bold: true }),
+        ),
+        locked(rect(`agenda-rule-${index}`, 137, top + 13, 38, 2, BLUE_WHITE_LIGHT_BLUE)),
+        text(
+          `agenda-title-${index}`,
+          str(item.title, "Agenda item"),
+          190,
+          top + 1,
+          800,
+          30,
+          blueWhiteTextStyle(24, BLUE_WHITE_TEXT),
+        ),
+      ];
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteSection(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  return blueWhiteDoc(blueWhiteId(slide, "section"), [
+    blueWhiteLogo("right"),
+    text(
+      "section-number",
+      str(data.number, "01"),
+      0,
+      200,
+      1280,
+      64,
+      blueWhiteTextStyle(56, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    text(
+      "section-title",
+      str(data.title, "Section Title"),
+      0,
+      290,
+      1280,
+      50,
+      blueWhiteTextStyle(40, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    text(
+      "section-subtitle",
+      str(data.subtitle, "Section subtitle"),
+      0,
+      360,
+      1280,
+      32,
+      blueWhiteTextStyle(22, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    ...blueWhiteWaveFooter(),
+  ]);
+}
+
+function buildBlueWhiteStandard(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const points = arr<{ number?: string; title?: string; body?: string }>(data.points);
+  return blueWhiteDoc(blueWhiteId(slide, "standard"), [
+    ...blueWhiteHeader(str(data.title, "Standard Content")),
+    ...points.slice(0, 3).flatMap((point, index) => {
+      const top = 154 + index * 120;
+      return [
+        locked(rect(`point-dot-${index}`, 80, top + 5, 18, 18, BLUE_WHITE_BLUE)),
+        text(
+          `point-title-${index}`,
+          `${str(point.title, "Point")} ${str(point.number, String(index + 1))}`,
+          114,
+          top,
+          420,
+          28,
+          blueWhiteTextStyle(20, BLUE_WHITE_BLUE, { bold: true }),
+        ),
+        text(
+          `point-body-${index}`,
+          str(point.body, "Add content here."),
+          114,
+          top + 38,
+          980,
+          64,
+          blueWhiteTextStyle(18, BLUE_WHITE_TEXT, { lineSpacingMultiple: 1.45 }),
+        ),
+      ];
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteTwoColumn(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const leftImage = editableImageValue(data.leftImage, "left industrial texture");
+  const rightImage = editableImageValue(data.rightImage, "right industrial texture");
+  return blueWhiteDoc(blueWhiteId(slide, "two-column"), [
+    ...blueWhiteHeader(str(data.title, "Two Column Content")),
+    locked(rect("left-panel", 80, 150, 520, 360, BLUE_WHITE_PALE)),
+    locked(rect("right-panel", 680, 150, 520, 360, BLUE_WHITE_PALE)),
+    text(
+      "left-title",
+      str(data.leftTitle, "Left Topic"),
+      110,
+      180,
+      300,
+      30,
+      blueWhiteTextStyle(20, BLUE_WHITE_BLUE, { bold: true }),
+    ),
+    text(
+      "left-body",
+      str(data.leftBody, "Add left side content."),
+      110,
+      232,
+      430,
+      72,
+      blueWhiteTextStyle(17, BLUE_WHITE_TEXT, { lineSpacingMultiple: 1.6 }),
+    ),
+    image("left-image", leftImage.src, 110, 274.4, 397.9, 209.2, {
+      prompt: leftImage.prompt,
+      name: "Left image",
+    }),
+    text(
+      "right-title",
+      str(data.rightTitle, "Right Topic"),
+      710,
+      180,
+      300,
+      30,
+      blueWhiteTextStyle(20, BLUE_WHITE_ORANGE, { bold: true }),
+    ),
+    text(
+      "right-body",
+      str(data.rightBody, "Add right side content."),
+      710,
+      232,
+      430,
+      72,
+      blueWhiteTextStyle(17, BLUE_WHITE_TEXT, { lineSpacingMultiple: 1.6 }),
+    ),
+    image("right-image", rightImage.src, 710, 274.4, 479, 209.2, {
+      prompt: rightImage.prompt,
+      name: "Right image",
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteMetrics(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const metrics = arr<{ value?: string; label?: string }>(data.metrics);
+  return blueWhiteDoc(blueWhiteId(slide, "metrics"), [
+    ...blueWhiteHeader(str(data.title, "Metrics")),
+    ...metrics.slice(0, 4).flatMap((metric, index) => {
+      const x = 80 + index * 300;
+      return [
+        text(
+          `metric-value-${index}`,
+          str(metric.value, "100"),
+          x,
+          150,
+          250,
+          44,
+          blueWhiteTextStyle(32, BLUE_WHITE_ORANGE, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+        text(
+          `metric-label-${index}`,
+          str(metric.label, "Metric"),
+          x,
+          250,
+          250,
+          24,
+          blueWhiteTextStyle(14, BLUE_WHITE_TEXT, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+      ];
+    }),
+    locked(rect("conclusion-panel", 80, 350, 1120, 150, BLUE_WHITE_PALE)),
+    text(
+      "conclusion",
+      str(data.conclusion, "Add conclusion here."),
+      120,
+      402,
+      1040,
+      58,
+      blueWhiteTextStyle(18, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+        lineSpacingMultiple: 1.6,
+      }),
+    ),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteTable(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const columns = arr<string>(data.columns).slice(0, 7);
+  const rows = arr<string[]>(data.rows).slice(0, 6);
+  const resolvedColumns = columns.length ? columns : ["A", "B", "C", "D", "E", "F", "G"];
+  const tableRows: AipptTableCell[][] = [
+    resolvedColumns.map((column) => ({
+      text: str(column, "-"),
+      fill: BLUE_WHITE_BLUE,
+      color: WHITE,
+      bold: true,
+    })),
+    ...rows.map((row, rowIndex) =>
+      resolvedColumns.map((_, columnIndex) => ({
+        text: str(row?.[columnIndex], ""),
+        fill: rowIndex % 2 === 0 ? WHITE : "F7FBFD",
+      })),
+    ),
+  ];
+
+  return blueWhiteDoc(blueWhiteId(slide, "table"), [
+    ...blueWhiteHeader(str(data.title, "Table")),
+    {
+      id: "table",
+      type: "table",
+      x: 80,
+      y: 150,
+      w: 1120,
+      h: 44 * Math.max(2, tableRows.length),
+      columns: resolvedColumns.map(() => 1120 / resolvedColumns.length),
+      rows: tableRows,
+      style: {
+        fontFace: FONT,
+        fontSize: 12,
+        color: BLUE_WHITE_TEXT,
+        borderColor: BLUE_WHITE_GRID,
+        margin: [4, 4, 4, 4],
+      },
+    },
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteTimeline(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const items = arr<{ month?: string; label?: string; accent?: string }>(data.items);
+  return blueWhiteDoc(blueWhiteId(slide, "timeline"), [
+    ...blueWhiteHeader(str(data.title, "Timeline")),
+    locked(rect("timeline-line", 155, 340, 970, 2, BLUE_WHITE_BLUE)),
+    ...items.slice(0, 5).flatMap((item, index) => {
+      const color = item.accent === "orange" ? BLUE_WHITE_ORANGE : BLUE_WHITE_BLUE;
+      const centerX = 155 + index * 250;
+      return [
+        text(
+          `timeline-month-${index}`,
+          `${str(item.month, String(index + 1))}M`,
+          centerX - 80,
+          270,
+          160,
+          32,
+          blueWhiteTextStyle(24, color, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+        locked({
+          ...rect(`timeline-dot-${index}`, centerX - 14, 330, 28, 28, color),
+          shape: "ellipse",
+        } as AipptSlideElement),
+        text(
+          `timeline-label-${index}`,
+          str(item.label, "Milestone"),
+          centerX - 80,
+          384,
+          160,
+          42,
+          blueWhiteTextStyle(14, BLUE_WHITE_TEXT, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+      ];
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteCardGrid(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const cards = arr<{ number?: string; title?: string; body?: string }>(data.cards);
+  return blueWhiteDoc(blueWhiteId(slide, "card-grid"), [
+    ...blueWhiteHeader(str(data.title, "Cards")),
+    ...cards.slice(0, 6).flatMap((card, index) => {
+      const col = index % 3;
+      const row = Math.floor(index / 3);
+      const left = 85 + col * 380;
+      const top = 155 + row * 190;
+      return [
+        locked(rect(`card-bg-${index}`, left, top, 330, 145, BLUE_WHITE_PALE, BLUE_WHITE_CARD_LINE)),
+        text(
+          `card-number-${index}`,
+          str(card.number, String(index + 1).padStart(2, "0")),
+          left + 27,
+          top + 24,
+          50,
+          28,
+          blueWhiteTextStyle(20, BLUE_WHITE_BLUE),
+        ),
+        text(
+          `card-title-${index}`,
+          str(card.title, "Card Title"),
+          left + 86,
+          top + 25,
+          190,
+          28,
+          blueWhiteTextStyle(20, BLUE_WHITE_BLUE),
+        ),
+        text(
+          `card-body-${index}`,
+          str(card.body, "Add card content here."),
+          left + 30,
+          top + 78,
+          270,
+          54,
+          blueWhiteTextStyle(13, BLUE_WHITE_TEXT, { lineSpacingMultiple: 1.5 }),
+        ),
+      ];
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteImageShowcase(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const slots = arr<{ label?: string; caption?: string; image?: unknown }>(data.images);
+  return blueWhiteDoc(blueWhiteId(slide, "image-showcase"), [
+    ...blueWhiteHeader(str(data.title, "Image Showcase")),
+    ...slots.slice(0, 4).flatMap((slot, index) => {
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const left = 90 + col * 560;
+      const top = 150 + row * 220;
+      const slotImage = editableImageValue(slot.image, `${str(slot.label, "Image")} prompt`);
+      return [
+        locked(rect(`image-frame-${index}`, left, top, 500, 160, BLUE_WHITE_IMAGE_FILL, BLUE_WHITE_IMAGE_LINE)),
+        text(
+          `image-label-${index}`,
+          str(slot.label, "Image / Screenshot"),
+          left,
+          top + 60,
+          500,
+          30,
+          blueWhiteTextStyle(16, BLUE_WHITE_BLUE, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+        image(`image-slot-${index}`, slotImage.src, left, top, 500, 160, {
+          prompt: slotImage.prompt,
+          name: str(slot.label, `Image ${index + 1}`),
+        }),
+        locked(rect(`image-caption-bg-${index}`, left, top + 160, 500, 28, BLUE_WHITE_BLUE)),
+        text(
+          `image-caption-${index}`,
+          str(slot.caption, "Caption"),
+          left + 8,
+          top + 164,
+          484,
+          20,
+          blueWhiteTextStyle(12, WHITE, { valign: "middle" }),
+        ),
+      ];
+    }),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteProcess(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  const steps = arr<{ number?: string; title?: string }>(data.steps);
+  return blueWhiteDoc(blueWhiteId(slide, "process"), [
+    ...blueWhiteHeader(str(data.title, "Process")),
+    ...steps.slice(0, 4).flatMap((step, index) => {
+      const left = 115 + index * 285;
+      return [
+        locked(rect(`process-card-${index}`, left, 230, 180, 110, BLUE_WHITE_PALE, BLUE_WHITE_GRID)),
+        text(
+          `process-number-${index}`,
+          str(step.number, String(index + 1).padStart(2, "0")),
+          left,
+          250,
+          180,
+          30,
+          blueWhiteTextStyle(22, BLUE_WHITE_BLUE, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+        text(
+          `process-title-${index}`,
+          str(step.title, "Step"),
+          left,
+          296,
+          180,
+          26,
+          blueWhiteTextStyle(16, BLUE_WHITE_TEXT, {
+            align: "center",
+            valign: "middle",
+          }),
+        ),
+      ];
+    }),
+    text(
+      "process-note",
+      str(data.note, "Add process note here."),
+      230,
+      430,
+      820,
+      34,
+      blueWhiteTextStyle(18, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    blueWhiteBottomBand(),
+  ]);
+}
+
+function buildBlueWhiteClosing(
+  slide: CoalSlideLike,
+  data: Record<string, any>,
+): AipptSlideDocument {
+  return blueWhiteDoc(blueWhiteId(slide, "closing"), [
+    blueWhiteLogo("right"),
+    text(
+      "closing-title",
+      str(data.title, "Thank You"),
+      0,
+      255,
+      1280,
+      52,
+      blueWhiteTextStyle(40, BLUE_WHITE_BLUE, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    text(
+      "closing-summary",
+      str(data.summary, "Summary / Next steps / Contact"),
+      0,
+      340,
+      1280,
+      34,
+      blueWhiteTextStyle(22, BLUE_WHITE_TEXT, {
+        align: "center",
+        valign: "middle",
+      }),
+    ),
+    ...blueWhiteWaveFooter(),
+  ]);
+}
+
 export function isCoalPowerLayout(slide: CoalSlideLike) {
-  return slide.layout_group === GROUP || key(slide).startsWith("coal-power-");
+  const layoutKey = key(slide);
+  return (
+    slide.layout_group === GROUP &&
+    (layoutKey.startsWith("coal-power-") ||
+      layoutKey.startsWith("coal-blue-white-"))
+  );
+}
+
+export function getCoalPowerStoredDocumentCandidate(
+  value: unknown,
+): AipptSlideDocument | null {
+  if (!value || typeof value !== "object") return null;
+  const document = value as Partial<AipptSlideDocument>;
+  if (
+    typeof document.id !== "string" ||
+    document.width !== 1280 ||
+    document.height !== 720 ||
+    !Array.isArray(document.elements)
+  ) {
+    return null;
+  }
+  return document as AipptSlideDocument;
 }
 
 export function buildCoalPowerAipptSlideDocument(
@@ -368,17 +1112,30 @@ export function buildCoalPowerAipptSlideDocument(
   if (!isCoalPowerLayout(slide)) return null;
   const data = slide.content ?? {};
   const layout = key(slide);
-  if (layout === "coal-power-cover-slide") return buildCover(slide, data);
-  if (layout === "coal-power-agenda-slide") return buildAgenda(slide, data);
-  if (layout === "coal-power-section-divider-slide") return buildSection(slide, data);
-  if (layout === "coal-power-kpi-snapshot-slide") return buildKpi(slide, data);
-  if (layout === "coal-power-two-column-progress-slide") return buildProgress(slide, data);
-  if (layout === "coal-power-timeline-slide") return buildTimeline(slide, data);
-  if (layout === "coal-power-performance-comparison-slide") return buildPerformance(slide, data);
-  if (layout === "coal-power-card-grid-slide") return buildCardGrid(slide, data);
-  if (layout === "coal-power-settlement-dashboard-slide") return buildSettlement(slide, data);
-  if (layout === "coal-power-closing-slide") return buildClosing(slide, data);
-  return null;
+  let document: AipptSlideDocument | null = null;
+  if (layout === "coal-power-cover-slide") document = buildCover(slide, data);
+  if (layout === "coal-power-agenda-slide") document = buildAgenda(slide, data);
+  if (layout === "coal-power-section-divider-slide") document = buildSection(slide, data);
+  if (layout === "coal-power-kpi-snapshot-slide") document = buildKpi(slide, data);
+  if (layout === "coal-power-two-column-progress-slide") document = buildProgress(slide, data);
+  if (layout === "coal-power-timeline-slide") document = buildTimeline(slide, data);
+  if (layout === "coal-power-performance-comparison-slide") document = buildPerformance(slide, data);
+  if (layout === "coal-power-card-grid-slide") document = buildCardGrid(slide, data);
+  if (layout === "coal-power-settlement-dashboard-slide") document = buildSettlement(slide, data);
+  if (layout === "coal-power-closing-slide") document = buildClosing(slide, data);
+  if (layout === "coal-blue-white-cover-slide") document = buildBlueWhiteCover(slide, data);
+  if (layout === "coal-blue-white-agenda-slide") document = buildBlueWhiteAgenda(slide, data);
+  if (layout === "coal-blue-white-section-slide") document = buildBlueWhiteSection(slide, data);
+  if (layout === "coal-blue-white-standard-content-slide") document = buildBlueWhiteStandard(slide, data);
+  if (layout === "coal-blue-white-two-column-slide") document = buildBlueWhiteTwoColumn(slide, data);
+  if (layout === "coal-blue-white-metrics-slide") document = buildBlueWhiteMetrics(slide, data);
+  if (layout === "coal-blue-white-table-slide") document = buildBlueWhiteTable(slide, data);
+  if (layout === "coal-blue-white-timeline-slide") document = buildBlueWhiteTimeline(slide, data);
+  if (layout === "coal-blue-white-card-grid-slide") document = buildBlueWhiteCardGrid(slide, data);
+  if (layout === "coal-blue-white-image-showcase-slide") document = buildBlueWhiteImageShowcase(slide, data);
+  if (layout === "coal-blue-white-process-slide") document = buildBlueWhiteProcess(slide, data);
+  if (layout === "coal-blue-white-closing-slide") document = buildBlueWhiteClosing(slide, data);
+  return document ? withCoalPowerMeta(document, layout) : null;
 }
 
 function collectElementById(
@@ -407,13 +1164,34 @@ function applyStoredElementOverrides(
     }
     if (!storedElement || storedElement.type !== element.type) return element;
     if (element.type === "text" && storedElement.type === "text") {
+      if (isLegacyInvisibleWhiteText(element, storedElement)) {
+        return {
+          ...element,
+          text: storedElement.text,
+        };
+      }
       return {
-        ...element,
-        text: storedElement.text,
+        ...storedElement,
       };
     }
-    return element;
+    return storedElement;
   });
+}
+
+function normalizeStoredColor(color?: string) {
+  return color?.replace(/^#/, "").toUpperCase();
+}
+
+function isLegacyInvisibleWhiteText(
+  element: AipptSlideElement,
+  storedElement: AipptSlideElement,
+) {
+  return (
+    element.type === "text" &&
+    storedElement.type === "text" &&
+    normalizeStoredColor(storedElement.style.color) === WHITE &&
+    normalizeStoredColor(element.style.color) !== WHITE
+  );
 }
 
 function filterDeletedElements(
@@ -467,6 +1245,7 @@ export function repairCoalPowerAipptSlideDocument(
 
   const layout = key(slide);
   const shouldRepair =
+    layout.startsWith("coal-blue-white-") ||
     layout === "coal-power-cover-slide" ||
     layout === "coal-power-section-divider-slide" ||
     layout === "coal-power-closing-slide";

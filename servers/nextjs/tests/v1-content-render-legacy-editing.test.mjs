@@ -7,6 +7,10 @@ const sourcePath = fileURLToPath(
   new URL("../app/(presentation-generator)/components/V1ContentRender.tsx", import.meta.url),
 );
 const source = readFileSync(sourcePath, "utf8");
+const editableWrapperSourcePath = fileURLToPath(
+  new URL("../app/(presentation-generator)/components/EditableLayoutWrapper.tsx", import.meta.url),
+);
+const editableWrapperSource = readFileSync(editableWrapperSourcePath, "utf8");
 
 test("legacy overlay background text is editable and writes changes back to slide content", () => {
   const legacyBlockStart = source.indexOf("if (legacyOverlayDocument) {");
@@ -26,7 +30,7 @@ test("legacy overlay background text is editable and writes changes back to slid
 
   assert.match(
     backgroundContent,
-    /onContentChange=\{handleLegacyTextContentChange\}/,
+    /onContentChange=\{readOnly \? undefined : handleLegacyTextContentChange\}/,
     "legacy background text replacer should receive an onContentChange handler",
   );
   assert.match(
@@ -43,5 +47,37 @@ test("legacy overlay background text is editable and writes changes back to slid
     legacyBlock,
     /renderLegacyBackgroundContent\(true\)/,
     "legacy preview mode should keep template text read-only",
+  );
+});
+
+test("explicit image edit paths are honored before URL-position matching", () => {
+  assert.match(
+    editableWrapperSource,
+    /getAttribute\('data-edit-path'\)/,
+    "editable images should be able to declare their data path directly",
+  );
+  assert.match(
+    editableWrapperSource,
+    /const explicitData = getExplicitEditableData\(imgElement, targetUrl\);[\s\S]*if \(explicitData\) return explicitData;/,
+    "explicit edit paths should be preferred over repeated-image URL matching",
+  );
+  assert.match(
+    editableWrapperSource,
+    /__image_url__:\s*fallbackSrc/,
+    "missing slide content should still open the image editor with fallback image data",
+  );
+});
+
+test("V1 content render routes coal templates through AIPPT canvas before Tiptap fallback", () => {
+  const coalRepairIndex = source.indexOf("repairCoalPowerAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(coalRepairIndex, -1, "coal template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    coalRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "coal templates should build native documents before the Tiptap fallback is reached",
   );
 });

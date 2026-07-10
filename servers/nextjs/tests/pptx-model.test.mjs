@@ -146,6 +146,9 @@ test("converts coal-power layouts into unified AIPPT slide documents", async () 
   const { buildCoalPowerAipptSlideDocument } = await importModule(
     "lib/pptx-model/coal-power-template.ts",
   );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
   const layouts = [
     "coal-power-cover-slide",
     "coal-power-agenda-slide",
@@ -178,7 +181,108 @@ test("converts coal-power layouts into unified AIPPT slide documents", async () 
     assert.equal(document.width, 1280);
     assert.equal(document.height, 720);
     assert.ok(document.elements.length > 0);
+    const validation = validateNativeSlideDocument(document);
+    assert.equal(validation.valid, true);
+    assert.equal(document.meta.sourceRenderer, "coal-power-builder");
   }
+});
+
+test("converts blue-white coal layouts into editable AIPPT elements", async () => {
+  const { buildCoalPowerAipptSlideDocument } = await importModule(
+    "lib/pptx-model/coal-power-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const layouts = [
+    "coal-blue-white-cover-slide",
+    "coal-blue-white-agenda-slide",
+    "coal-blue-white-section-slide",
+    "coal-blue-white-standard-content-slide",
+    "coal-blue-white-two-column-slide",
+    "coal-blue-white-metrics-slide",
+    "coal-blue-white-table-slide",
+    "coal-blue-white-timeline-slide",
+    "coal-blue-white-card-grid-slide",
+    "coal-blue-white-image-showcase-slide",
+    "coal-blue-white-process-slide",
+    "coal-blue-white-closing-slide",
+  ];
+
+  for (const [index, layout] of layouts.entries()) {
+    const document = buildCoalPowerAipptSlideDocument({
+      id: `blue-white-${index}`,
+      index,
+      layout_group: "taicang-coal-power-report",
+      layout: `taicang-coal-power-report:${layout}`,
+      content: {
+        title: "Editable blue-white title",
+        organization: "Editable organization",
+        presenter: "Editable presenter",
+        number: "01",
+        subtitle: "Editable subtitle",
+        items: [{ number: "01", title: "Editable agenda item" }],
+        points: [{ number: "1", title: "Editable point", body: "Editable body" }],
+        leftTitle: "Left title",
+        leftBody: "Left body",
+        leftImage: { __image_url__: "/left.png", __image_prompt__: "left prompt" },
+        rightTitle: "Right title",
+        rightBody: "Right body",
+        rightImage: { __image_url__: "/right.png", __image_prompt__: "right prompt" },
+        metrics: [{ value: "100", label: "Editable metric" }],
+        conclusion: "Editable conclusion",
+        columns: ["A", "B", "C"],
+        rows: [["1", "2", "3"]],
+        cards: [{ number: "01", title: "Card", body: "Card body" }],
+        images: [
+          {
+            label: "Image slot",
+            caption: "Editable caption",
+            image: { __image_url__: "/slot.png", __image_prompt__: "slot prompt" },
+          },
+        ],
+        steps: [{ number: "01", title: "Step" }],
+        note: "Editable note",
+        summary: "Editable summary",
+      },
+    });
+
+    assert.equal(document.width, 1280);
+    assert.equal(document.height, 720);
+    assert.ok(document.elements.length > 0);
+    assert.equal(validateNativeSlideDocument(document).valid, true);
+    assert.equal(document.meta.sourceRenderer, "coal-power-builder");
+  }
+
+  const imageDocument = buildCoalPowerAipptSlideDocument({
+    id: "blue-white-image",
+    layout_group: "taicang-coal-power-report",
+    layout: "taicang-coal-power-report:coal-blue-white-image-showcase-slide",
+    content: {
+      title: "Images",
+      images: [
+        {
+          label: "Slot",
+          caption: "Caption",
+          image: { __image_url__: "/slot.png", __image_prompt__: "slot prompt" },
+        },
+      ],
+    },
+  });
+  assert.ok(imageDocument.elements.some((element) => element.type === "image"));
+  assert.ok(imageDocument.elements.some((element) => element.type === "text"));
+
+  const tableDocument = buildCoalPowerAipptSlideDocument({
+    id: "blue-white-table",
+    layout_group: "taicang-coal-power-report",
+    layout: "taicang-coal-power-report:coal-blue-white-table-slide",
+    content: {
+      title: "Table",
+      columns: ["A", "B"],
+      rows: [["1", "2"]],
+    },
+  });
+  assert.ok(tableDocument.elements.some((element) => element.type === "table"));
 });
 
 test("exports converted coal-power model slides with template background assets", async () => {
@@ -262,6 +366,58 @@ test("repairs stale coal-power cover documents with invisible white text", async
   assert.equal(title.style.color, "0B3B78");
   assert.equal(title.x, 140);
   assert.equal(title.y, 240);
+});
+
+test("preserves user edits to repaired coal-power template elements", async () => {
+  const { repairCoalPowerAipptSlideDocument } = await importModule(
+    "lib/pptx-model/coal-power-template.ts",
+  );
+
+  const repaired = repairCoalPowerAipptSlideDocument(
+    {
+      id: "coal-cover",
+      index: 0,
+      layout_group: "taicang-coal-power-report",
+      layout: "taicang-coal-power-report:coal-power-cover-slide",
+      content: { title: "璇箟鏍囬" },
+    },
+    {
+      id: "coal-cover",
+      width: 1280,
+      height: 720,
+      elements: [
+        {
+          id: "cover-title",
+          type: "text",
+          x: 220,
+          y: 180,
+          w: 760,
+          h: 96,
+          text: "鐢ㄦ埛缂栬緫鏍囬",
+          style: {
+            fontFace: "Microsoft YaHei",
+            fontSize: 36,
+            color: "C2410C",
+            bold: false,
+            align: "left",
+            valign: "middle",
+            margin: [4, 8, 4, 8],
+          },
+        },
+      ],
+    },
+  );
+
+  const title = repaired.elements.find((element) => element.id === "cover-title");
+  assert.equal(title.text, "鐢ㄦ埛缂栬緫鏍囬");
+  assert.equal(title.x, 220);
+  assert.equal(title.y, 180);
+  assert.equal(title.w, 760);
+  assert.equal(title.h, 96);
+  assert.equal(title.style.color, "C2410C");
+  assert.equal(title.style.fontSize, 36);
+  assert.equal(title.style.bold, false);
+  assert.equal(title.style.align, "left");
 });
 
 test("repairs coal-power cover documents without dropping inserted elements", async () => {

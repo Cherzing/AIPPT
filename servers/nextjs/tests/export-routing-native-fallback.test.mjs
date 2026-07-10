@@ -143,3 +143,77 @@ test("allows coal-power slides without stored native document through dedicated 
   assert.equal(document?.slides.length, 1);
   assert.equal(document?.slides[0].width, 1280);
 });
+
+test("allows blue-white coal slides without stored native document through dedicated builder", async () => {
+  const presentationToAipptDocument = await loadRouteHelper();
+  const document = presentationToAipptDocument({
+    title: "blue-white coal deck",
+    slides: [
+      {
+        id: "coal-blue-white-image",
+        layout_group: "taicang-coal-power-report",
+        layout: "taicang-coal-power-report:coal-blue-white-image-showcase-slide",
+        content: {
+          title: "Images",
+          images: [
+            {
+              label: "Slot",
+              caption: "Caption",
+              image: { __image_url__: "/slot.png", __image_prompt__: "slot prompt" },
+            },
+          ],
+        },
+      },
+    ],
+  });
+
+  assert.equal(document?.slides.length, 1);
+  assert.equal(document?.slides[0].meta.sourceRenderer, "coal-power-builder");
+  assert.ok(document?.slides[0].elements.some((element) => element.type === "image"));
+});
+
+test("repairs legacy coal-power stored documents without native metadata", async () => {
+  const presentationToAipptDocument = await loadRouteHelper();
+  const document = presentationToAipptDocument({
+    title: "coal deck",
+    slides: [
+      {
+        id: "coal-cover",
+        layout_group: "taicang-coal-power-report",
+        layout: "taicang-coal-power-report:coal-power-cover-slide",
+        content: {
+          title: "鐓ょ數椤圭洰",
+          __aippt: {
+            id: "coal-cover",
+            width: 1280,
+            height: 720,
+            elements: [
+              {
+                id: "cover-title",
+                type: "text",
+                x: 230,
+                y: 210,
+                w: 780,
+                h: 88,
+                text: "鐢ㄦ埛淇敼鏍囬",
+                style: {
+                  fontFace: "Microsoft YaHei",
+                  fontSize: 34,
+                  color: "C2410C",
+                },
+              },
+            ],
+          },
+        },
+      },
+    ],
+  });
+
+  const title = document?.slides[0].elements.find(
+    (element) => element.id === "cover-title",
+  );
+  assert.equal(document?.slides[0].meta.sourceRenderer, "coal-power-builder");
+  assert.equal(title?.text, "鐢ㄦ埛淇敼鏍囬");
+  assert.equal(title?.x, 230);
+  assert.equal(title?.style.color, "C2410C");
+});

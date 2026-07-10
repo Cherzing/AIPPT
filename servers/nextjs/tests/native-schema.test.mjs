@@ -92,7 +92,21 @@ test("classifies coal-power slide as native level A", async () => {
   const { getSlideNativeCapability } = await loadCapabilities();
   const capability = getSlideNativeCapability({
     layout_group: "taicang-coal-power-report",
+    layout: "taicang-coal-power-report:coal-power-cover-slide",
     content: {},
+  });
+
+  assert.equal(capability.level, "A");
+  assert.equal(capability.mode, "native");
+  assert.equal(capability.reason, "dedicated coal-power native builder exists");
+});
+
+test("classifies blue-white coal template as native level A", async () => {
+  const { getSlideNativeCapability } = await loadCapabilities();
+  const capability = getSlideNativeCapability({
+    layout_group: "taicang-coal-power-report",
+    layout: "taicang-coal-power-report:coal-blue-white-image-showcase-slide",
+    content: { title: "图片展示页" },
   });
 
   assert.equal(capability.level, "A");

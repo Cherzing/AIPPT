@@ -7,67 +7,69 @@
 import { localizeTemplateGroup } from "./template-zh";
 
 import * as taicangCoalPowerReportSettings from "./taicang-coal-power-report/settings.json";
-import taicangCoalPowerReportSampleData from "./taicang-coal-power-report/sampleData";
-import TaicangCoverSlide, {
-  Schema as TaicangCoverSchema,
-  slideLayoutId as TaicangCoverId,
-  slideLayoutName as TaicangCoverName,
-  slideLayoutDescription as TaicangCoverDesc,
-} from "./taicang-coal-power-report/01-CoverSlide";
-import TaicangAgendaSlide, {
-  Schema as TaicangAgendaSchema,
-  slideLayoutId as TaicangAgendaId,
-  slideLayoutName as TaicangAgendaName,
-  slideLayoutDescription as TaicangAgendaDesc,
-} from "./taicang-coal-power-report/02-AgendaSlide";
-import TaicangSectionDividerSlide, {
-  Schema as TaicangSectionDividerSchema,
-  slideLayoutId as TaicangSectionDividerId,
-  slideLayoutName as TaicangSectionDividerName,
-  slideLayoutDescription as TaicangSectionDividerDesc,
-} from "./taicang-coal-power-report/03-SectionDividerSlide";
-import TaicangKpiSnapshotSlide, {
-  Schema as TaicangKpiSnapshotSchema,
-  slideLayoutId as TaicangKpiSnapshotId,
-  slideLayoutName as TaicangKpiSnapshotName,
-  slideLayoutDescription as TaicangKpiSnapshotDesc,
-} from "./taicang-coal-power-report/04-KpiSnapshotSlide";
-import TaicangTwoColumnProgressSlide, {
-  Schema as TaicangTwoColumnProgressSchema,
-  slideLayoutId as TaicangTwoColumnProgressId,
-  slideLayoutName as TaicangTwoColumnProgressName,
-  slideLayoutDescription as TaicangTwoColumnProgressDesc,
-} from "./taicang-coal-power-report/05-TwoColumnProgressSlide";
-import TaicangTimelineSlide, {
-  Schema as TaicangTimelineSchema,
-  slideLayoutId as TaicangTimelineId,
-  slideLayoutName as TaicangTimelineName,
-  slideLayoutDescription as TaicangTimelineDesc,
-} from "./taicang-coal-power-report/06-TimelineSlide";
-import TaicangPerformanceComparisonSlide, {
-  Schema as TaicangPerformanceComparisonSchema,
-  slideLayoutId as TaicangPerformanceComparisonId,
-  slideLayoutName as TaicangPerformanceComparisonName,
-  slideLayoutDescription as TaicangPerformanceComparisonDesc,
-} from "./taicang-coal-power-report/07-PerformanceComparisonSlide";
-import TaicangCardGridSlide, {
-  Schema as TaicangCardGridSchema,
-  slideLayoutId as TaicangCardGridId,
-  slideLayoutName as TaicangCardGridName,
-  slideLayoutDescription as TaicangCardGridDesc,
-} from "./taicang-coal-power-report/08-CardGridSlide";
-import TaicangSettlementDashboardSlide, {
-  Schema as TaicangSettlementDashboardSchema,
-  slideLayoutId as TaicangSettlementDashboardId,
-  slideLayoutName as TaicangSettlementDashboardName,
-  slideLayoutDescription as TaicangSettlementDashboardDesc,
-} from "./taicang-coal-power-report/09-SettlementDashboardSlide";
-import TaicangClosingSlide, {
-  Schema as TaicangClosingSchema,
-  slideLayoutId as TaicangClosingId,
-  slideLayoutName as TaicangClosingName,
-  slideLayoutDescription as TaicangClosingDesc,
-} from "./taicang-coal-power-report/10-ClosingSlide";
+import {
+  AgendaSchema as TaicangAgendaSchema,
+  AgendaSlide as TaicangAgendaSlide,
+  CardGridSchema as TaicangCardGridSchema,
+  CardGridSlide as TaicangCardGridSlide,
+  ClosingSchema as TaicangClosingSchema,
+  ClosingSlide as TaicangClosingSlide,
+  CoverSchema as TaicangCoverSchema,
+  CoverSlide as TaicangCoverSlide,
+  ImageShowcaseSchema as TaicangImageShowcaseSchema,
+  ImageShowcaseSlide as TaicangImageShowcaseSlide,
+  MetricsSchema as TaicangMetricsSchema,
+  MetricsSlide as TaicangMetricsSlide,
+  ProcessSchema as TaicangProcessSchema,
+  ProcessSlide as TaicangProcessSlide,
+  SectionSchema as TaicangSectionSchema,
+  SectionSlide as TaicangSectionSlide,
+  StandardContentSchema as TaicangStandardContentSchema,
+  StandardContentSlide as TaicangStandardContentSlide,
+  TableSchema as TaicangTableSchema,
+  TableSlide as TaicangTableSlide,
+  TimelineSchema as TaicangTimelineSchema,
+  TimelineSlide as TaicangTimelineSlide,
+  TwoColumnSchema as TaicangTwoColumnSchema,
+  TwoColumnSlide as TaicangTwoColumnSlide,
+  agendaSlideLayoutDescription as TaicangAgendaDesc,
+  agendaSlideLayoutId as TaicangAgendaId,
+  agendaSlideLayoutName as TaicangAgendaName,
+  blueWhiteSampleData as taicangCoalPowerReportSampleData,
+  cardGridSlideLayoutDescription as TaicangCardGridDesc,
+  cardGridSlideLayoutId as TaicangCardGridId,
+  cardGridSlideLayoutName as TaicangCardGridName,
+  closingSlideLayoutDescription as TaicangClosingDesc,
+  closingSlideLayoutId as TaicangClosingId,
+  closingSlideLayoutName as TaicangClosingName,
+  coverSlideLayoutDescription as TaicangCoverDesc,
+  coverSlideLayoutId as TaicangCoverId,
+  coverSlideLayoutName as TaicangCoverName,
+  imageSlideLayoutDescription as TaicangImageShowcaseDesc,
+  imageSlideLayoutId as TaicangImageShowcaseId,
+  imageSlideLayoutName as TaicangImageShowcaseName,
+  metricsSlideLayoutDescription as TaicangMetricsDesc,
+  metricsSlideLayoutId as TaicangMetricsId,
+  metricsSlideLayoutName as TaicangMetricsName,
+  processSlideLayoutDescription as TaicangProcessDesc,
+  processSlideLayoutId as TaicangProcessId,
+  processSlideLayoutName as TaicangProcessName,
+  sectionSlideLayoutDescription as TaicangSectionDesc,
+  sectionSlideLayoutId as TaicangSectionId,
+  sectionSlideLayoutName as TaicangSectionName,
+  standardSlideLayoutDescription as TaicangStandardContentDesc,
+  standardSlideLayoutId as TaicangStandardContentId,
+  standardSlideLayoutName as TaicangStandardContentName,
+  tableSlideLayoutDescription as TaicangTableDesc,
+  tableSlideLayoutId as TaicangTableId,
+  tableSlideLayoutName as TaicangTableName,
+  timelineSlideLayoutDescription as TaicangTimelineDesc,
+  timelineSlideLayoutId as TaicangTimelineId,
+  timelineSlideLayoutName as TaicangTimelineName,
+  twoColumnSlideLayoutDescription as TaicangTwoColumnDesc,
+  twoColumnSlideLayoutId as TaicangTwoColumnId,
+  twoColumnSlideLayoutName as TaicangTwoColumnName,
+} from "./taicang-coal-power-report/blue-white-slides";
 
 
 // TODO: Step 1: Import All templates Layouts Here (like the ones below)
@@ -3451,14 +3453,16 @@ export const swiftTemplates: TemplateWithData[] = [
 const taicangCoalPowerReportTemplates: TemplateWithData[] = [
   (() => { const t = createTemplateEntry(TaicangCoverSlide, TaicangCoverSchema, TaicangCoverId, TaicangCoverName, TaicangCoverDesc, "taicang-coal-power-report", "01-CoverSlide"); t.sampleData = taicangCoalPowerReportSampleData.cover; return t; })(),
   (() => { const t = createTemplateEntry(TaicangAgendaSlide, TaicangAgendaSchema, TaicangAgendaId, TaicangAgendaName, TaicangAgendaDesc, "taicang-coal-power-report", "02-AgendaSlide"); t.sampleData = taicangCoalPowerReportSampleData.agenda; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangSectionDividerSlide, TaicangSectionDividerSchema, TaicangSectionDividerId, TaicangSectionDividerName, TaicangSectionDividerDesc, "taicang-coal-power-report", "03-SectionDividerSlide"); t.sampleData = taicangCoalPowerReportSampleData.section; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangKpiSnapshotSlide, TaicangKpiSnapshotSchema, TaicangKpiSnapshotId, TaicangKpiSnapshotName, TaicangKpiSnapshotDesc, "taicang-coal-power-report", "04-KpiSnapshotSlide"); t.sampleData = { ...t.sampleData, ...taicangCoalPowerReportSampleData.kpi }; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangTwoColumnProgressSlide, TaicangTwoColumnProgressSchema, TaicangTwoColumnProgressId, TaicangTwoColumnProgressName, TaicangTwoColumnProgressDesc, "taicang-coal-power-report", "05-TwoColumnProgressSlide"); t.sampleData = taicangCoalPowerReportSampleData.progress; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangTimelineSlide, TaicangTimelineSchema, TaicangTimelineId, TaicangTimelineName, TaicangTimelineDesc, "taicang-coal-power-report", "06-TimelineSlide"); t.sampleData = taicangCoalPowerReportSampleData.followup; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangPerformanceComparisonSlide, TaicangPerformanceComparisonSchema, TaicangPerformanceComparisonId, TaicangPerformanceComparisonName, TaicangPerformanceComparisonDesc, "taicang-coal-power-report", "07-PerformanceComparisonSlide"); t.sampleData = taicangCoalPowerReportSampleData.defect; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangCardGridSlide, TaicangCardGridSchema, TaicangCardGridId, TaicangCardGridName, TaicangCardGridDesc, "taicang-coal-power-report", "08-CardGridSlide"); t.sampleData = taicangCoalPowerReportSampleData.performance; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangSettlementDashboardSlide, TaicangSettlementDashboardSchema, TaicangSettlementDashboardId, TaicangSettlementDashboardName, TaicangSettlementDashboardDesc, "taicang-coal-power-report", "09-SettlementDashboardSlide"); t.sampleData = taicangCoalPowerReportSampleData.optimization; return t; })(),
-  (() => { const t = createTemplateEntry(TaicangClosingSlide, TaicangClosingSchema, TaicangClosingId, TaicangClosingName, TaicangClosingDesc, "taicang-coal-power-report", "10-ClosingSlide"); t.sampleData = taicangCoalPowerReportSampleData.wisdom; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangSectionSlide, TaicangSectionSchema, TaicangSectionId, TaicangSectionName, TaicangSectionDesc, "taicang-coal-power-report", "03-SectionSlide"); t.sampleData = taicangCoalPowerReportSampleData.section; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangStandardContentSlide, TaicangStandardContentSchema, TaicangStandardContentId, TaicangStandardContentName, TaicangStandardContentDesc, "taicang-coal-power-report", "04-StandardContentSlide"); t.sampleData = taicangCoalPowerReportSampleData.standard; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangTwoColumnSlide, TaicangTwoColumnSchema, TaicangTwoColumnId, TaicangTwoColumnName, TaicangTwoColumnDesc, "taicang-coal-power-report", "05-TwoColumnSlide"); t.sampleData = taicangCoalPowerReportSampleData.twoColumn; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangMetricsSlide, TaicangMetricsSchema, TaicangMetricsId, TaicangMetricsName, TaicangMetricsDesc, "taicang-coal-power-report", "06-MetricsSlide"); t.sampleData = taicangCoalPowerReportSampleData.metrics; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangTableSlide, TaicangTableSchema, TaicangTableId, TaicangTableName, TaicangTableDesc, "taicang-coal-power-report", "07-TableSlide"); t.sampleData = taicangCoalPowerReportSampleData.table; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangTimelineSlide, TaicangTimelineSchema, TaicangTimelineId, TaicangTimelineName, TaicangTimelineDesc, "taicang-coal-power-report", "08-TimelineSlide"); t.sampleData = taicangCoalPowerReportSampleData.timeline; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangCardGridSlide, TaicangCardGridSchema, TaicangCardGridId, TaicangCardGridName, TaicangCardGridDesc, "taicang-coal-power-report", "09-CardGridSlide"); t.sampleData = taicangCoalPowerReportSampleData.cards; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangImageShowcaseSlide, TaicangImageShowcaseSchema, TaicangImageShowcaseId, TaicangImageShowcaseName, TaicangImageShowcaseDesc, "taicang-coal-power-report", "10-ImageShowcaseSlide"); t.sampleData = taicangCoalPowerReportSampleData.images; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangProcessSlide, TaicangProcessSchema, TaicangProcessId, TaicangProcessName, TaicangProcessDesc, "taicang-coal-power-report", "11-ProcessSlide"); t.sampleData = taicangCoalPowerReportSampleData.process; return t; })(),
+  (() => { const t = createTemplateEntry(TaicangClosingSlide, TaicangClosingSchema, TaicangClosingId, TaicangClosingName, TaicangClosingDesc, "taicang-coal-power-report", "12-ClosingSlide"); t.sampleData = taicangCoalPowerReportSampleData.closing; return t; })(),
 ];
 
 // TODO: Step 4: Combine all templates into a single array For UseCases (like the ones below)

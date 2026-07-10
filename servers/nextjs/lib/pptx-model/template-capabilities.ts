@@ -21,7 +21,12 @@ type ValidNativeContent = {
 export function isCoalPowerLayout(slide: SlideLike): boolean {
   const layoutGroup = typeof slide.layout_group === "string" ? slide.layout_group : "";
   const layout = typeof slide.layout === "string" ? slide.layout : "";
-  return layoutGroup === "taicang-coal-power-report" || layout.includes("coal-power-");
+  const layoutKey = layout.includes(":") ? layout.split(":").pop() ?? layout : layout;
+  return (
+    layoutGroup === "taicang-coal-power-report" &&
+    (layoutKey.startsWith("coal-power-") ||
+      layoutKey.startsWith("coal-blue-white-"))
+  );
 }
 
 export function getSlideNativeCapability(slide: SlideLike): SlideNativeCapability {

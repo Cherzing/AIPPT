@@ -36,6 +36,54 @@ const EditableLayoutWrapper: React.FC<EditableLayoutWrapperProps> = ({
     const [editableElements, setEditableElements] = useState<EditableElement[]>([]);
     const [activeEditor, setActiveEditor] = useState<EditableElement | null>(null);
 
+    const parsePath = (path: string): string[] =>
+        path.split(/[.\[\]]+/).filter(Boolean);
+
+    const getNestedValue = (data: any, path: string) => {
+        if (!path) return data;
+        return parsePath(path).reduce((current, key) => {
+            if (current === null || current === undefined) return undefined;
+            return isNaN(Number(key)) ? current[key] : current[Number(key)];
+        }, data);
+    };
+
+    const getExplicitEditableData = (
+        element: HTMLImageElement | SVGElement,
+        fallbackSrc: string,
+    ): { path: string; type: 'image' | 'icon'; data: any } | null => {
+        const htmlElement = element as HTMLElement;
+        const explicitPath = htmlElement.getAttribute('data-edit-path');
+        const explicitType = htmlElement.getAttribute('data-edit-type');
+        if (!explicitPath || (explicitType !== 'image' && explicitType !== 'icon')) {
+            return null;
+        }
+
+        const existingData = getNestedValue(slideData, explicitPath);
+        if (existingData && typeof existingData === 'object') {
+            return { path: explicitPath, type: explicitType, data: existingData };
+        }
+
+        if (explicitType === 'image') {
+            return {
+                path: explicitPath,
+                type: 'image',
+                data: {
+                    __image_url__: fallbackSrc,
+                    __image_prompt__: htmlElement.getAttribute('data-edit-prompt') || '',
+                },
+            };
+        }
+
+        return {
+            path: explicitPath,
+            type: 'icon',
+            data: {
+                __icon_url__: fallbackSrc,
+                __icon_query__: htmlElement.getAttribute('data-edit-query') || '',
+            },
+        };
+    };
+
     /**
      * Recursively searches for ALL image/icon data paths in the slide data structure
      */
@@ -75,6 +123,9 @@ const EditableLayoutWrapper: React.FC<EditableLayoutWrapperProps> = ({
      * Finds the best matching data path for a specific DOM element
      */
     const findBestDataPath = (targetUrl: string, imgElement: HTMLImageElement | SVGElement, data: any): { path: string; type: 'image' | 'icon'; data: any } | null => {
+        const explicitData = getExplicitEditableData(imgElement, targetUrl);
+        if (explicitData) return explicitData;
+
         const allMatches = findAllDataPaths(targetUrl, data);
 
         if (allMatches.length === 0) return null;
