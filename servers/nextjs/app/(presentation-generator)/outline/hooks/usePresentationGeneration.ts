@@ -8,6 +8,7 @@ import { LoadingState, TABS } from "../types/index";
 import { TemplateLayoutsWithSettings } from "@/app/presentation-templates/utils";
 import { getCustomTemplateDetails } from "@/app/hooks/useCustomTemplates";
 import { MixpanelEvent, trackEvent } from "@/utils/mixpanel";
+import { buildPresentationEditorHref } from "../../utils/presentationRoute";
 
 const DEFAULT_LOADING_STATE: LoadingState = {
   message: "",
@@ -183,7 +184,11 @@ export const usePresentationGeneration = (
         dispatch(clearPresentationData());
         clearTheme();
         router.replace(
-          `/presentation?id=${presentationId}&stream=true&type=standard`
+          buildPresentationEditorHref({
+            presentationId: presentationId ?? "",
+            templateType: selectedTemplateId,
+            stream: true,
+          })
         );
       }
     } catch (error: any) {

@@ -6,6 +6,11 @@ export type AipptNativeFidelity = "A" | "B" | "C" | "D";
 export type AipptNativeSourceRenderer =
   | "native"
   | "coal-power-builder"
+  | "general-template-builder"
+  | "modern-template-builder"
+  | "standard-template-builder"
+  | "swift-template-builder"
+  | "built-in-template-builder"
   | "legacy-template-converter"
   | "ppt-importer"
   | "manual-template-authoring";

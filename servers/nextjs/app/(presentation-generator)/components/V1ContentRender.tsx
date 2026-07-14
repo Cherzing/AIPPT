@@ -14,6 +14,31 @@ import {
     isCoalPowerLayout,
     repairCoalPowerAipptSlideDocument,
 } from "@/lib/pptx-model/coal-power-template";
+import {
+    getGeneralStoredDocumentCandidate,
+    isGeneralLayout,
+    repairGeneralAipptSlideDocument,
+} from "@/lib/pptx-model/general-template";
+import {
+    getModernStoredDocumentCandidate,
+    isModernLayout,
+    repairModernAipptSlideDocument,
+} from "@/lib/pptx-model/modern-template";
+import {
+    getStandardStoredDocumentCandidate,
+    isStandardLayout,
+    repairStandardAipptSlideDocument,
+} from "@/lib/pptx-model/standard-template";
+import {
+    getSwiftStoredDocumentCandidate,
+    isSwiftLayout,
+    repairSwiftAipptSlideDocument,
+} from "@/lib/pptx-model/swift-template";
+import {
+    getBuiltInTemplateStoredDocumentCandidate,
+    isBuiltInTemplateLayout,
+    repairBuiltInTemplateAipptSlideDocument,
+} from "@/lib/pptx-model/built-in-template";
 import { updateSlide, updateSlideContent } from "@/store/slices/presentationGeneration";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react";
@@ -130,6 +155,86 @@ export const V1ContentRender = ({
         storedAipptDocument,
     ]);
 
+    const generalStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isGeneralLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getGeneralStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
+    const modernStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isModernLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getModernStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
+    const standardStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isStandardLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getStandardStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
+    const swiftStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isSwiftLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getSwiftStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
+    const builtInTemplateStoredDocument = useMemo(() => {
+        if (storedAipptDocument) return storedAipptDocument;
+        if (!isBuiltInTemplateLayout({
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+        })) {
+            return null;
+        }
+        return getBuiltInTemplateStoredDocumentCandidate(slideContent.__aippt);
+    }, [
+        slideContent.__aippt,
+        slideLayout,
+        slideLayoutGroup,
+        storedAipptDocument,
+    ]);
+
     const legacyOverlayDocument = useMemo(() => {
         if (
             storedAipptValidation.valid &&
@@ -206,8 +311,103 @@ export const V1ContentRender = ({
         ],
     );
 
+    const repairedGeneralDocument = useMemo(
+        () =>
+            repairGeneralAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, generalStoredDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            generalStoredDocument,
+        ],
+    );
+
+    const repairedModernDocument = useMemo(
+        () =>
+            repairModernAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, modernStoredDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            modernStoredDocument,
+        ],
+    );
+
+    const repairedStandardDocument = useMemo(
+        () =>
+            repairStandardAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, standardStoredDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            standardStoredDocument,
+        ],
+    );
+
+    const repairedSwiftDocument = useMemo(
+        () =>
+            repairSwiftAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, swiftStoredDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            swiftStoredDocument,
+        ],
+    );
+
+    const repairedBuiltInTemplateDocument = useMemo(
+        () =>
+            repairBuiltInTemplateAipptSlideDocument({
+            id: safeSlide.id,
+            index: safeSlide.index,
+            layout: slideLayout,
+            layout_group: slideLayoutGroup,
+            content: slideContent,
+        }, builtInTemplateStoredDocument),
+        [
+            safeSlide.id,
+            safeSlide.index,
+            slideLayout,
+            slideLayoutGroup,
+            slideContent,
+            builtInTemplateStoredDocument,
+        ],
+    );
+
     const aipptDocument =
-        repairedCoalPowerDocument ?? storedAipptDocument;
+        repairedCoalPowerDocument ?? repairedGeneralDocument ?? repairedModernDocument ?? repairedStandardDocument ?? repairedSwiftDocument ?? repairedBuiltInTemplateDocument ?? storedAipptDocument;
     const fidelityLevel = aipptDocument?.meta?.fidelity ?? capability.level;
 
     const customTemplateId = slideLayoutGroup.startsWith("custom-") ? slideLayoutGroup.split("custom-")[1] : slideLayoutGroup;

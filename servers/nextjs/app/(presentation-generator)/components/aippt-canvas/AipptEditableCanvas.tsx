@@ -80,6 +80,13 @@ type InsertTool =
   | "video"
   | "audio";
 
+type ImageClickState = {
+  elementId: string;
+  startX: number;
+  startY: number;
+  moved: boolean;
+};
+
 type ShapePreset = {
   shape: AipptShapeElement["shape"];
   label: string;
@@ -128,6 +135,8 @@ const LINE_PRESETS: LinePreset[] = [
   { lineType: "cubic", label: "自由曲线", path: "M 10 75 C 35 5 60 95 90 25", endArrowType: "triangle" },
 ];
 
+const IMAGE_CLICK_DELAY_MS = 500;
+const IMAGE_CLICK_DRAG_THRESHOLD_PX = 4;
 const STRAIGHT_LINE_PRESETS = LINE_PRESETS.slice(0, 5);
 const BENT_LINE_PRESETS = LINE_PRESETS.slice(5);
 
@@ -351,6 +360,9 @@ export default function AipptEditableCanvas({
 }) {
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const dragRef = useRef<DragState | null>(null);
+  const imageClickStateRef = useRef<ImageClickState | null>(null);
+  const imageEditorOpenTimerRef = useRef<number | null>(null);
+  const pendingImageEditorElementIdRef = useRef<string | null>(null);
   const textEditorRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const pendingMediaToolRef = useRef<"image" | "video" | "audio" | null>(null);
@@ -372,6 +384,7 @@ export default function AipptEditableCanvas({
     cellIndex: number;
   } | null>(null);
   const [imageEditorElementId, setImageEditorElementId] = useState<string | null>(null);
+  const [imageDesignPanelSuppressedId, setImageDesignPanelSuppressedId] = useState<string | null>(null);
   const [selectedShape, setSelectedShape] = useState<AipptShapeElement["shape"]>("roundRect");
   const [selectedLinePreset, setSelectedLinePreset] = useState<LinePreset>(LINE_PRESETS[0]);
   const selectedElement = useMemo(
@@ -391,11 +404,14 @@ export default function AipptEditableCanvas({
   const selectedIndex = selectedId
     ? document.elements.findIndex((element) => element.id === selectedId)
     : -1;
+  const shouldShowDesignPanel =
+    Boolean(selectedElement) &&
+    !(selectedElement?.type === "image" && selectedElement.id === imageDesignPanelSuppressedId);
 
   useEffect(() => {
-    onInspectorChange?.(Boolean(selectedElement));
+    onInspectorChange?.(shouldShowDesignPanel);
     return () => onInspectorChange?.(false);
-  }, [onInspectorChange, selectedElement]);
+  }, [onInspectorChange, shouldShowDesignPanel]);
 
   const getScale = useCallback(() => {
     if (!canvasRef.current) return 1;
@@ -420,6 +436,31 @@ export default function AipptEditableCanvas({
     [onChange],
   );
 
+  const cancelPendingImageEditorOpen = () => {
+    if (imageEditorOpenTimerRef.current === null) return;
+    window.clearTimeout(imageEditorOpenTimerRef.current);
+    imageEditorOpenTimerRef.current = null;
+    pendingImageEditorElementIdRef.current = null;
+  };
+
+  const scheduleImageEditorOpen = (
+    elementId: string,
+  ) => {
+    cancelPendingImageEditorOpen();
+    pendingImageEditorElementIdRef.current = elementId;
+    imageEditorOpenTimerRef.current = window.setTimeout(() => {
+      setSelectedId(elementId);
+      setEditingTextId(null);
+      setEditingTableCell(null);
+      setImageEditorElementId(elementId);
+      setImageDesignPanelSuppressedId(null);
+      imageEditorOpenTimerRef.current = null;
+      pendingImageEditorElementIdRef.current = null;
+    }, IMAGE_CLICK_DELAY_MS);
+  };
+
+  useEffect(() => () => cancelPendingImageEditorOpen(), []);
+
   useEffect(() => {
     if (selectedElement?.type !== "text" || editingTextId !== selectedElement.id) return;
     const frame = window.requestAnimationFrame(() => {
@@ -433,6 +474,19 @@ export default function AipptEditableCanvas({
     const onMouseMove = (event: MouseEvent) => {
       const drag = dragRef.current;
       if (!drag) return;
+      const imageClickState = imageClickStateRef.current;
+      if (imageClickState?.elementId === drag.id) {
+        const distance = Math.hypot(
+          event.clientX - imageClickState.startX,
+          event.clientY - imageClickState.startY,
+        );
+        if (distance > IMAGE_CLICK_DRAG_THRESHOLD_PX) {
+          imageClickState.moved = true;
+          setImageDesignPanelSuppressedId((current) =>
+            current === imageClickState.elementId ? null : current,
+          );
+        }
+      }
       const dx = (event.clientX - drag.startX) / drag.scale;
       const dy = (event.clientY - drag.startY) / drag.scale;
 
@@ -480,8 +534,29 @@ export default function AipptEditableCanvas({
     };
 
     const onMouseUp = () => {
+      const drag = dragRef.current;
+      let imageElementIdToOpen: string | null = null;
+      if (drag?.type === "move" && drag.original.type === "image") {
+        const clickState = imageClickStateRef.current;
+        imageClickStateRef.current = null;
+        if (clickState && clickState.elementId === drag.id) {
+          if (!clickState || clickState.moved) {
+            imageElementIdToOpen = null;
+            setImageDesignPanelSuppressedId((current) =>
+              current === clickState.elementId ? null : current,
+            );
+          } else {
+            imageElementIdToOpen = drag.id;
+          }
+        }
+      } else {
+        imageClickStateRef.current = null;
+      }
       dragRef.current = null;
       setIsDragging(false);
+      if (imageElementIdToOpen) {
+        scheduleImageEditorOpen(imageElementIdToOpen);
+      }
     };
 
     window.addEventListener("mousemove", onMouseMove);
@@ -563,6 +638,53 @@ export default function AipptEditableCanvas({
     setIsDragging(true);
   };
 
+  const onImageMouseDown = (
+    event: React.MouseEvent<HTMLElement>,
+    element: AipptImageElement,
+  ) => {
+    const isSecondClickOnPendingImage =
+      pendingImageEditorElementIdRef.current === element.id;
+    cancelPendingImageEditorOpen();
+    setImageEditorElementId(null);
+    if (event.detail >= 2 || isSecondClickOnPendingImage) {
+      event.preventDefault();
+      event.stopPropagation();
+      imageClickStateRef.current = null;
+      dragRef.current = null;
+      setIsDragging(false);
+      setImageDesignPanelSuppressedId(null);
+      setSelectedId(element.id);
+      setEditingTextId(null);
+      setEditingTableCell(null);
+      return;
+    }
+    imageClickStateRef.current = {
+      elementId: element.id,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false,
+    };
+    setImageDesignPanelSuppressedId(element.id);
+    startElementDrag(event, element);
+  };
+
+  const onImageDoubleClick = (
+    event: React.MouseEvent<HTMLElement>,
+    element: AipptImageElement,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    cancelPendingImageEditorOpen();
+    imageClickStateRef.current = null;
+    dragRef.current = null;
+    setIsDragging(false);
+    setSelectedId(element.id);
+    setEditingTextId(null);
+    setEditingTableCell(null);
+    setImageEditorElementId(null);
+    setImageDesignPanelSuppressedId(null);
+  };
+
   const onCanvasMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     if (activeTool) {
@@ -576,13 +698,30 @@ export default function AipptEditableCanvas({
     const elementNode = target.closest("[data-aippt-element-id]") as HTMLElement | null;
     const id = elementNode?.dataset.aipptElementId;
     if (!id) {
+      cancelPendingImageEditorOpen();
+      setImageDesignPanelSuppressedId(null);
       setSelectedId(null);
       setEditingTextId(null);
       return;
     }
     const element = findElement(document.elements, id);
     if (!element || element.locked) return;
+    if (element.type === "image") {
+      onImageMouseDown(event, element);
+      return;
+    }
     startElementDrag(event, element);
+  };
+
+  const onCanvasDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    const elementNode = target.closest("[data-aippt-element-id]") as HTMLElement | null;
+    const id = elementNode?.dataset.aipptElementId;
+    if (!id) return;
+    const element = findElement(document.elements, id);
+    if (element?.type === "image") {
+      onImageDoubleClick(event, element);
+    }
   };
 
   const onTableEditorMouseDown = (
@@ -1354,6 +1493,7 @@ export default function AipptEditableCanvas({
         className="relative z-10"
         style={{ pointerEvents: backgroundLayer && !activeTool ? "none" : undefined }}
         onMouseDown={onCanvasMouseDown}
+        onDoubleClick={onCanvasDoubleClick}
       >
         <AipptSlideCanvas
           document={document}
@@ -1554,7 +1694,7 @@ export default function AipptEditableCanvas({
             </>
           );
         })()}
-      {selectedElement && (
+      {shouldShowDesignPanel && selectedElement && (
         <>
           <style>
             {`@keyframes aipptDesignPanelIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}`}

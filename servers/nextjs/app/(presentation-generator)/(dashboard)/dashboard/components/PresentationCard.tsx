@@ -7,6 +7,7 @@ import { AlertTriangle, CalendarDays, EllipsisVertical, Loader2, Trash, UserRoun
 import { DashboardApi } from "@/app/(presentation-generator)/services/api/dashboard";
 import SlideScale from "@/app/(presentation-generator)/components/PresentationRender";
 import { useFontLoader } from "@/app/(presentation-generator)/hooks/useFontLoad";
+import { buildPresentationEditorHref } from "@/app/(presentation-generator)/utils/presentationRoute";
 import MarkdownRenderer from "@/components/MarkDownRender";
 import { notify } from "@/components/ui/sonner";
 import {
@@ -40,7 +41,12 @@ export const PresentationCard = ({
       title_length: (title || "").length,
       slide_count: presentation?.slides?.length || 0,
     });
-    router.push(`/presentation?id=${id}&type=standard`);
+    router.push(
+      buildPresentationEditorHref({
+        presentationId: id,
+        presentation,
+      })
+    );
   };
 
   useEffect(() => {

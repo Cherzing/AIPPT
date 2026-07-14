@@ -285,6 +285,879 @@ test("converts blue-white coal layouts into editable AIPPT elements", async () =
   assert.ok(tableDocument.elements.some((element) => element.type === "table"));
 });
 
+test("converts general layouts into high-fidelity editable AIPPT elements", async () => {
+  const { buildGeneralAipptSlideDocument } = await importModule(
+    "lib/pptx-model/general-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const layouts = [
+    "general-intro-slide",
+    "basic-info-slide",
+    "bullet-icons-only-slide",
+    "bullet-with-icons-slide",
+    "chart-with-bullets-slide",
+    "metrics-slide",
+    "metrics-with-image-slide",
+    "numbered-bullets-slide",
+    "quote-slide",
+    "table-info-slide",
+    "table-of-contents-slide",
+    "team-slide",
+  ];
+
+  for (const [index, layout] of layouts.entries()) {
+    const document = buildGeneralAipptSlideDocument({
+      id: `general-${index}`,
+      index,
+      layout_group: "general",
+      layout: `general:${layout}`,
+      content: {
+        title: "Editable general title",
+        heading: "Editable quote heading",
+        description: "Editable description text for the general native template.",
+        presenterName: "Jane Doe",
+        presentationDate: "July 2026",
+        quote: "Editable quotation text that remains selectable.",
+        author: "Author Name",
+        image: { __image_url__: "/image.png", __image_prompt__: "image prompt" },
+        backgroundImage: { __image_url__: "/background.png", __image_prompt__: "background prompt" },
+        bulletPoints: [
+          {
+            title: "Editable point",
+            subtitle: "Editable subtitle",
+            description: "Editable point description.",
+            icon: { __icon_url__: "/static/icons/bold/checks-bold.svg", __icon_query__: "check" },
+          },
+          {
+            title: "Second point",
+            subtitle: "Second subtitle",
+            description: "Second point description.",
+            icon: { __icon_url__: "/static/icons/bold/code-bold.svg", __icon_query__: "code" },
+          },
+        ],
+        metrics: [
+          { label: "Clients", value: "200+", description: "Editable metric description." },
+          { label: "Growth", value: "35%", description: "Second metric description." },
+        ],
+        chartData: {
+          type: "bar",
+          data: [
+            { name: "Q1", value: 12 },
+            { name: "Q2", value: 18 },
+            { name: "Q3", value: 24 },
+          ],
+        },
+        tableData: {
+          headers: ["Company", "Revenue", "Growth"],
+          rows: [
+            ["A", "$2M", "15%"],
+            ["B", "$3M", "20%"],
+          ],
+        },
+        sections: [
+          { number: 1, title: "Problem", pageNumber: "03" },
+          { number: 2, title: "Solution", pageNumber: "04" },
+        ],
+        companyDescription: "Editable company description.",
+        teamMembers: [
+          {
+            name: "Alex Chen",
+            position: "CEO",
+            description: "Editable team member description.",
+            image: { __image_url__: "/alex.png", __image_prompt__: "headshot" },
+          },
+          {
+            name: "Sam Lee",
+            position: "CTO",
+            description: "Editable team member description.",
+            image: { __image_url__: "/sam.png", __image_prompt__: "headshot" },
+          },
+        ],
+      },
+    });
+
+    assert.equal(document.width, 1280);
+    assert.equal(document.height, 720);
+    assert.ok(document.elements.length > 0);
+    assert.equal(validateNativeSlideDocument(document).valid, true);
+    assert.equal(document.meta.sourceRenderer, "general-template-builder");
+    assert.equal(document.meta.sourceTemplate, "general");
+    assert.equal(document.meta.fidelity, "A");
+  }
+
+  const imageDocument = buildGeneralAipptSlideDocument({
+    id: "general-image",
+    layout_group: "general",
+    layout: "general:metrics-with-image-slide",
+    content: {
+      title: "Image slide",
+      description: "Description",
+      image: { __image_url__: "/editable-image.png", __image_prompt__: "editable image" },
+      metrics: [{ label: "Metric", value: "100" }],
+    },
+  });
+  assert.ok(imageDocument.elements.some((element) => element.type === "image" && element.id === "main-image"));
+
+  const chartDocument = buildGeneralAipptSlideDocument({
+    id: "general-chart",
+    layout_group: "general",
+    layout: "general:chart-with-bullets-slide",
+    content: {
+      title: "Chart slide",
+      description: "Description",
+      chartData: {
+        type: "bar",
+        data: [
+          { name: "A", value: 1 },
+          { name: "B", value: 2 },
+        ],
+      },
+      bulletPoints: [{ title: "Point", description: "Description", icon: {} }],
+    },
+  });
+  assert.ok(chartDocument.elements.some((element) => element.type === "chart"));
+
+  const tableDocument = buildGeneralAipptSlideDocument({
+    id: "general-table",
+    layout_group: "general",
+    layout: "general:table-info-slide",
+    content: {
+      title: "Table slide",
+      description: "Description",
+      tableData: {
+        headers: ["A", "B"],
+        rows: [["1", "2"]],
+      },
+    },
+  });
+  assert.ok(tableDocument.elements.some((element) => element.type === "table"));
+});
+
+test("converts modern layouts into high-fidelity editable AIPPT elements", async () => {
+  const { buildModernAipptSlideDocument } = await importModule(
+    "lib/pptx-model/modern-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const layouts = [
+    "intro-pitchdeck-slide",
+    "bullet-with-icons-description-grid",
+    "bullet-with-icons",
+    "chart-or-table-with-description",
+    "chart-with-metrics",
+    "image-and-description",
+    "image-list-with-description",
+    "images-with-description",
+    "metrics-with-description-image",
+    "table-of-contents",
+  ];
+
+  for (const [index, layout] of layouts.entries()) {
+    const document = buildModernAipptSlideDocument({
+      id: `modern-${index}`,
+      index,
+      layout_group: "modern",
+      layout: `modern:${layout}`,
+      content: {
+        title: "Editable modern title",
+        description: "Editable description text for the modern native template.",
+        introCard: { enabled: true, name: "Jane Doe", date: "July 2026" },
+        image: { __image_url__: "/image.png", __image_prompt__: "image prompt" },
+        mapImage: { __image_url__: "/map.png", __image_prompt__: "map prompt" },
+        content: "Editable content paragraph for the image-and-description layout.",
+        mainDescription: "Editable main description for the icon grid layout.",
+        subtitle: "Editable subtitle",
+        problemCategories: [
+          {
+            title: "Inefficiency",
+            description: "Businesses struggle with fragmented processes.",
+            icon: { __icon_url__: "/static/icons/bold/checks-bold.svg", __icon_query__: "check" },
+          },
+          {
+            title: "High Costs",
+            description: "Legacy systems increase operating costs.",
+            icon: { __icon_url__: "/static/icons/bold/video-bold.svg", __icon_query__: "cost" },
+          },
+        ],
+        sections: [
+          {
+            title: "Market",
+            description: "Data-driven market positioning.",
+            icon: { __icon_url__: "/static/icons/bold/checks-bold.svg", __icon_query__: "market" },
+          },
+          {
+            title: "Industry",
+            description: "Operational improvements at scale.",
+            icon: { __icon_url__: "/static/icons/bold/video-bold.svg", __icon_query__: "industry" },
+          },
+        ],
+        mode: "chart",
+        columns: ["Column 1", "Column 2", "Column 3"],
+        rows: [{ cells: ["Row A", "Value", "123"] }],
+        chart: {
+          type: "bar",
+          data: [
+            { label: "A", value: 60 },
+            { label: "B", value: 42 },
+            { label: "C", value: 75 },
+          ],
+          showLabels: true,
+        },
+        growthStats: [
+          { year: "2022", artificialIntelligence: 10, internetOfThings: 20, others: 15 },
+          { year: "2023", artificialIntelligence: 18, internetOfThings: 28, others: 22 },
+          { year: "2024", artificialIntelligence: 26, internetOfThings: 36, others: 30 },
+        ],
+        tableMode: false,
+        tableColumns: ["Metric", "Value"],
+        tableRows: [["Users", "10K+"], ["Revenue", "$1.2M"]],
+        products: [
+          {
+            title: "Internet of Things",
+            description: "Connected devices coordinated through one platform.",
+            image: { __image_url__: "/product-1.png", __image_prompt__: "iot" },
+            isBlueBackground: true,
+          },
+          {
+            title: "Analytics Dashboard",
+            description: "Interactive dashboards for decision makers.",
+            image: { __image_url__: "/product-2.png", __image_prompt__: "dashboard" },
+            isBlueBackground: true,
+          },
+        ],
+        teamMembers: [
+          {
+            name: "Sarah Johnson",
+            description: "Strategic leader with 15 years of experience.",
+            linkedIn: "https://linkedin.com/in/sarah",
+            image: { __image_url__: "/sarah.png", __image_prompt__: "headshot" },
+          },
+          {
+            name: "Michael Chen",
+            description: "Technology expert focused on scalable systems.",
+            image: { __image_url__: "/michael.png", __image_prompt__: "headshot" },
+          },
+        ],
+        marketStats: [
+          {
+            label: "Total Available Market (TAM)",
+            value: "1.4 Billion",
+            description: "Overall addressable market size.",
+          },
+          {
+            label: "Serviceable Available Market (SAM)",
+            value: "194 Million",
+            description: "Reachable market based on product fit.",
+          },
+        ],
+        items: [
+          { title: "Section 1", description: "Brief description for this section." },
+          { title: "Section 2", description: "Brief description for this section." },
+        ],
+      },
+    });
+
+    assert.equal(document.width, 1280);
+    assert.equal(document.height, 720);
+    assert.ok(document.elements.length > 0);
+    assert.equal(validateNativeSlideDocument(document).valid, true);
+    assert.equal(document.meta.sourceRenderer, "modern-template-builder");
+    assert.equal(document.meta.sourceTemplate, "modern");
+    assert.equal(document.meta.fidelity, "A");
+  }
+
+  const imageDocument = buildModernAipptSlideDocument({
+    id: "modern-image",
+    layout_group: "modern",
+    layout: "modern:image-and-description",
+    content: {
+      title: "Image slide",
+      content: "Description",
+      image: { __image_url__: "/editable-image.png", __image_prompt__: "editable image" },
+    },
+  });
+  assert.ok(imageDocument.elements.some((element) => element.type === "image" && element.id === "main-image"));
+
+  const chartDocument = buildModernAipptSlideDocument({
+    id: "modern-chart",
+    layout_group: "modern",
+    layout: "modern:chart-or-table-with-description",
+    content: {
+      title: "Chart slide",
+      description: "Description",
+      mode: "chart",
+      chart: {
+        type: "bar",
+        data: [
+          { label: "A", value: 1 },
+          { label: "B", value: 2 },
+        ],
+        showLabels: true,
+      },
+    },
+  });
+  assert.ok(chartDocument.elements.some((element) => element.type === "chart"));
+
+  const tableDocument = buildModernAipptSlideDocument({
+    id: "modern-table",
+    layout_group: "modern",
+    layout: "modern:chart-or-table-with-description",
+    content: {
+      title: "Table slide",
+      description: "Description",
+      mode: "table",
+      columns: ["A", "B"],
+      rows: [{ cells: ["1", "2"] }],
+    },
+  });
+  assert.ok(tableDocument.elements.some((element) => element.type === "table"));
+});
+
+test("converts standard layouts into high-fidelity editable AIPPT elements", async () => {
+  const { buildStandardAipptSlideDocument } = await importModule(
+    "lib/pptx-model/standard-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const layouts = [
+    "header-counter-two-column-image-text-slide",
+    "chart-left-text-right-layout",
+    "ContactLayout",
+    "HeadingBulletImageDescriptionLayout",
+    "IconBulletDescriptionLayout",
+    "IconImageDescriptionLayout",
+    "ImageListWithDescriptionLayout",
+    "MetricsDescriptionLayout",
+    "NumberedBulletSingleImageLayout",
+    "TableOfContentsLayout",
+    "VisualMetricsSlideLayout",
+  ];
+
+  for (const [index, layout] of layouts.entries()) {
+    const document = buildStandardAipptSlideDocument({
+      id: `standard-${index}`,
+      index,
+      layout_group: "standard",
+      layout: `standard:${layout}`,
+      content: {
+        title: "Editable standard title",
+        titleBreakAfter: 8,
+        paragraph: "Editable paragraph text for the standard native template.",
+        description: "Editable description text for a standard slide.",
+        heading: "Editable heading",
+        header: { counter: String(index + 1) },
+        media: {
+          type: "image",
+          image: { __image_url__: "/media.png", __image_prompt__: "media prompt" },
+        },
+        image: { __image_url__: "/image.png", __image_prompt__: "image prompt" },
+        introCard: {
+          enabled: true,
+          initials: "JD",
+          name: "Jane Doe",
+          date: "July 2026",
+        },
+        chart: {
+          type: "line",
+          data: [
+            { label: "A", value: 60 },
+            { label: "B", value: 42 },
+            { label: "C", value: 75 },
+          ],
+          showLabels: true,
+        },
+        bulletPoints: [
+          {
+            title: "Editable point",
+            description: "Editable point description.",
+            icon: { __icon_url__: "/static/icons/regular/checks.svg", __icon_query__: "check" },
+          },
+          {
+            title: "Second point",
+            description: "Second point description.",
+            icon: { __icon_url__: "/static/icons/regular/code.svg", __icon_query__: "code" },
+          },
+        ],
+        items: [
+          { title: "Section one", description: "Section one description." },
+          { title: "Section two", description: "Section two description." },
+        ],
+        metrics: [
+          { label: "Clients", value: "200+", description: "Editable metric description." },
+          { label: "Growth", value: "35%", description: "Second metric description." },
+        ],
+        contact: {
+          email: "hello@example.com",
+          website: "example.com",
+        },
+      },
+    });
+
+    assert.equal(document.width, 1280);
+    assert.equal(document.height, 720);
+    assert.ok(document.elements.length > 0);
+    assert.equal(validateNativeSlideDocument(document).valid, true);
+    assert.equal(document.meta.sourceRenderer, "standard-template-builder");
+    assert.equal(document.meta.sourceTemplate, "standard");
+    assert.equal(document.meta.fidelity, "A");
+  }
+
+  const imageDocument = buildStandardAipptSlideDocument({
+    id: "standard-image",
+    layout_group: "standard",
+    layout: "standard:IconImageDescriptionLayout",
+    content: {
+      title: "Image slide",
+      description: "Description",
+      image: { __image_url__: "/editable-image.png", __image_prompt__: "editable image" },
+    },
+  });
+  assert.ok(imageDocument.elements.some((element) => element.type === "image"));
+
+  const chartDocument = buildStandardAipptSlideDocument({
+    id: "standard-chart",
+    layout_group: "standard",
+    layout: "standard:chart-left-text-right-layout",
+    content: {
+      title: "Chart slide",
+      paragraph: "Description",
+      chart: {
+        type: "bar",
+        data: [
+          { label: "A", value: 1 },
+          { label: "B", value: 2 },
+        ],
+      },
+    },
+  });
+  assert.ok(chartDocument.elements.some((element) => element.type === "chart"));
+});
+
+test("converts swift layouts into high-fidelity editable AIPPT elements", async () => {
+  const { buildSwiftAipptSlideDocument } = await importModule(
+    "lib/pptx-model/swift-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const layouts = [
+    "IntroSlideLayout",
+    "bullet-with-icons-title-description",
+    "icon-bullet-list-description-slide",
+    "image-list-description-slide",
+    "MetricsNumbers",
+    "SwiftTableOfContents",
+    "simple-bullet-points-layout",
+    "tableorChart",
+    "Timeline",
+  ];
+
+  for (const [index, layout] of layouts.entries()) {
+    const document = buildSwiftAipptSlideDocument({
+      id: `swift-${index}`,
+      index,
+      layout_group: "swift",
+      layout: `swift:${layout}`,
+      content: {
+        title: "Editable swift title",
+        subtitlePrefix: "Presentation",
+        subtitleAccent: "Template",
+        subtitle: "Editable subtitle text for the swift timeline template.",
+        paragraph: "Editable paragraph text for the swift native template.",
+        description: "Editable description text for a swift slide.",
+        statement: "Editable statement text for the swift bullet layout.",
+        sideHeading: "Editable side heading",
+        sideParagraph: "Editable side paragraph for the swift icon layout.",
+        titleLine1: "Meet Our",
+        titleLine2: "Team",
+        leftTitle: "Proven Results\nThrough Data",
+        leftBody: "Editable body text for the metrics layout.",
+        website: "www.example.com",
+        introCard: { enabled: true, name: "Jane Doe", date: "July 2026" },
+        media: {
+          type: "image",
+          image: { __image_url__: "/media.png", __image_prompt__: "media prompt" },
+        },
+        image: { __image_url__: "/image.png", __image_prompt__: "image prompt" },
+        items: [
+          {
+            title: "Editable item",
+            description: "Editable item description.",
+            year: "2026",
+            heading: "Editable milestone",
+            body: "Editable milestone body.",
+            icon: { __icon_url__: "/static/icons/bold/checks-bold.svg", __icon_query__: "check" },
+            image: { __image_url__: "/item.png", __image_prompt__: "item image" },
+          },
+          {
+            title: "Second item",
+            description: "Second item description.",
+            year: "2027",
+            heading: "Second milestone",
+            body: "Second milestone body.",
+            icon: { __icon_url__: "/static/icons/bold/user-bold.svg", __icon_query__: "user" },
+            image: { __image_url__: "/item-2.png", __image_prompt__: "item image" },
+          },
+        ],
+        features: [
+          {
+            title: "Customizable Workflows",
+            body: "Editable feature body.",
+            icon: { __icon_url__: "/static/icons/bold/file-text-bold.svg", __icon_query__: "file" },
+          },
+          {
+            title: "Detailed Reports",
+            body: "Second feature body.",
+            icon: { __icon_url__: "/static/icons/bold/checks-bold.svg", __icon_query__: "check" },
+          },
+        ],
+        points: [
+          { title: "First point", body: "Editable point body for the swift bullet layout." },
+          { title: "Second point", body: "Second editable point body." },
+        ],
+        metrics: [
+          { value: "10K+", line1: "Total", line2: "Users", description: "Editable metric description." },
+          { value: "95%", line1: "Customer", line2: "Satisfaction", description: "Second metric description." },
+        ],
+        mode: "chart",
+        columns: ["Column 1", "Column 2"],
+        rows: [{ cells: ["Row A", "Value"] }],
+        chart: {
+          type: "line",
+          data: [
+            { label: "A", value: 60 },
+            { label: "B", value: 42 },
+            { label: "C", value: 75 },
+          ],
+          showLabels: true,
+        },
+      },
+    });
+
+    assert.equal(document.width, 1280);
+    assert.equal(document.height, 720);
+    assert.ok(document.elements.length > 0);
+    assert.equal(validateNativeSlideDocument(document).valid, true);
+    assert.equal(document.meta.sourceRenderer, "swift-template-builder");
+    assert.equal(document.meta.sourceTemplate, "swift");
+    assert.equal(document.meta.fidelity, "A");
+  }
+
+  const imageDocument = buildSwiftAipptSlideDocument({
+    id: "swift-image",
+    layout_group: "swift",
+    layout: "swift:IntroSlideLayout",
+    content: {
+      title: "Image slide",
+      paragraph: "Editable paragraph text.",
+      media: {
+        type: "image",
+        image: { __image_url__: "/editable-image.png", __image_prompt__: "editable image" },
+      },
+    },
+  });
+  assert.ok(imageDocument.elements.some((element) => element.type === "image"));
+
+  const chartDocument = buildSwiftAipptSlideDocument({
+    id: "swift-chart",
+    layout_group: "swift",
+    layout: "swift:tableorChart",
+    content: {
+      title: "Chart slide",
+      description: "Description",
+      mode: "chart",
+      chart: {
+        type: "bar",
+        data: [
+          { label: "A", value: 1 },
+          { label: "B", value: 2 },
+        ],
+      },
+    },
+  });
+  assert.ok(chartDocument.elements.some((element) => element.type === "chart"));
+
+  const tableDocument = buildSwiftAipptSlideDocument({
+    id: "swift-table",
+    layout_group: "swift",
+    layout: "swift:tableorChart",
+    content: {
+      title: "Table slide",
+      description: "Description",
+      mode: "table",
+      columns: ["A", "B"],
+      rows: [{ cells: ["1", "2"] }],
+    },
+  });
+  assert.ok(tableDocument.elements.some((element) => element.type === "table"));
+});
+
+test("converts remaining built-in template layouts into editable AIPPT elements", async () => {
+  const { buildBuiltInTemplateAipptSlideDocument } = await importModule(
+    "lib/pptx-model/built-in-template.ts",
+  );
+  const { validateNativeSlideDocument } = await importModule(
+    "lib/pptx-model/native-schema.ts",
+  );
+  const groups = {
+    code: [
+      "cover-slide",
+      "code-explanation-split-slide",
+      "api-request-response-slide",
+      "cards-grid-slide",
+      "table-slide",
+      "workflow-slide",
+      "bullet-list-slide",
+      "description-text-slide",
+      "table-of-content-slide",
+      "description-and-metrics-slide",
+      "metrics-grid-slide",
+      "full-code-block-slide",
+      "code-diff-comparison-slide",
+      "terminal-command-slide",
+      "file-tree-structure-slide",
+      "code-output-slide",
+    ],
+    education: [
+      "cover-slide",
+      "table-of-contents-slide",
+      "about-slide",
+      "content-split-slide",
+      "image-gallery-slide",
+      "report-chart-slide",
+      "services-split-slide",
+      "statistics-grid-slide",
+      "timeline-slide",
+      "numbered-outcome-cards-slide",
+      "module-grid-slide",
+      "agenda-timeline-slide",
+      "evaluation-matrix-slide",
+      "closing-contact-slide",
+    ],
+    "product-overview": [
+      "title-description-with-cards-text-slide",
+      "title-with-blocks-text-slide",
+      "comparison-status-table-slide",
+      "title-description-with-table-slide",
+      "cover-slide",
+      "card-grid-with-labels-slide",
+      "title-description-with-image-gallery-slide",
+      "introduction-slide",
+      "title-with-kpi-cards-slide",
+      "title-description-with-cards-slide",
+      "text-blocks-with-image-block-slide",
+      "closing-actions-contact-slide",
+      "title-description-with-image-block-slide",
+      "two-panel-contrast-metrics-slide",
+      "title-cards-list-with-text-slide",
+      "title-with-process-steps-slide",
+      "phase-timeline-cards-slide",
+      "title-description-with-chart-and-kpi-cards-slide",
+      "table-of-content-slide",
+      "segment-cards-slide",
+      "scenario-cards-slide",
+    ],
+    report: [
+      "intro-slide",
+      "section-index-slide",
+      "summary-cards-slide",
+      "title-description-image-slide",
+      "method-source-panels-slide",
+      "metrics-slide",
+      "title-image-bullet-cards-slide",
+      "milestone-slide",
+      "bullet-list-with-icon-title-description-slide",
+      "bar-chart-with-bullet-list-title-description-icon-slide",
+      "title-description-chart-slide",
+      "title-chart-metrics-cards-slide",
+      "data-analysis-dashboard-slide",
+      "finding-cards-slide",
+      "title-metrics-slide",
+      "recommendation-cards-slide",
+      "action-plan-table-slide",
+      "risk-limitation-matrix-slide",
+      "appendix-notes-slide",
+      "closing-contact-slide",
+      "horizontal-height-spanning-images-with-title-slide",
+      "title-workflow-with-title-description-slide",
+    ],
+    "pitch-deck": [
+      "centered-cover-with-footer-meta",
+      "problem-evidence-slide",
+      "value-proposition-slide",
+      "market-size-slide",
+      "product-workflow-slide",
+      "go-to-market-slide",
+      "business-model-slide",
+      "traction-metrics-slide",
+      "competitive-positioning-slide",
+      "defensibility-slide",
+      "financial-projection-slide",
+      "funding-ask-slide",
+      "team-credentials-slide",
+      "closing-contact-slide",
+      "adaptive-value-card-grid",
+      "adaptive-media-card-grid",
+      "cards-with-chart-split",
+      "full-width-statement",
+      "headline-with-detail-columns",
+      "horizontal-timeline",
+      "media-and-text-split",
+      "numbered-multi-column-overview",
+      "overlapping-circle-cards",
+      "panel-list-with-media",
+      "text-and-chart-split-layout",
+    ],
+    "neo-general": [
+      "bullet-icons-only-slide",
+      "bullet-with-icons-slide",
+      "chart-with-bullets-slide",
+      "title-challenge-outcome-customer-card",
+      "headline-description-with-image-layout",
+      "headline-description-with-double-image-layout",
+      "performance-grid-snapshot-slide",
+      "headline-text-with-stats-layout",
+      "title-three-columns-with-labels",
+      "left-align-quote",
+      "layout-text-block-with-metric-cards",
+      "metrics-with-image-slide",
+      "multi-chart-grid-slide",
+      "numbered-bullets-slide",
+      "quote-slide",
+      "team-slide",
+      "title-two-column-numbered-list",
+      "thank-you-contact-info-footer-image-slide-layout",
+      "timeline-alternating-cards-slide",
+      "title-description-multi-chart-grid-bullets",
+      "title-description-multi-chart-grid-metrics",
+      "title-description-three-columns-table",
+      "title-description-team-grid",
+      "title-with-full-width-chart",
+      "title-metricValue-metricLabel-funnelStages",
+      "title-three-column-risk-constraints-slide-layout",
+      "title-six-card-grid-slide-layout",
+      "title-metrics-with-chart",
+      "title-side-insight-slide",
+    ],
+    "neo-standard": [
+      "title-description-bullet-list",
+      "title-description-contact-cards",
+      "title-description-icon-list",
+      "title-description-image-right",
+      "title-description-multi-chart-grid",
+      "title-description-multi-chart-grid-bullets",
+      "title-description-multi-chart-grid-metrics",
+      "title-description-radial-cards",
+      "title-description-table",
+      "title-description-timeline",
+      "title-dual-charts-comparison",
+      "title-dual-comparison-cards",
+      "title-kpi-grid",
+      "title-metrics-chart",
+      "title-metrics-image",
+      "title-points-donut-grid",
+      "title-badge-chart",
+    ],
+    "neo-modern": [
+      "title-description-bullet-list",
+      "title-description-contact-list",
+      "title-description-dual-metrics-grid",
+      "title-description-icon-timeline",
+      "title-description-image-right",
+      "title-description-metrics-chart",
+      "title-description-metrics-image",
+      "title-description-multi-chart-grid",
+      "title-description-multi-chart-grid-bullets",
+      "title-description-multi-chart-grid-metrics",
+      "title-description-table",
+      "title-dual-comparison-cards",
+      "title-dual-comparison-charts",
+      "title-horizontal-alternating-timeline",
+      "title-kpi-snapshot-grid",
+      "title-subtitles-chart",
+      "title-two-column-numbered-list",
+    ],
+    "neo-swift": [
+      "title-chart-metrics-sidebar",
+      "title-centered-chart",
+      "title-description-bullet-list",
+      "title-description-three-column-table",
+      "title-description-four-charts-six-bullets",
+      "title-description-large-image-right",
+      "title-description-eight-metrics-grid",
+      "title-description-metrics-grid-large-image",
+      "title-description-six-charts-four-metrics",
+      "title-description-six-charts-grid",
+      "title-dual-comparison-blocks-numbered",
+      "title-label-description-cascading-stats",
+      "title-subtitle-four-team-member-cards",
+      "title-tagline-description-numbered-steps",
+      "title-three-by-three-metrics-grid",
+    ],
+  };
+
+  for (const [group, layouts] of Object.entries(groups)) {
+    for (const [index, layout] of layouts.entries()) {
+      const document = buildBuiltInTemplateAipptSlideDocument({
+        id: `${group}-${index}`,
+        index,
+        layout_group: group,
+        layout: `${group}:${layout}`,
+        content: {
+          title: `Editable ${group} title`,
+          subtitle: "Editable subtitle",
+          description: "Editable description text for the native template.",
+          paragraph: "Editable paragraph text.",
+          image: { __image_url__: "/image.png", __image_prompt__: "image prompt" },
+          media: {
+            type: "image",
+            image: { __image_url__: "/media.png", __image_prompt__: "media prompt" },
+          },
+          items: [
+            { title: "Editable item", description: "Editable item description.", value: "42%" },
+            { title: "Second item", description: "Second editable item.", value: "18" },
+          ],
+          cards: [
+            { title: "Editable card", description: "Editable card description.", value: "A" },
+            { title: "Second card", description: "Second card description.", value: "B" },
+          ],
+          metrics: [
+            { value: "42%", label: "Editable metric" },
+            { value: "18", label: "Editable count" },
+          ],
+          steps: [
+            { title: "Step one", description: "Editable step description." },
+            { title: "Step two", description: "Second step description." },
+          ],
+          columns: ["A", "B"],
+          rows: [["1", "2"]],
+          chart: {
+            type: "bar",
+            data: [
+              { label: "A", value: 1 },
+              { label: "B", value: 2 },
+            ],
+          },
+        },
+      });
+
+      assert.equal(document.width, 1280);
+      assert.equal(document.height, 720);
+      assert.equal(validateNativeSlideDocument(document).valid, true);
+      assert.equal(document.meta.sourceRenderer, "built-in-template-builder");
+      assert.equal(document.meta.sourceTemplate, group);
+      assert.equal(document.meta.sourceLayout, layout);
+      assert.equal(document.meta.fidelity, "A");
+      assert.ok(document.elements.some((element) => element.type === "text"));
+      assert.ok(document.elements.some((element) => element.type === "image"));
+    }
+  }
+});
+
 test("exports converted coal-power model slides with template background assets", async () => {
   const { buildCoalPowerAipptSlideDocument } = await importModule(
     "lib/pptx-model/coal-power-template.ts",

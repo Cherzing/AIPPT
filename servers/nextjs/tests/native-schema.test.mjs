@@ -30,6 +30,10 @@ async function loadCapabilities() {
       "./template-inventory",
       await readFile(new URL("../lib/pptx-model/template-inventory.ts", import.meta.url), "utf8"),
     ],
+    [
+      "./built-in-template",
+      await readFile(new URL("../lib/pptx-model/built-in-template.ts", import.meta.url), "utf8"),
+    ],
   ]);
   const cache = new Map();
 

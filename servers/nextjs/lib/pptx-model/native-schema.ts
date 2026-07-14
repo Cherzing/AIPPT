@@ -8,6 +8,11 @@ const FIDELITY = new Set(["A", "B", "C", "D"]);
 const SOURCE = new Set([
   "native",
   "coal-power-builder",
+  "general-template-builder",
+  "modern-template-builder",
+  "standard-template-builder",
+  "swift-template-builder",
+  "built-in-template-builder",
   "legacy-template-converter",
   "ppt-importer",
   "manual-template-authoring",

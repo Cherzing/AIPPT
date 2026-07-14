@@ -81,3 +81,73 @@ test("V1 content render routes coal templates through AIPPT canvas before Tiptap
     "coal templates should build native documents before the Tiptap fallback is reached",
   );
 });
+
+test("V1 content render routes general templates through AIPPT canvas before Tiptap fallback", () => {
+  const generalRepairIndex = source.indexOf("repairGeneralAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(generalRepairIndex, -1, "general template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    generalRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "general templates should build native documents before the Tiptap fallback is reached",
+  );
+});
+
+test("V1 content render routes modern templates through AIPPT canvas before Tiptap fallback", () => {
+  const modernRepairIndex = source.indexOf("repairModernAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(modernRepairIndex, -1, "modern template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    modernRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "modern templates should build native documents before the Tiptap fallback is reached",
+  );
+});
+
+test("V1 content render routes standard templates through AIPPT canvas before Tiptap fallback", () => {
+  const standardRepairIndex = source.indexOf("repairStandardAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(standardRepairIndex, -1, "standard template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    standardRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "standard templates should build native documents before the Tiptap fallback is reached",
+  );
+});
+
+test("V1 content render routes swift templates through AIPPT canvas before Tiptap fallback", () => {
+  const swiftRepairIndex = source.indexOf("repairSwiftAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(swiftRepairIndex, -1, "swift template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    swiftRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "swift templates should build native documents before the Tiptap fallback is reached",
+  );
+});
+
+test("V1 content render routes remaining built-in templates through AIPPT canvas before Tiptap fallback", () => {
+  const builtInRepairIndex = source.indexOf("repairBuiltInTemplateAipptSlideDocument");
+  const aipptBranchIndex = source.indexOf("if (aipptDocument) {");
+  const tiptapFallbackIndex = source.indexOf("if (isEditMode) {", aipptBranchIndex);
+
+  assert.notEqual(builtInRepairIndex, -1, "remaining built-in template repair/build path should exist");
+  assert.notEqual(aipptBranchIndex, -1, "native AIPPT branch should exist");
+  assert.notEqual(tiptapFallbackIndex, -1, "Tiptap fallback branch should exist");
+  assert.ok(
+    builtInRepairIndex < aipptBranchIndex && aipptBranchIndex < tiptapFallbackIndex,
+    "remaining built-in templates should build native documents before the Tiptap fallback is reached",
+  );
+});

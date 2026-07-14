@@ -2,6 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { V1ContentRender } from "../../(presentation-generator)/components/V1ContentRender";
 import { repairCoalPowerAipptSlideDocument } from "@/lib/pptx-model/coal-power-template";
+import { repairGeneralAipptSlideDocument } from "@/lib/pptx-model/general-template";
+import { repairModernAipptSlideDocument } from "@/lib/pptx-model/modern-template";
+import { repairStandardAipptSlideDocument } from "@/lib/pptx-model/standard-template";
+import { repairSwiftAipptSlideDocument } from "@/lib/pptx-model/swift-template";
+import { repairBuiltInTemplateAipptSlideDocument } from "@/lib/pptx-model/built-in-template";
 import { convertLegacyTemplateSlideToAippt } from "@/lib/pptx-model/legacy-template-converter";
 import { validateNativeSlideDocument } from "@/lib/pptx-model/native-schema";
 import { getSlideNativeCapability } from "@/lib/pptx-model/template-capabilities";
@@ -56,6 +61,66 @@ function hasAipptEditorChrome(slide: any, isEditMode: boolean, presentMode: bool
     null,
   );
   if (coalPowerDocument) return true;
+
+  const generalDocument = repairGeneralAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
+  );
+  if (generalDocument) return true;
+
+  const modernDocument = repairModernAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
+  );
+  if (modernDocument) return true;
+
+  const standardDocument = repairStandardAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
+  );
+  if (standardDocument) return true;
+
+  const swiftDocument = repairSwiftAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
+  );
+  if (swiftDocument) return true;
+
+  const builtInTemplateDocument = repairBuiltInTemplateAipptSlideDocument(
+    {
+      id: slide?.id,
+      index: slide?.index,
+      layout: typeof slide?.layout === "string" ? slide.layout : "",
+      layout_group: typeof slide?.layout_group === "string" ? slide.layout_group : "",
+      content,
+    },
+    null,
+  );
+  if (builtInTemplateDocument) return true;
 
   const capability = getSlideNativeCapability({
     layout: typeof slide?.layout === "string" ? slide.layout : "",
