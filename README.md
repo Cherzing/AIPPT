@@ -1,127 +1,192 @@
 # AIPPT
 
-> AIPPT 是一款开源 AI PPT 生成、编辑与导出平台，面向中文办公、汇报材料、项目报告、培训课件和行业模板场景，支持从主题、文档、模板和多模型能力快速生成可编辑演示文稿。
+> A self-hostable AI presentation generator with editable slides, template-driven layouts, AI image workflows, and PPTX/PDF export.
+>
+> AIPPT 是一款可私有化部署的 AI 演示文稿生成与编辑平台，支持从主题、文档、大纲和模板生成可编辑 PPT，并提供在线编辑、AI 图片替换、模板库、PPTX/PDF 导出和 Docker 部署能力。
 
-![AIPPT Overview](readme_assets/images/aippt-cover.png)
+<p align="center">
+  <img src="readme_assets/images/screenshot-dashboard.png" alt="AIPPT 工作台" width="100%" />
+</p>
+
+<p align="center">
+  <a href="#项目定位">项目定位</a> ·
+  <a href="#核心能力">核心能力</a> ·
+  <a href="#产品截图">产品截图</a> ·
+  <a href="#技术架构">技术架构</a> ·
+  <a href="#快速开始">快速开始</a> ·
+  <a href="#配置说明">配置说明</a> ·
+  <a href="#本地开发">本地开发</a>
+</p>
 
 ## 项目定位
 
-AIPPT 在 [presenton/presenton](https://github.com/presenton/presenton/) 开源项目基础上进行了面向中文办公、行业模板、用户权限、模型配置和产品界面的重构。
+AIPPT 是一个面向真实办公场景的 AI PPT 工作台。它不是只生成静态预览图的演示工具，而是围绕“生成、编辑、复用、导出、部署”完整链路设计的演示文稿生产系统。
 
-AIPPT 不是简单的幻灯片截图工具，而是一个完整的 AI 演示文稿工作台。它围绕“生成、编辑、管理、导出、复用”五个环节构建，目标是让用户可以在浏览器中完成从选题到导出 PPTX/PDF 的完整流程。
+用户可以从一个主题、文档或大纲开始，选择模板后生成 PPT，在浏览器中继续编辑文字、图片、形状、表格、图表等元素，并导出为 PPTX 或 PDF。项目适合企业汇报、项目材料、行业模板、培训课件、产品介绍、技术方案和私有化办公自动化场景。
 
-适合的使用场景包括：
+本项目基于 [presenton/presenton](https://github.com/presenton/presenton/) 开源项目继续扩展，重点增强了中文办公体验、模板分类、用户权限、模型配置、Docker 部署、AI 图片编辑和部分模板的原生可编辑模型能力。
 
-- 企业汇报：经营分析、项目进展、生产经营、周报月报、专题汇报。
-- 行业模板：电厂专区、项目汇报、数据报告、产品介绍、培训课件。
-- 文档转 PPT：从上传文档、资料摘要或文字大纲生成结构化演示文稿。
-- 团队使用：管理员统一配置模型与服务，普通用户独立管理自己的作品。
-- 私有化部署：通过 Docker 在本地、内网或服务器环境中运行。
+## 典型流程
 
-## 功能总览
+```text
+主题 / 文档 / 大纲
+        |
+        v
+AI 生成大纲与页面规划
+        |
+        v
+选择模板与版式
+        |
+        v
+生成可编辑演示文稿
+        |
+        v
+在线编辑文字、图片、形状、表格、图表
+        |
+        v
+导出 PPTX / PDF
+```
 
-![AIPPT Capabilities](readme_assets/images/aippt-capabilities.png)
+## 核心能力
 
-### AI 生成 PPT
+### AI 生成演示文稿
 
-- 支持根据一个主题自动生成完整 PPT。
-- 支持根据用户输入的大纲生成页面结构。
-- 支持上传文档后提取内容并生成演示文稿。
-- 支持生成过程中实时查看进度。
-- 支持对已生成 PPT 继续编辑和二次生成。
+- 支持根据主题、提示词、文档或大纲生成 PPT。
+- 支持生成前编辑大纲，先确认内容结构再进入页面生成。
+- 支持模板驱动生成，生成结果保留模板风格与版式约束。
+- 支持生成过程状态展示和历史文稿管理。
+- 支持对已生成文稿继续编辑和二次迭代。
 
-### 模板库与行业专区
+### 原生可编辑幻灯片模型
 
-- 内置通用模板、报告模板、产品模板等常见版式。
-- 支持模板分类展示，便于按场景选择。
-- 已加入“电厂专区”，可承载电力、煤电、工程建设、投产汇报等行业模板。
-- 支持自定义模板保存与复用。
-- 支持模板预览后再创建 PPT。
+AIPPT 针对“AI 生成后不能改、导出后元素不可编辑”的问题，引入可编辑的幻灯片元素模型。部分模板不再只作为整页背景图渲染，而是拆分为可选择、可拖拽、可缩放和可修改的结构化元素。
 
-![AIPPT Template System](readme_assets/images/aippt-template-system.png)
+当前模型覆盖的常见元素包括：
 
-### 在线编辑
+- 文本框与文字样式；
+- 图片与图片提示词；
+- 形状、线条和装饰元素；
+- 表格；
+- 图表；
+- 公式；
+- 视频、音频等媒体占位。
 
-- 支持在浏览器中查看和编辑生成后的幻灯片。
-- 支持文字、标题、列表、图片、图标、图表、布局等组件展示。
-- 支持页面缩略图浏览与切换。
-- 支持辅助编辑区域，方便继续优化内容。
-- 支持中文界面和中文办公场景。
+这使生成后的 PPT 更接近真实办公文件：用户可以在网页中改，也可以导出后继续在 PowerPoint、WPS 或 Keynote 中加工。
+
+### 模板库与行业模板
+
+- 内置通用模板、现代商务、标准模板、快速模板、代码演示、教育课件、产品介绍、报告模板、路演文稿等模板。
+- 支持模板分类展示，包括通用模板、报告模板、电厂专区和自定义模板。
+- 支持模板预览，用户可先查看母版页面再开始生成。
+- 支持自定义模板创建、保存和分类。
+- 支持电厂专区等行业模板，适合工程建设、投产汇报、生产经营和专题汇报等场景。
+- 部分内置模板已转换为原生可编辑模型，提高在线编辑和 PPTX 导出可用性。
+
+### AI 图片编辑与替换
+
+- 点击图片可打开图片编辑面板。
+- 支持根据提示词生成替换图片。
+- 支持上传本地图片替换。
+- 支持复用历史生成图片。
+- 支持配置 Pexels、Pixabay 等图库提供商。
+- 支持 OpenAI-compatible 图片接口、Open WebUI、ComfyUI 等图片生成方式。
 
 ### PPTX/PDF 导出
 
-- 支持导出可编辑 PPTX。
+- 支持导出 PPTX。
 - 支持导出 PDF。
-- 支持保留页面结构、文本内容、图片与模板布局。
-- 适合导出后继续在 PowerPoint、WPS、Keynote 等工具中加工。
+- Docker 镜像内置导出运行时和相关依赖。
+- 对原生可编辑模板优先走原生 PPTX 导出路径。
+- 对旧版复杂模板保留兼容导出路径，降低模板迁移风险。
 
-### 用户与权限
+### 多模型与私有化部署
 
-- 支持普通用户注册、登录、修改个人信息和退出登录。
-- 普通用户只能查看和管理自己生成的 PPT。
-- 管理员可以查看全部用户生成的 PPT。
-- 管理员可以管理普通用户账号。
-- 管理员可以统一配置文本生成、图片生成、联网搜索等服务提供商。
+文本模型支持多种提供商和兼容模式：
 
-### 多模型与服务提供商
-
-AIPPT 支持接入多种文本、图片和搜索服务，方便在本地模型、云模型和企业内网模型之间切换。
-
-常见能力包括：
-
-- OpenAI 兼容接口
-- Ollama
-- LM Studio
-- Gemini
+- OpenAI-compatible API
+- DeepSeek
+- Google Gemini
 - Azure OpenAI
 - Amazon Bedrock
 - Anthropic
 - Together AI
 - Fireworks
-- 自定义图片生成接口
-- 联网搜索提供商配置
+- Cerebras
+- OpenRouter
+- Ollama
+- LM Studio
+- Custom LLM endpoint
 
-## 产品界面
+图片生成、联网搜索和记忆能力也可按需配置。系统支持通过 Docker 在本地、内网或服务器中部署，适合对数据和模型访问有管控要求的团队。
 
-![AIPPT Architecture](readme_assets/images/aippt-architecture.png)
+### 用户、权限与数据
 
-AIPPT 的界面围绕中文用户重新设计，核心页面包括：
+- 支持登录认证。
+- 普通用户管理自己的文稿。
+- 管理员可管理用户和全局模型配置。
+- 运行数据、上传图片、导出文件和配置默认保存在 `app_data`。
+- 可通过 `DATABASE_URL` 接入外部数据库；未配置时使用本地默认存储。
 
-- 首页：创建 PPT、上传文档、进入模板库。
-- 仪表盘：管理用户生成的 PPT。
-- 模板库：按分类浏览和预览模板。
-- 主题页：选择或管理演示文稿主题。
-- 设置页：配置模型、图片、搜索、用户和账号。
-- 编辑页：查看、编辑、导出生成后的 PPT。
+## 产品截图
+
+以下截图均来自当前 Docker 运行中的 AIPPT 项目页面，不是生成图或设计稿。
+
+### 工作台
+
+![AIPPT 工作台](readme_assets/images/screenshot-dashboard.png)
+
+### 模板库
+
+![AIPPT 模板库](readme_assets/images/screenshot-template-library.png)
+
+### 行业模板预览
+
+![AIPPT 行业模板预览](readme_assets/images/screenshot-template-preview.png)
+
+### 在线编辑器
+
+![AIPPT 在线编辑器](readme_assets/images/screenshot-editor.png)
+
+### AI 图片替换
+
+![AIPPT AI 图片替换](readme_assets/images/screenshot-image-editor.png)
 
 ## 技术架构
 
-AIPPT 采用前后端分离架构，包含 Web 前端、API 后端、导出服务、模板系统和桌面端支持。
-
 ```text
 AIPPT
-├─ servers/nextjs      # Web 前端、模板库、编辑器、用户界面
-├─ servers/fastapi     # API 后端、模型调用、任务处理、数据模型
-├─ electron            # 桌面端相关能力
-├─ readme_assets       # README 图片与展示资源
-├─ docker-compose.yml  # Docker 编排配置
-└─ Dockerfile          # 镜像构建配置
+├── servers/nextjs         # Web 前端、模板库、在线编辑器、导出路由
+├── servers/fastapi        # API 后端、生成服务、模型适配、配置管理
+├── electron               # 桌面端打包与本地集成
+├── scripts                # 运行时同步、配置初始化、辅助脚本
+├── readme_assets          # README 截图与展示资源
+├── app_data               # Docker 挂载的运行数据目录
+├── Dockerfile             # 生产镜像构建配置
+└── docker-compose.yml     # 生产、GPU、开发服务编排
 ```
 
-核心技术栈：
+### 前端
 
-- Next.js：前端页面、模板预览、编辑器界面。
-- FastAPI：后端接口、生成任务、配置管理。
-- Python：文档处理、导出任务、服务编排。
-- Docker：私有化部署与生产运行。
-- Electron：桌面端打包与本地运行能力。
+前端基于 Next.js、React、TypeScript、Tailwind CSS、Radix UI 和 Redux 构建，负责工作台、模板库、设置页、模板预览、演示文稿编辑器、图片编辑面板和导出入口。
+
+### 后端
+
+后端基于 FastAPI 和 Python 构建，负责生成任务、模型调用、文档处理、模板发现、用户配置、认证、记忆服务和业务数据接口。
+
+### 导出链路
+
+项目内置演示文稿导出运行时，结合 PPTX/PDF 导出能力，将生成后的文稿输出为办公软件可继续处理的文件。生产 Docker 镜像包含浏览器、字体、Office、图片处理和导出依赖。
+
+### 上下文记忆
+
+后端包含基于 Mem0 的演示文稿记忆服务，用于存储生成上下文、大纲草稿、页面编辑记录和检索上下文，辅助后续 AI 编辑与问答操作。
 
 ## 快速开始
 
-### 使用 Docker Compose
+### Docker Compose 启动
 
 ```bash
-docker compose up -d
+docker compose up -d --build production
 ```
 
 启动后访问：
@@ -130,18 +195,84 @@ docker compose up -d
 http://localhost:5001
 ```
 
-### 使用 Docker 运行
+默认端口：
 
-Linux/macOS：
+- Web 应用：`http://localhost:5001`
+- OAuth 回调辅助端口：`1455`
+- 运行数据目录：`./app_data`
+
+### GPU 服务
 
 ```bash
-docker run -it --name aippt -p 5001:80 -v "./app_data:/app_data" ghcr.io/cherzing/aippt:latest
+docker compose up -d --build production-gpu
 ```
 
-Windows PowerShell：
+当本地模型或图片生成链路需要 GPU 时，可使用该服务。
 
-```powershell
-docker run -it --name aippt -p 5001:80 -v "${PWD}\app_data:/app_data" ghcr.io/cherzing/aippt:latest
+### 停止服务
+
+```bash
+docker compose down
+```
+
+## 配置说明
+
+多数生产配置可通过环境变量传入，也可以登录后在系统设置页维护。
+
+### OpenAI 示例
+
+```bash
+LLM=openai
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4.1
+```
+
+### DeepSeek 示例
+
+```bash
+LLM=deepseek
+DEEPSEEK_API_KEY=...
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+```
+
+### Ollama 示例
+
+```bash
+LLM=ollama
+OLLAMA_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=llama3.1:latest
+```
+
+### OpenAI-Compatible 自定义接口
+
+```bash
+LLM=custom
+CUSTOM_LLM_URL=http://localhost:11434/v1
+CUSTOM_LLM_API_KEY=local-key
+CUSTOM_MODEL=your-model-name
+```
+
+### 图片生成接口
+
+```bash
+IMAGE_PROVIDER=openai_compatible
+OPENAI_COMPAT_IMAGE_BASE_URL=https://your-image-endpoint/v1
+OPENAI_COMPAT_IMAGE_API_KEY=...
+OPENAI_COMPAT_IMAGE_MODEL=...
+```
+
+### 登录认证
+
+```bash
+AUTH_USERNAME=admin
+AUTH_PASSWORD=change-me
+```
+
+系统生成的用户配置和登录信息会保存在：
+
+```text
+app_data/userConfig.json
 ```
 
 ## 本地开发
@@ -162,83 +293,96 @@ uv sync
 uv run python -m api.main
 ```
 
-### 桌面端开发
+### Docker 开发服务
 
 ```bash
-cd electron
-npm run setup:env
-npm run dev
+docker compose up -d --build development
 ```
 
-## 配置说明
+## 测试与验证
 
-管理员可以在设置页中配置生成能力，也可以通过环境变量和配置文件进行部署级配置。
+前端测试：
 
-建议优先配置：
+```bash
+cd servers/nextjs
+node --test tests/*.test.mjs
+```
 
-- 文本生成提供商：用于生成大纲、页面内容和演讲稿。
-- 图片生成提供商：用于生成或检索幻灯片配图。
-- 联网搜索提供商：用于补充实时资料和外部信息。
-- 导出能力：用于生成 PPTX 和 PDF 文件。
-- 用户权限：用于区分管理员与普通用户的数据范围。
+Next.js 生产构建：
+
+```bash
+cd servers/nextjs
+npm run build
+```
+
+后端测试：
+
+```bash
+cd servers/fastapi
+uv run pytest
+```
+
+导出运行时检查：
+
+```bash
+npm run check:presentation-export
+```
 
 ## 模板系统
 
-AIPPT 的模板系统面向真实办公场景设计，模板不仅是视觉皮肤，也包含页面结构、组件位置、文字层级和内容类型。
+模板目录：
 
-模板可以包含：
+```text
+servers/nextjs/app/presentation-templates
+```
 
-- 封面页
-- 目录页
-- 章节页
-- 图文页
-- 数据页
-- 流程页
-- 时间轴页
-- 对比页
-- 总结页
-- 致谢页
+当前仓库包含的模板组包括：
 
-模板分类可以用于组织不同业务场景。例如：
+- `general`
+- `modern`
+- `standard`
+- `swift`
+- `Code`
+- `Education`
+- `ProductOverview`
+- `Report`
+- `pitch-deck`
+- `neo-general`
+- `neo-modern`
+- `neo-standard`
+- `neo-swift`
+- `taicang-coal-power-report`
 
-- 通用模板
-- 报告模板
-- 电厂专区
-- 自定义模板
+原生 PPT 模型相关逻辑位于：
 
-## 数据与权限边界
+```text
+servers/nextjs/lib/pptx-model
+```
 
-AIPPT 适合团队和个人共同使用：
+这些模块负责模板能力识别、原生页面文档校验、内置模板转换和导出路径选择。
 
-- 普通用户：只能看到自己的 PPT、模板使用记录和账号信息。
-- 管理员：可以查看全部 PPT、管理普通用户、配置全局服务。
-- 配置隔离：普通用户看不到模型服务商、图片服务商和搜索服务商等管理配置。
+## 生产部署建议
 
-## 部署建议
+- 挂载 `app_data`，避免用户数据、生成记录和配置随容器删除。
+- 在团队使用前配置稳定的模型、图片和搜索服务。
+- 对公网访问场景建议使用 HTTPS 反向代理。
+- 定期备份 `app_data`。
+- 分享截图或日志前检查是否包含 API Key、用户数据或内部资料。
+- 保持 Docker 镜像依赖与导出运行时版本一致。
 
-生产环境建议：
+## 路线图
 
-- 使用 Docker Compose 管理服务。
-- 将 `app_data` 挂载到宿主机，避免数据随容器删除。
-- 为模型接口配置稳定的内网或云端访问地址。
-- 使用 HTTPS 反向代理暴露外部访问。
-- 定期备份用户数据、生成记录和配置文件。
-
-## 路线方向
-
-后续重点方向：
-
-- 提升 PPTX 原生导出的版式一致性。
-- 完善更多中文行业模板。
-- 增强模板分类、检索和预览体验。
-- 增强管理员后台能力。
-- 支持更精细的企业级权限与审计。
-- 提升复杂图表、表格和图片排版能力。
+- 提升更多复杂模板的原生 PPTX 导出一致性。
+- 扩展更多中文行业模板专区。
+- 增强企业级权限、审计和团队协作能力。
+- 完善图表、表格、公式和媒体元素编辑能力。
+- 提升导入 PPT 模板转换为原生可编辑元素的能力。
+- 增加生成、编辑、导出的端到端测试覆盖。
 
 ## 许可证
 
-本项目遵循仓库中 `LICENSE` 文件声明的许可证。
+本项目遵循 [LICENSE](LICENSE) 文件声明的许可证。
 
 ## 致谢
 
-感谢 [presenton/presenton](https://github.com/presenton/presenton/) 项目提供的开源基础与启发。
+AIPPT 基于 [presenton/presenton](https://github.com/presenton/presenton/) 项目继续开发。感谢相关开源项目、模型服务和工具链对自托管 AI 办公工作流的支持。
