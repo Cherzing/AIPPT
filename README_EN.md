@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">Chinese version</a>
+  <a href="README.md">中文</a>
 </p>
 
 ## Project Overview
