@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="README_EN.md">英文版</a>
+  <a href="README_EN.md">English</a>
 </p>
 
 ## 项目定位
